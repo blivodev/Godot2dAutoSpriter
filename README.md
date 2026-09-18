@@ -12,16 +12,68 @@ This system connects **ComfyUI generative AI workflows** (using ControlNet OpenP
    * **Base Generation**: Text-to-Image stage creating 2D anime-style sprites (clean cel-shading, crisp outlines, flat colors).
    * **Bridge to Exploded Separation**: Chains base generation via **IP-Adapter** + **OpenPose ControlNet** + **LayerDiffuse** to render the exact character with limbs detached across an orthographic canvas with true alpha transparency.
    * **VRAM Management**: Sequential queueing and model offloading to run locally on consumer GPUs (8GB–12GB VRAM).
-2. **Model Context Protocol (MCP) Server (`server.py`)**:
+2. **Web UI Dashboard & Standalone Executable (`web_ui.py` / `launch_ui.bat` / `dist/Godot2dAutoSpriterUI.exe`)**:
+   * Complete browser dashboard with archetype presets (including "cyberpunk warrior alien"), live generation logs, parameter tuning, transparent limb gallery, and 1-click scene launching.
+3. **Model Context Protocol (MCP) Server (`server.py`)**:
    * Exposes end-to-end pipeline tools (`generate_character_sprites`, `slice_character_limbs`, `assemble_godot_rig`) to AI agents (Claude Desktop, Cline, Cursor, OpenCode).
-3. **Standalone Character CLI (`scripts/create_character.py`)**:
+4. **Standalone Character CLI (`scripts/create_character.py`)**:
    * 1-command generation and rig assembly for any character archetype without requiring an AI agent or GUI.
-4. **Headless Godot 4 Rig Builder (`scripts/headless_rig_builder.gd`)**:
+5. **Headless Godot 4 Rig Builder (`scripts/headless_rig_builder.gd`)**:
    * Executes via Godot CLI without GUI to bind sliced transparent PNGs to the master `Skeleton2D` template and pack ready-to-use `.tscn` character scenes.
-5. **Godot 4 `@tool` Auto-Rigging Importer (`auto_rig_importer.gd`)**:
-   * Runs inside the Godot Editor Inspector for manual/interactive auto-rigging with 1-click trigger buttons.
-6. **Master Rig Template (`scenes/character_rig_template.tscn`)**:
-   * Complete 15-bone MOBA/brawler hierarchy with zero-warning leaf-bone setup.
+6. **Godot 4 Editor Plugin (`addons/godot_2d_auto_spriter/`)**:
+   * Runs inside the Godot Editor with custom dock controls and multi-limb bone generators (wings, secondary arms, multi-segment tails).
+7. **Master Rig Templates (`scenes/character_rig_template.tscn` & `scenes/quadruped_rig_template.tscn`)**:
+   * Complete 15-bone humanoid and 20-bone quadruped hierarchies with zero-warning leaf-bone setup.
+
+---
+
+## 🖥️ Web UI Dashboard & Standalone Executable
+
+The project provides a self-contained, browser-based graphical dashboard for triggering sprite generation, tuning parameters, and auto-rigging Godot scenes with zero terminal setup needed.
+
+### 🚀 Launching the Dashboard:
+
+* **Option 1 (Double-Click `.bat`)**:
+  Double-click `launch_ui.bat` in the project root.
+  * Automatically detects and launches the compiled standalone `dist/Godot2dAutoSpriterUI.exe`.
+  * Automatically falls back to `python web_ui.py` if Python is present.
+* **Option 2 (Standalone Executable - No Python Required)**:
+  Run `dist\Godot2dAutoSpriterUI.exe` directly:
+  ```cmd
+  dist\Godot2dAutoSpriterUI.exe
+  ```
+* **Option 3 (Python Script)**:
+  ```bash
+  python web_ui.py
+  # or with custom port:
+  python web_ui.py --port 8080
+  ```
+
+Once launched, your default web browser automatically opens to `http://localhost:8080`.
+
+### 🎨 Dashboard Features:
+1. **Convenient Presets**: Pre-loaded with ready-to-generate concepts:
+   * 👾 *Cyber Alien* (`cyberpunk warrior alien with neon bioluminescent crest`)
+   * ⚔️ *Paladin* (`holy paladin in cobalt and gold armor with glowing sword`)
+   * ❄️ *Ice Mage* (`ice sorceress with crystal staff and glowing purple runes`)
+   * 🥷 *Shadow Ninja* (`shadow ninja assassin with dual kunai and crimson glow`)
+   * 🤖 *Diesel Mech* (`heavy dieselpunk juggernaut with caution stripes and furnace`)
+   * 🐺 *Dire Beast* (`celestial dire wolf chimera with emerald core and armored paws`)
+2. **Custom Parameter Tuning**:
+   * **Seed**: Random or manual seed input for deterministic re-generation.
+   * **Diffusion Steps (15–50)** & **CFG Scale (4.0–12.0)**.
+   * **ControlNet Guidance Weight (0.2–1.5)**.
+   * **Rig Architecture**: Toggle between Humanoid Biped (15 bones) and Quadruped / Beast (20 bones).
+   * **Engine Mode**: Switch between live local ComfyUI API (`127.0.0.1:8188`) and Offline Smart Spriter.
+3. **Live Streaming Console**:
+   * View live generation, slicing, and Godot scene assembly logs in real time.
+4. **Transparent Limb Gallery**:
+   * Inspect generated transparent PNG cutouts directly in the browser with dark checkerboard preview.
+5. **Direct System Integration**:
+   * **"Open Sprite Folder"**: Opens Windows Explorer directly to the character's asset folder.
+   * **"Open Rigged Scene in Godot"**: Launches the Godot 4 editor directly into the generated `.tscn` file.
+6. **ComfyUI Diagnostics**:
+   * Real-time indicator of Godot and ComfyUI backend status, plus 1-click installer trigger.
 
 ---
 

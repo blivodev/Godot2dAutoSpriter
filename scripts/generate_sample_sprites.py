@@ -341,6 +341,9 @@ def generate_all(out_dir, prefix="warrior", archetype="warrior"):
         img.save(out_path, "PNG")
         generated_paths.append(out_path)
 
+    print(f"[Generator] Created {len(generated_paths)} {archetype.upper()} sprites for '{prefix}' in: {out_dir}")
+    return generated_paths
+
 def draw_beast_head(draw, w, h, s, theme):
     cx, cy = w // 2, h // 2
     # Wolf/beast head: snout, ears, glowing eyes

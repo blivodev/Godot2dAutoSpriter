@@ -6,6 +6,10 @@
 __pycache__/
 *.pyc
 
+# PyInstaller build cache
+build/
+*.spec
+
 # System files
 .DS_Store
 Thumbs.db
