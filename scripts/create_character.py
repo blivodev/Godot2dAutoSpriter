@@ -87,12 +87,13 @@ def main():
             print(f"ComfyUI API unavailable ({e}), using built-in generator.")
 
     if not generated_via_comfy:
+        prompt_text = args.prompt if args.prompt else f"{archetype} character"
         if rig_type == "quadruped":
             from scripts.generate_sample_sprites import generate_quadruped
-            generate_quadruped(str(sprites_dir), prefix=char_name, archetype="assassin" if archetype == "beast" else archetype)
+            generate_quadruped(str(sprites_dir), prefix=char_name, archetype="assassin" if archetype == "beast" else archetype, prompt=prompt_text)
         else:
             from scripts.generate_sample_sprites import generate_all
-            generate_all(str(sprites_dir), prefix=char_name, archetype=archetype)
+            generate_all(str(sprites_dir), prefix=char_name, archetype=archetype, prompt=prompt_text)
 
     # 2. Godot Rig Assembly
     if args.no_godot:

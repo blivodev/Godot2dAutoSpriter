@@ -266,20 +266,40 @@ For bosses, chimeras, centaurs, or multi-armed deities:
 
 ---
 
-## 🧙 How to Create Anything Other Than a Warrior (30-Character Roster Guide)
+## 🧙 How to Create Anything Other Than a Warrior (Multi-Species Roster Guide)
 
-To build a 30-character MOBA/brawler roster, you need a diverse spectrum of archetypes (Mages, Rogues, Tanks, Snipers, Beasts, Mounts).
+To build a diverse 30-character MOBA/brawler roster, you need total creative freedom to generate diverse species (Aliens, Elves, Demons, Skeletons, Dragonkin, Beasts, Mantises, Mechs) rather than just mechanical or armored warriors.
 
-### 1. Archetype Presets in the Pipeline
+The pipeline includes a **Dynamic Multi-Species Procedural Engine** in [`scripts/generate_sample_sprites.py`](file:///D:/Projects/Godot2dAutoSpriter/scripts/generate_sample_sprites.py) alongside the ComfyUI generative diffusion workflow.
 
-| Archetype | Colors & Accents | Visual Elements | CLI Flag | Default Rig |
-| :--- | :--- | :--- | :--- | :--- |
-| **Beast / Quadruped** | Shadow Black & Emerald Beast Core | Snout, predatory eyes, multi-segment tail, 4 clawed paws | `--archetype beast` | `quadruped` |
-| **Mage / Caster** | Deep Violet & Gold with Arcane Magenta Glow | Circlets, cloth cowls, arcane runes, power crystals | `--archetype mage` | `biped` |
-| **Assassin / Rogue** | Obsidian Midnight & Crimson Blood Glow | Sleek leather, face mask/cowl, light vambraces, knuckle studs | `--archetype assassin` | `biped` |
-| **Mech / Juggernaut** | Gunmetal Gray & Caution Amber / Orange Glow | Heavy reinforced plates, furnace reactor, piston joints | `--archetype mech` | `biped` |
-| **Ranger / Scout** | Forest Greens, Leather Browns & Emerald Glow | Agile tunics, utility belts, leather bracers, light greaves | `--archetype ranger` | `biped` |
-| **Warrior / Paladin** | Cobalt Steel & Regal Amber Gold with Cyan Core | Heavy breastplate, T-visor helmet, gold crest, poleyns | `--archetype warrior` | `biped` |
+### 1. Supported Species & Anatomies
+
+| Species / Creature | Visual Anatomical Features | Hands & Feet |
+| :--- | :--- | :--- |
+| **👾 Alien / Xenomorph** | Elongated bulbous cranium, bioluminescent forehead crest, glowing triple/slit eyes, bio-vent jaw, chitin carapace, bio-core | Elongated 4-clawed fingers & digitigrade claw talons |
+| **🧝 Human / Elf / Anime** | Organic skin tones, styled anime hair/bangs, expressive eyes (iris, pupil, shiny sparkle), tunics/robes/sash, collar | 4 articulated fingers + thumb & adventurer boots/shoes |
+| **😈 Demon / Fiend / Oni** | Sweeping curved horns, glowing runic brands, menacing eyes, sharp fangs, muscular torso | Obsidian sharp talons & cloven hooves / raptor spurs |
+| **💀 Undead / Skeleton** | Polished bone skull, hollow eye sockets with soul fire flames, nasal cavity, teeth row, exposed ribcage, spine, soul core | Bony phalange digits & skeletal metatarsal foot bones |
+| **🦎 Reptilian / Dragonkin** | Angular muzzle with teeth, brow horns, ridge frills, vertical slit eyes, overlapping scaled chest scutes | Heavy dragon claws & 3-toed raptor talons |
+| **🐺 Beast / Chimera** | Predatory canine/feline snout, dark nose, fangs, pointed ears with fur, furry mane, digitigrade legs, tail | Padded paws with soft toe beans and sharp claws |
+| **🦗 Insectoid / Mantis** | Triangular carapace head, antennae, multifaceted compound eyes, mandibles, segmented thorax | Mantis scythe claws / pincers & segmented tarsi |
+| **🌿 Plant / Dryad** | Bark skin, floral leaf crest hair, blooming flower petal core, intertwined vine wraps | Branch-like wooden digits & root feet |
+| **💧 Slime / Elemental** | Translucent fluid contours, internal floating nucleus/crystal core, energy droplets | Rounded fluid pseudopods |
+| **🤖 Cyborg / Mech** | Angular armor plates, glowing visor slits, caution hazard stripes, hydraulic pistons, vents | Robotic gauntlets & heavy metal sabatons |
+
+### 2. Prompt-Driven Dynamic Color Synthesis
+The generator dynamically extracts colors from free-form prompt text:
+* *"neon cyan"* / *"plasma"* -> Vibrant neon turquoise and cyan energy cores.
+* *"crimson"* / *"blood"* / *"flame"* -> Deep scarlet and blood glow.
+* *"emerald"* / *"jade"* / *"toxic"* -> Brilliant nature or acidic greens.
+* *"amethyst"* / *"purple"* / *"arcane"* -> Royal violet and glowing magenta.
+* *"gold"* / *"amber"* / *"solar"* -> Regal gold plating and warm highlights.
+* *"obsidian"* / *"shadow"* / *"void"* -> Midnight charcoal and deep dark contrasts.
+* *"bone"* / *"silver"* / *"frost"* -> Ivory white and frosted highlights.
+
+Use the **🎲 Random Seed** button in the Web UI to roll fresh seeds for limitless procedural variations!
+
+### 3. Archetype Presets in the Pipeline
 
 ### 2. Custom Prompts in ComfyUI
 To generate completely new visual styles in ComfyUI:

@@ -98,6 +98,47 @@ def _find_godot_executable() -> str:
         for exe in local_winget.glob("Godot*.exe"):
             return str(exe)
 
+    # Check packages folder in WinGet
+    local_pkg = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
+    if local_pkg.is_dir():
+        for exe in local_pkg.glob("**/Godot*console.exe"):
+            return str(exe)
+        for exe in local_pkg.glob("**/Godot*.exe"):
+            return str(exe)
+    return ""
+
+
+def _find_godot_editor_executable() -> str:
+    """Finds the native Godot 4 GUI (non-console) executable for interactive editor windows."""
+    if GODOT_BIN and os.path.isfile(GODOT_BIN):
+        if "console" in GODOT_BIN.lower():
+            gui_sibling = GODOT_BIN.replace("_console.exe", ".exe").replace("-console.exe", ".exe")
+            if os.path.isfile(gui_sibling):
+                return gui_sibling
+        return GODOT_BIN
+
+    # Check packages folder in WinGet for GUI binary
+    local_pkg = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
+    if local_pkg.is_dir():
+        for exe in local_pkg.glob("**/Godot*win64.exe"):
+            if "console" not in exe.name.lower():
+                return str(exe)
+
+    candidates = [
+        "Godot_v4.7.2-stable_win64.exe",
+        "godot4",
+        "godot.exe",
+        "godot",
+        "Godot_v4.7.2-stable_win64_console.exe"
+    ]
+    for name in candidates:
+        found = shutil.which(name)
+        if found:
+            return found
+
+    return _find_godot_executable()
+
+
 def _detect_archetype(text: str) -> str:
     p = text.lower()
     if any(k in p for k in ["beast", "wolf", "quadruped", "mount", "creature", "hound", "tiger", "dragon"]):
@@ -289,9 +330,9 @@ def generate_character_sprites(
         from scripts.generate_sample_sprites import generate_all, generate_quadruped
         arch = _detect_archetype(archetype_prompt)
         if rig_type == "quadruped" or arch == "beast":
-            generate_quadruped(str(out_dir), prefix=clean_name, archetype="assassin" if arch == "beast" else arch)
+            generate_quadruped(str(out_dir), prefix=clean_name, archetype="assassin" if arch == "beast" else arch, prompt=archetype_prompt, seed=seed)
         else:
-            generate_all(str(out_dir), prefix=clean_name, archetype=arch)
+            generate_all(str(out_dir), prefix=clean_name, archetype=arch, prompt=archetype_prompt, seed=seed)
     except Exception as e:
         pass
 
