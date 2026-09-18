@@ -48,8 +48,11 @@ def find_godot() -> str:
 def main():
     parser = argparse.ArgumentParser(description="Create and auto-rig any 2D character for Godot 4.")
     parser.add_argument("--name", "-n", required=True, help="Character identifier (e.g. sorceress, shinobi, titan)")
-    parser.add_argument("--archetype", "-a", default="warrior", choices=["warrior", "mage", "assassin", "ranger", "mech"],
+    parser.add_argument("--archetype", "-a", default="warrior", choices=["warrior", "mage", "assassin", "ranger", "mech", "beast"],
                         help="Visual archetype preset (controls colors, glow, theme)")
+    parser.add_argument("--rig-type", "-r", default="", choices=["", "biped", "quadruped"],
+                        help="Rig hierarchy type: biped (humanoid) or quadruped (beast/mount)")
+    parser.add_argument("--template", "-t", default="", help="Optional custom template scene path")
     parser.add_argument("--prompt", "-p", default="", help="Optional prompt description when using ComfyUI")
     parser.add_argument("--comfy", action="store_true", help="Attempt generating via local ComfyUI API first")
     parser.add_argument("--no-godot", action="store_true", help="Generate sprites only, skip Godot rig assembly")
@@ -59,11 +62,15 @@ def main():
 
     char_name = args.name.strip().lower().replace(" ", "_")
     archetype = args.archetype.lower()
+    rig_type = args.rig_type.lower()
+    if not rig_type:
+        rig_type = "quadruped" if archetype == "beast" else "biped"
+
     sprites_dir = PROJECT_ROOT / "sprites" / char_name
     sprites_dir.mkdir(parents=True, exist_ok=True)
 
     print("\n========================================================")
-    print(f"Creating Character: '{char_name}' (Archetype: {archetype.upper()})")
+    print(f"Creating Character: '{char_name}' (Archetype: {archetype.upper()}, Rig: {rig_type.upper()})")
     print("========================================================")
 
     # 1. Sprite Generation
@@ -80,8 +87,12 @@ def main():
             print(f"ComfyUI API unavailable ({e}), using built-in generator.")
 
     if not generated_via_comfy:
-        from scripts.generate_sample_sprites import generate_all
-        generate_all(str(sprites_dir), prefix=char_name, archetype=archetype)
+        if rig_type == "quadruped":
+            from scripts.generate_sample_sprites import generate_quadruped
+            generate_quadruped(str(sprites_dir), prefix=char_name, archetype="assassin" if archetype == "beast" else archetype)
+        else:
+            from scripts.generate_sample_sprites import generate_all
+            generate_all(str(sprites_dir), prefix=char_name, archetype=archetype)
 
     # 2. Godot Rig Assembly
     if args.no_godot:
@@ -102,8 +113,11 @@ def main():
         "--",
         "--character-name", char_name,
         "--assets-dir", res_dir,
-        "--target-scene", target_scene
+        "--target-scene", target_scene,
+        "--rig-type", rig_type
     ]
+    if args.template:
+        cmd.extend(["--template", args.template])
 
     try:
         proc = subprocess.run(cmd, cwd=str(PROJECT_ROOT), stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)

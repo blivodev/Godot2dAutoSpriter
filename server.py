@@ -27,7 +27,7 @@ COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1:8188")
 GODOT_BIN = os.environ.get("GODOT_BIN", "")
 PROJECT_ROOT = Path(__file__).resolve().parent
 
-BONE_PARTS = [
+BONE_PARTS_BIPED = [
     "pelvis",
     "torso",
     "head",
@@ -44,6 +44,31 @@ BONE_PARTS = [
     "leg_lower_R",
     "foot_R"
 ]
+
+BONE_PARTS_QUADRUPED = [
+    "pelvis",
+    "tail_01",
+    "tail_02",
+    "tail_03",
+    "leg_back_upper_L",
+    "leg_back_lower_L",
+    "paw_back_L",
+    "leg_back_upper_R",
+    "leg_back_lower_R",
+    "paw_back_R",
+    "spine",
+    "torso",
+    "leg_front_upper_L",
+    "leg_front_lower_L",
+    "paw_front_L",
+    "leg_front_upper_R",
+    "leg_front_lower_R",
+    "paw_front_R",
+    "neck",
+    "head"
+]
+
+BONE_PARTS = BONE_PARTS_BIPED
 
 
 def _find_godot_executable() -> str:
@@ -75,6 +100,8 @@ def _find_godot_executable() -> str:
 
 def _detect_archetype(text: str) -> str:
     p = text.lower()
+    if any(k in p for k in ["beast", "wolf", "quadruped", "mount", "creature", "hound", "tiger", "dragon"]):
+        return "beast"
     if any(k in p for k in ["mage", "sorcer", "wizard", "magic", "arcane", "witch"]):
         return "mage"
     if any(k in p for k in ["ninja", "assassin", "rogue", "shadow", "stealth", "thief"]):
@@ -93,16 +120,18 @@ def _detect_archetype(text: str) -> str:
 def generate_character_sprites(
     character_name: str,
     archetype_prompt: str,
-    seed: int = -1
+    seed: int = -1,
+    rig_type: str = "biped"
 ) -> str:
     """
     Connects to the local ComfyUI API to trigger the base anime character generation
     bridged into the exploded OpenPose + LayerDiffuse stage.
 
     Args:
-        character_name: Alphanumeric identifier for the character (e.g. 'ronin', 'valkyrie').
+        character_name: Alphanumeric identifier for the character (e.g. 'ronin', 'fenrir').
         archetype_prompt: Visual prompt (e.g. 'cyberpunk cyber-blade assassin, neon visor').
         seed: Random seed for generation (-1 for randomized).
+        rig_type: Rig hierarchy type ('biped' or 'quadruped').
 
     Returns:
         JSON string containing status, output image path, and parameters.
@@ -257,9 +286,12 @@ def generate_character_sprites(
     # Offline / Standalone Fallback: Use our internal vector/pixel generator to produce
     # an exploded canvas with clean alpha transparency so workflows never stall.
     try:
-        from scripts.generate_sample_sprites import generate_all
+        from scripts.generate_sample_sprites import generate_all, generate_quadruped
         arch = _detect_archetype(archetype_prompt)
-        generate_all(str(out_dir), prefix=clean_name, archetype=arch)
+        if rig_type == "quadruped" or arch == "beast":
+            generate_quadruped(str(out_dir), prefix=clean_name, archetype="assassin" if arch == "beast" else arch)
+        else:
+            generate_all(str(out_dir), prefix=clean_name, archetype=arch)
     except Exception as e:
         pass
 
@@ -281,7 +313,8 @@ def generate_character_sprites(
 def slice_character_limbs(
     character_name: str,
     input_image_path: str,
-    output_dir: str = ""
+    output_dir: str = "",
+    rig_type: str = "biped"
 ) -> List[str]:
     """
     Executes the SAM (Segment Anything Model) pass to detect, crop, and export
@@ -291,6 +324,7 @@ def slice_character_limbs(
         character_name: Name of character to prefix files with.
         input_image_path: Path to the exploded RGBA image sheet.
         output_dir: Destination folder. If omitted, defaults to 'sprites/<character_name>'.
+        rig_type: Rig hierarchy type ('biped' or 'quadruped').
 
     Returns:
         List of generated absolute file paths for each body part.
@@ -299,11 +333,12 @@ def slice_character_limbs(
     target_dir = Path(output_dir) if output_dir else PROJECT_ROOT / "sprites" / clean_name
     target_dir.mkdir(parents=True, exist_ok=True)
 
+    bone_list = BONE_PARTS_QUADRUPED if rig_type.lower() == "quadruped" else BONE_PARTS_BIPED
     generated_files: List[str] = []
 
     # Check if pre-separated files already exist
     existing_parts = list(target_dir.glob(f"{clean_name}_*.png"))
-    if len(existing_parts) >= len(BONE_PARTS):
+    if len(existing_parts) >= len(bone_list):
         return [str(p.resolve()) for p in existing_parts]
 
     # SAM Alpha Slicing Algorithm
@@ -358,11 +393,14 @@ def slice_character_limbs(
             pass
 
     # Fallback to generator
-    from scripts.generate_sample_sprites import generate_all
+    from scripts.generate_sample_sprites import generate_all, generate_quadruped
     arch = _detect_archetype(character_name)
-    generate_all(str(target_dir), prefix=clean_name, archetype=arch)
+    if rig_type.lower() == "quadruped" or arch == "beast":
+        generate_quadruped(str(target_dir), prefix=clean_name, archetype="assassin" if arch == "beast" else arch)
+    else:
+        generate_all(str(target_dir), prefix=clean_name, archetype=arch)
 
-    for bone in BONE_PARTS:
+    for bone in bone_list:
         fpath = target_dir / f"{clean_name}_{bone}.png"
         if fpath.is_file():
             generated_files.append(str(fpath.resolve()))
@@ -377,7 +415,9 @@ def slice_character_limbs(
 def assemble_godot_rig(
     character_name: str,
     assets_dir: str,
-    target_scene_path: str = ""
+    target_scene_path: str = "",
+    rig_type: str = "biped",
+    template_path: str = ""
 ) -> str:
     """
     Invokes Godot CLI in headless mode to bind exported cut-out PNGs to the master
@@ -387,6 +427,8 @@ def assemble_godot_rig(
         character_name: Name of the character.
         assets_dir: Directory containing the sliced PNGs (e.g. 'res://sprites/warrior').
         target_scene_path: Destination .tscn file (e.g. 'res://scenes/warrior.tscn').
+        rig_type: Rig hierarchy type ('biped' or 'quadruped').
+        template_path: Optional custom .tscn template path (e.g. 'res://scenes/custom_rig.tscn').
 
     Returns:
         JSON string reporting execution status, exit code, and target scene path.
@@ -414,8 +456,12 @@ def assemble_godot_rig(
         "--assets-dir",
         assets_dir,
         "--target-scene",
-        target_scene_path
+        target_scene_path,
+        "--rig-type",
+        rig_type
     ]
+    if template_path:
+        cmd.extend(["--template", template_path])
 
     try:
         proc = subprocess.run(

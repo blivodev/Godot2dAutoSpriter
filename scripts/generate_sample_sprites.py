@@ -341,11 +341,90 @@ def generate_all(out_dir, prefix="warrior", archetype="warrior"):
         img.save(out_path, "PNG")
         generated_paths.append(out_path)
 
-    print(f"[Generator] Created 15 {archetype.upper()} sprites for '{prefix}' in: {out_dir}")
+def draw_beast_head(draw, w, h, s, theme):
+    cx, cy = w // 2, h // 2
+    # Wolf/beast head: snout, ears, glowing eyes
+    draw.polygon([
+        (cx - 20*s, cy + 10*s),
+        (cx - 16*s, cy - 10*s),
+        (cx - 12*s, cy - 26*s), # Left ear tip
+        (cx - 4*s, cy - 14*s),
+        (cx + 4*s, cy - 14*s),
+        (cx + 12*s, cy - 26*s), # Right ear tip
+        (cx + 16*s, cy - 10*s),
+        (cx + 26*s, cy + 4*s),  # Snout
+        (cx + 24*s, cy + 16*s), # Jaw
+        (cx + 4*s, cy + 20*s),
+        (cx - 16*s, cy + 18*s)
+    ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+
+    # Snout bridge highlight
+    draw.polygon([(cx, cy - 8*s), (cx + 20*s, cy + 4*s), (cx + 6*s, cy + 12*s)], fill=theme["primary_light"])
+    # Glowing predatory eye
+    draw.ellipse([cx - 4*s, cy - 4*s, cx + 6*s, cy + 4*s], fill=theme["glow"])
+    draw.ellipse([cx - 1*s, cy - 2*s, cx + 3*s, cy + 2*s], fill=theme["glow_core"])
+
+
+def draw_beast_paw(draw, w, h, s, theme):
+    cx, cy = w // 2, h // 2
+    draw.ellipse([cx - 14*s, cy - 8*s, cx + 14*s, cy + 12*s], fill=theme["primary_dark"], outline=theme["outline"], width=2*s)
+    # Claw pads
+    for ox in [-8, -2, 4, 10]:
+        draw.polygon([(cx + ox*s, cy + 4*s), (cx + (ox+3)*s, cy + 14*s), (cx + (ox-1)*s, cy + 12*s)], fill=theme["accent_light"])
+
+
+def draw_beast_tail(draw, w, h, s, theme, seg_idx=1):
+    cx, cy = w // 2, h // 2
+    r = 14 - seg_idx * 2
+    draw.ellipse([cx - r*s, cy - r*s, cx + r*s, cy + r*s], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+    draw.line([(cx - (r-4)*s, cy), (cx + (r-4)*s, cy)], fill=theme["primary_light"], width=2*s)
+
+
+def generate_quadruped(out_dir, prefix="fenrir", archetype="beast"):
+    """Generates all 17 quadruped body part sprites."""
+    os.makedirs(out_dir, exist_ok=True)
+    theme = ARCHETYPES.get(archetype.lower(), ARCHETYPES["assassin"])
+
+    parts = {
+        "head": ((64, 64), lambda d, w, h, s: draw_beast_head(d, w, h, s, theme)),
+        "neck": ((48, 56), lambda d, w, h, s: draw_torso(d, w, h, s, theme)),
+        "torso": ((80, 64), lambda d, w, h, s: draw_torso(d, w, h, s, theme)),
+        "spine": ((64, 56), lambda d, w, h, s: draw_pelvis(d, w, h, s, theme)),
+        "pelvis": ((64, 56), lambda d, w, h, s: draw_pelvis(d, w, h, s, theme)),
+        "tail_01": ((36, 36), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 1)),
+        "tail_02": ((32, 32), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 2)),
+        "tail_03": ((28, 28), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 3)),
+        "leg_front_upper_L": ((40, 56), lambda d, w, h, s: draw_leg_upper(d, w, h, s, theme, True)),
+        "leg_front_lower_L": ((36, 56), lambda d, w, h, s: draw_leg_lower(d, w, h, s, theme, True)),
+        "paw_front_L": ((36, 32), lambda d, w, h, s: draw_beast_paw(d, w, h, s, theme)),
+        "leg_front_upper_R": ((40, 56), lambda d, w, h, s: draw_leg_upper(d, w, h, s, theme, False)),
+        "leg_front_lower_R": ((36, 56), lambda d, w, h, s: draw_leg_lower(d, w, h, s, theme, False)),
+        "paw_front_R": ((36, 32), lambda d, w, h, s: draw_beast_paw(d, w, h, s, theme)),
+        "leg_back_upper_L": ((44, 60), lambda d, w, h, s: draw_leg_upper(d, w, h, s, theme, True)),
+        "leg_back_lower_L": ((38, 56), lambda d, w, h, s: draw_leg_lower(d, w, h, s, theme, True)),
+        "paw_back_L": ((36, 32), lambda d, w, h, s: draw_beast_paw(d, w, h, s, theme)),
+        "leg_back_upper_R": ((44, 60), lambda d, w, h, s: draw_leg_upper(d, w, h, s, theme, False)),
+        "leg_back_lower_R": ((38, 56), lambda d, w, h, s: draw_leg_lower(d, w, h, s, theme, False)),
+        "paw_back_R": ((36, 32), lambda d, w, h, s: draw_beast_paw(d, w, h, s, theme)),
+    }
+
+    generated_paths = []
+    for name, (size, fn) in parts.items():
+        img = create_sprite(size, fn)
+        out_path = os.path.join(out_dir, f"{prefix}_{name}.png")
+        img.save(out_path, "PNG")
+        generated_paths.append(out_path)
+
+    print(f"[Generator] Created 20 QUADRUPED sprites for '{prefix}' in: {out_dir}")
     return generated_paths
+
 
 if __name__ == "__main__":
     target = sys.argv[1] if len(sys.argv) > 1 else "sprites/warrior"
     char_name = sys.argv[2] if len(sys.argv) > 2 else "warrior"
     arch = sys.argv[3] if len(sys.argv) > 3 else "warrior"
-    generate_all(target, prefix=char_name, archetype=arch)
+    if arch == "quadruped" or arch == "beast":
+        generate_quadruped(target, prefix=char_name, archetype="assassin")
+    else:
+        generate_all(target, prefix=char_name, archetype=arch)
+

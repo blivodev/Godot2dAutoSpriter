@@ -85,58 +85,107 @@ python scripts/create_character.py --name sylvana --archetype ranger
 
 # Create a Knight / Warrior
 python scripts/create_character.py --name paladin --archetype warrior
+
+# Create a Beast / Quadruped (Dire Wolf / Mount)
+python scripts/create_character.py --name fenrir --archetype beast --rig-type quadruped
 ```
 
 CLI Options:
 * `--name` (`-n`): Character identifier.
-* `--archetype` (`-a`): `warrior`, `mage`, `assassin`, `ranger`, `mech`.
+* `--archetype` (`-a`): `warrior`, `mage`, `assassin`, `ranger`, `mech`, `beast`.
+* `--rig-type` (`-r`): `biped` (15-bone humanoid) or `quadruped` (20-bone beast/mount).
+* `--template` (`-t`): Optional custom `.tscn` template path.
 * `--prompt` (`-p`): Custom prompt description for ComfyUI.
 * `--comfy`: Attempts generating via live local ComfyUI API first.
-* `--no-godot`: Only generates the 15 transparent PNGs; skips scene packing.
+* `--no-godot`: Only generates the transparent PNGs; skips scene packing.
 * `--target-scene` (`-o`): Custom `.tscn` destination path.
 
 ### Option B: Headless Godot Assembly via CLI
-If you already have your 15 transparent PNGs exported:
+If you already have your transparent PNGs exported:
 
 ```bash
-# Windows
+# Biped (Humanoid)
 Godot_v4.7.2-stable_win64_console.exe --headless --script scripts/headless_rig_builder.gd -- \
   --character-name sorceress \
   --assets-dir res://sprites/sorceress \
-  --target-scene res://scenes/sorceress_character.tscn
+  --target-scene res://scenes/sorceress_character.tscn \
+  --rig-type biped
 
-# Linux / macOS
-godot --headless --script scripts/headless_rig_builder.gd -- \
-  --character-name sorceress \
-  --assets-dir res://sprites/sorceress \
-  --target-scene res://scenes/sorceress_character.tscn
+# Quadruped (Beast / Mount)
+Godot_v4.7.2-stable_win64_console.exe --headless --script scripts/headless_rig_builder.gd -- \
+  --character-name fenrir \
+  --assets-dir res://sprites/fenrir \
+  --target-scene res://scenes/fenrir_character.tscn \
+  --rig-type quadruped
 ```
 
-### Option C: Inside the Godot 4 Editor (GUI)
-1. Open the Godot project in **Godot 4.x**.
-2. Open `scenes/character_rig_template.tscn`.
-3. In the **Scene Tree**, click the `Skeleton2D` node.
-4. In the **Inspector**:
-   * Set **`Character Sprites Dir`** to your exported folder (e.g. `res://sprites/sorceress`).
-   * Set **`Character Prefix`** to `sorceress` (or leave blank for auto-inference).
-   * Click **`Trigger Auto Rig`**.
-5. Save the scene via **Scene $\rightarrow$ Save Scene As...** (e.g., `res://scenes/sorceress.tscn`).
+### Option C: Godot 4 Editor Plugin GUI (Integrated Dock)
+
+The repository includes a dedicated Godot 4 Editor Plugin in `addons/godot_2d_auto_spriter/`.
+
+1. Open the project in Godot 4 (the plugin is enabled in `project.godot`).
+2. Look at the right-hand editor dock panel for **"2D Auto Spriter & Rigger"**.
+3. Use the GUI controls:
+   * **Character Identifier**: e.g., `warrior`, `fenrir`, `valkyrie`.
+   * **Rig Template Architecture**:
+     * `Humanoid Biped (15 bones)`
+     * `Beast / Quadruped (20 bones)`
+     * `Custom Template...`
+   * **Sprite PNG Directory**: Browse or type your sprite folder (`res://sprites/<name>`).
+   * **Pipeline Actions**:
+     * **"Instantiate New Rig Scene"**: Generates a new editable rig scene and opens it.
+     * **"Auto-Rig Active Skeleton2D"**: Maps and binds all sprites directly onto the open scene's skeleton with 1 click.
+     * **"One-Click Build & Save Scene"**: Assembles, binds, packs, saves, and opens `res://scenes/<name>_character.tscn` immediately.
+   * **Multi-Limb & Extra Bones Helper**:
+     * **`+ Add Wing Pair (L / R)`**: Adds left/right 2-segment wings (`wing_upper_L/R`, `wing_lower_L/R`) to `torso`.
+     * **`+ Add Extra Arms (4/6 Limbs)`**: Adds secondary limb chains (`arm_upper_L2/R2`, `arm_lower_L2/R2`, `hand_L2/R2`) to `torso`.
+     * **`+ Add Tail Segment`**: Appends the next numbered tail bone (`tail_01`, `tail_02`, ...) to `pelvis` or the existing tail chain.
+
+---
+
+## 🐾 Quadrupeds, Beasts, & Multi-Limbed Creatures
+
+### 1. Quadruped 20-Bone Architecture
+Quadrupeds and beasts use the `scenes/quadruped_rig_template.tscn` hierarchy:
+
+```text
+Skeleton2D (AutoRigImporter)
+└── pelvis
+    ├── tail_01 ── tail_02 ── tail_03
+    ├── leg_back_upper_L ── leg_back_lower_L ── paw_back_L
+    ├── leg_back_upper_R ── leg_back_lower_R ── paw_back_R
+    └── spine
+        └── torso
+            ├── leg_front_upper_L ── leg_front_lower_L ── paw_front_L
+            ├── leg_front_upper_R ── leg_front_lower_R ── paw_front_R
+            └── neck
+                └── head
+```
+
+### 2. Multi-Limb Expansions (Wings, Extra Arms, Multi-Tail)
+For bosses, chimeras, centaurs, or multi-armed deities:
+* **In the Editor Plugin Dock**: Click **"+ Add Wing Pair"** or **"+ Add Extra Arms"** to automatically add child `Bone2D` nodes with pre-configured `Sprite2D` placeholders and zero-warning angle calculations.
+* **Naming Schema**: Sprite parts automatically bind to the new bone names:
+  * Wings: `[name]_wing_upper_L.png`, `[name]_wing_lower_L.png`, `[name]_wing_upper_R.png`, `[name]_wing_lower_R.png`
+  * Secondary Arms: `[name]_arm_upper_L2.png`, `[name]_arm_lower_L2.png`, `[name]_hand_L2.png`, etc.
+  * Extended Tails: `[name]_tail_04.png`, `[name]_tail_05.png`, etc.
 
 ---
 
 ## 🧙 How to Create Anything Other Than a Warrior (30-Character Roster Guide)
 
-To build a 30-character MOBA/brawler roster, you need a diverse spectrum of archetypes (Mages, Rogues, Tanks, Snipers, Summoners).
+To build a 30-character MOBA/brawler roster, you need a diverse spectrum of archetypes (Mages, Rogues, Tanks, Snipers, Beasts, Mounts).
 
 ### 1. Archetype Presets in the Pipeline
 
-| Archetype | Colors & Accents | Visual Elements | CLI Flag |
-| :--- | :--- | :--- | :--- |
-| **Mage / Caster** | Deep Violet & Gold with Arcane Magenta Glow | Circlets, cloth cowls, arcane runes, power crystals | `--archetype mage` |
-| **Assassin / Rogue** | Obsidian Midnight & Crimson Blood Glow | Sleek leather, face mask/cowl, light vambraces, knuckle studs | `--archetype assassin` |
-| **Mech / Juggernaut** | Gunmetal Gray & Caution Amber / Orange Glow | Heavy reinforced plates, furnace reactor, piston joints | `--archetype mech` |
-| **Ranger / Scout** | Forest Greens, Leather Browns & Emerald Glow | Agile tunics, utility belts, leather bracers, light greaves | `--archetype ranger` |
-| **Warrior / Paladin** | Cobalt Steel & Regal Amber Gold with Cyan Core | Heavy breastplate, T-visor helmet, gold crest, poleyns | `--archetype warrior` |
+| Archetype | Colors & Accents | Visual Elements | CLI Flag | Default Rig |
+| :--- | :--- | :--- | :--- | :--- |
+| **Beast / Quadruped** | Shadow Black & Emerald Beast Core | Snout, predatory eyes, multi-segment tail, 4 clawed paws | `--archetype beast` | `quadruped` |
+| **Mage / Caster** | Deep Violet & Gold with Arcane Magenta Glow | Circlets, cloth cowls, arcane runes, power crystals | `--archetype mage` | `biped` |
+| **Assassin / Rogue** | Obsidian Midnight & Crimson Blood Glow | Sleek leather, face mask/cowl, light vambraces, knuckle studs | `--archetype assassin` | `biped` |
+| **Mech / Juggernaut** | Gunmetal Gray & Caution Amber / Orange Glow | Heavy reinforced plates, furnace reactor, piston joints | `--archetype mech` | `biped` |
+| **Ranger / Scout** | Forest Greens, Leather Browns & Emerald Glow | Agile tunics, utility belts, leather bracers, light greaves | `--archetype ranger` | `biped` |
+| **Warrior / Paladin** | Cobalt Steel & Regal Amber Gold with Cyan Core | Heavy breastplate, T-visor helmet, gold crest, poleyns | `--archetype warrior` | `biped` |
 
 ### 2. Custom Prompts in ComfyUI
 To generate completely new visual styles in ComfyUI:
@@ -239,16 +288,24 @@ python -c "import server; print(server.assemble_godot_rig('sorceress', 'res://sp
 
 ```text
 Godot2dAutoSpriter/
+├── addons/
+│   └── godot_2d_auto_spriter/                 # Godot 4 Editor Plugin
+│       ├── plugin.cfg                         # Plugin configuration metadata
+│       ├── plugin.gd                          # EditorPlugin initialization script
+│       ├── dock.tscn                          # GUI Dock user interface
+│       └── dock.gd                            # Dock logic (auto-rigging & multi-limb tools)
 ├── server.py                                  # FastMCP server (tools: generate, slice, assemble)
 ├── auto_rig_importer.gd                       # Core @tool Godot 4 script for Skeleton2D
 ├── project.godot                              # Godot 4 engine project definition
 ├── .gitignore                                 # Godot 4 & Python ignore configurations
 ├── README.md                                  # Complete pipeline & user guide
 ├── scenes/
-│   ├── character_rig_template.tscn            # Master 15-bone Skeleton2D template
+│   ├── character_rig_template.tscn            # Master 15-bone humanoid Skeleton2D template
+│   ├── quadruped_rig_template.tscn            # Master 20-bone quadruped Skeleton2D template
 │   ├── warrior_rigged.tscn                    # Pre-rigged Warrior character
 │   ├── sorceress_character.tscn               # Pre-rigged Mage character
-│   └── shinobi_character.tscn                 # Pre-rigged Assassin character
+│   ├── shinobi_character.tscn                 # Pre-rigged Assassin character
+│   └── fenrir_character.tscn                  # Pre-rigged Beast / Quadruped character
 ├── scripts/
 │   ├── create_character.py                    # Standalone 1-command character CLI builder
 │   ├── headless_rig_builder.gd                # Headless CLI entry point for scene packing
@@ -257,9 +314,10 @@ Godot2dAutoSpriter/
 ├── sprites/
 │   ├── warrior/                               # 15 Warrior limb sprites
 │   ├── sorceress/                             # 15 Mage limb sprites
-│   └── shinobi/                               # 15 Assassin limb sprites
+│   ├── shinobi/                               # 15 Assassin limb sprites
+│   └── fenrir/                                # 20 Beast / Quadruped limb sprites
 ├── tests/
-│   └── test_auto_rig.gd                       # Headless test suite (15/15 passing)
+│   └── test_auto_rig.gd                       # Headless test suite (Biped & Quadruped)
 └── workflows/
     └── comfyui_exploded_sprite_workflow.json  # ComfyUI API workflow definition
 ```

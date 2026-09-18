@@ -1,0 +1,147 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8qm2p7f4xrig"]
+
+[ext_resource type="Script" path="res://auto_rig_importer.gd" id="1_importer"]
+
+[node name="QuadrupedRoot" type="Node2D"]
+
+[node name="Skeleton2D" type="Skeleton2D" parent="."]
+script = ExtResource("1_importer")
+character_sprites_dir = "res://sprites/fenrir"
+
+[node name="pelvis" type="Bone2D" parent="Skeleton2D"]
+position = Vector2(-30, 0)
+rest = Transform2D(1, 0, 0, 1, -30, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis"]
+
+[node name="tail_01" type="Bone2D" parent="Skeleton2D/pelvis"]
+position = Vector2(-35, -15)
+rest = Transform2D(1, 0, 0, 1, -35, -15)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/tail_01"]
+
+[node name="tail_02" type="Bone2D" parent="Skeleton2D/pelvis/tail_01"]
+position = Vector2(-30, 10)
+rest = Transform2D(1, 0, 0, 1, -30, 10)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/tail_01/tail_02"]
+
+[node name="tail_03" type="Bone2D" parent="Skeleton2D/pelvis/tail_01/tail_02"]
+position = Vector2(-25, 20)
+rest = Transform2D(1, 0, 0, 1, -25, 20)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 2.35619
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/tail_01/tail_02/tail_03"]
+
+[node name="leg_back_upper_L" type="Bone2D" parent="Skeleton2D/pelvis"]
+position = Vector2(10, 25)
+rest = Transform2D(1, 0, 0, 1, 10, 25)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_back_upper_L"]
+
+[node name="leg_back_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_back_upper_L"]
+position = Vector2(-10, 35)
+rest = Transform2D(1, 0, 0, 1, -10, 35)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_back_upper_L/leg_back_lower_L"]
+
+[node name="paw_back_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_back_upper_L/leg_back_lower_L"]
+position = Vector2(15, 30)
+rest = Transform2D(1, 0, 0, 1, 15, 30)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.5708
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_back_upper_L/leg_back_lower_L/paw_back_L"]
+
+[node name="leg_back_upper_R" type="Bone2D" parent="Skeleton2D/pelvis"]
+position = Vector2(-15, 20)
+rest = Transform2D(1, 0, 0, 1, -15, 20)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_back_upper_R"]
+
+[node name="leg_back_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_back_upper_R"]
+position = Vector2(-10, 35)
+rest = Transform2D(1, 0, 0, 1, -10, 35)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_back_upper_R/leg_back_lower_R"]
+
+[node name="paw_back_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_back_upper_R/leg_back_lower_R"]
+position = Vector2(15, 30)
+rest = Transform2D(1, 0, 0, 1, 15, 30)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.5708
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_back_upper_R/leg_back_lower_R/paw_back_R"]
+
+[node name="spine" type="Bone2D" parent="Skeleton2D/pelvis"]
+position = Vector2(40, -5)
+rest = Transform2D(1, 0, 0, 1, 40, -5)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine"]
+
+[node name="torso" type="Bone2D" parent="Skeleton2D/pelvis/spine"]
+position = Vector2(45, -5)
+rest = Transform2D(1, 0, 0, 1, 45, -5)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso"]
+
+[node name="leg_front_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso"]
+position = Vector2(10, 25)
+rest = Transform2D(1, 0, 0, 1, 10, 25)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_L"]
+
+[node name="leg_front_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_L"]
+position = Vector2(5, 35)
+rest = Transform2D(1, 0, 0, 1, 5, 35)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_L/leg_front_lower_L"]
+
+[node name="paw_front_L" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_L/leg_front_lower_L"]
+position = Vector2(10, 25)
+rest = Transform2D(1, 0, 0, 1, 10, 25)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.5708
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_L/leg_front_lower_L/paw_front_L"]
+
+[node name="leg_front_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso"]
+position = Vector2(-10, 20)
+rest = Transform2D(1, 0, 0, 1, -10, 20)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_R"]
+
+[node name="leg_front_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_R"]
+position = Vector2(5, 35)
+rest = Transform2D(1, 0, 0, 1, 5, 35)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_R/leg_front_lower_R"]
+
+[node name="paw_front_R" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_R/leg_front_lower_R"]
+position = Vector2(10, 25)
+rest = Transform2D(1, 0, 0, 1, 10, 25)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.5708
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/leg_front_upper_R/leg_front_lower_R/paw_front_R"]
+
+[node name="neck" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso"]
+position = Vector2(25, -20)
+rest = Transform2D(1, 0, 0, 1, 25, -20)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/neck"]
+
+[node name="head" type="Bone2D" parent="Skeleton2D/pelvis/spine/torso/neck"]
+position = Vector2(20, -15)
+rest = Transform2D(1, 0, 0, 1, 20, -15)
+auto_calculate_length_and_angle = false
+length = 20.0
+bone_angle = 0.0
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/spine/torso/neck/head"]

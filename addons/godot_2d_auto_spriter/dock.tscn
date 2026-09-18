@@ -1,0 +1,178 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxydoc7spriter"]
+
+[ext_resource type="Script" path="res://addons/godot_2d_auto_spriter/dock.gd" id="1_dock"]
+
+[node name="AutoSpriterDock" type="Control"]
+custom_minimum_size = Vector2(280, 400)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_dock")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="Content" type="VBoxContainer" parent="VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "2D Auto Spriter & Rigger"
+horizontal_alignment = 1
+
+[node name="HSeparator0" type="HSeparator" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="CharSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameLabel" type="Label" parent="VBox/Scroll/Content/CharSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Character Identifier:"
+
+[node name="NameInput" type="LineEdit" parent="VBox/Scroll/Content/CharSection"]
+layout_mode = 2
+text = "warrior"
+placeholder_text = "e.g. warrior, fenrir, valkyrie"
+
+[node name="RigTypeLabel" type="Label" parent="VBox/Scroll/Content/CharSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Rig Template Architecture:"
+
+[node name="RigTypeOption" type="OptionButton" parent="VBox/Scroll/Content/CharSection"]
+layout_mode = 2
+
+[node name="CustomTemplateSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CustomTemplateLabel" type="Label" parent="VBox/Scroll/Content/CustomTemplateSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Custom Template Scene:"
+
+[node name="CustomTemplateInput" type="LineEdit" parent="VBox/Scroll/Content/CustomTemplateSection"]
+layout_mode = 2
+placeholder_text = "res://scenes/custom_rig.tscn"
+
+[node name="DirSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DirLabel" type="Label" parent="VBox/Scroll/Content/DirSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Sprite PNG Directory:"
+
+[node name="DirHBox" type="HBoxContainer" parent="VBox/Scroll/Content/DirSection"]
+layout_mode = 2
+
+[node name="DirInput" type="LineEdit" parent="VBox/Scroll/Content/DirSection/DirHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "res://sprites/warrior"
+
+[node name="BrowseButton" type="Button" parent="VBox/Scroll/Content/DirSection/DirHBox"]
+layout_mode = 2
+text = "Browse..."
+
+[node name="HSeparator1" type="HSeparator" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="ActionsLabel" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Pipeline Actions:"
+
+[node name="ActionsSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="InstantiateButton" type="Button" parent="VBox/Scroll/Content/ActionsSection"]
+layout_mode = 2
+text = "Instantiate New Rig Scene"
+
+[node name="AutoRigButton" type="Button" parent="VBox/Scroll/Content/ActionsSection"]
+layout_mode = 2
+text = "Auto-Rig Active Skeleton2D"
+
+[node name="BuildSaveButton" type="Button" parent="VBox/Scroll/Content/ActionsSection"]
+layout_mode = 2
+text = "One-Click Build & Save Scene"
+
+[node name="HSeparator2" type="HSeparator" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="MultiLimbLabel" type="Label" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Multi-Limb Expansions:"
+
+[node name="MultiLimbSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="WingsButton" type="Button" parent="VBox/Scroll/Content/MultiLimbSection"]
+layout_mode = 2
+text = "+ Add Wing Pair (L / R)"
+
+[node name="ExtraArmsButton" type="Button" parent="VBox/Scroll/Content/MultiLimbSection"]
+layout_mode = 2
+text = "+ Add Extra Arms (4/6 Limbs)"
+
+[node name="TailButton" type="Button" parent="VBox/Scroll/Content/MultiLimbSection"]
+layout_mode = 2
+text = "+ Add Tail Segment"
+
+[node name="HSeparator3" type="HSeparator" parent="VBox/Scroll/Content"]
+layout_mode = 2
+
+[node name="StatusSection" type="VBoxContainer" parent="VBox/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ConsoleLabel" type="Label" parent="VBox/Scroll/Content/StatusSection"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Status & Output Log:"
+
+[node name="StatusLabel" type="RichTextLabel" parent="VBox/Scroll/Content/StatusSection"]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+bbcode_enabled = true
+scroll_following = true
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Select Sprite Directory"
+ok_button_text = "Select Current Folder"
+file_mode = 2
+
+[connection signal="pressed" from="VBox/Scroll/Content/DirSection/DirHBox/BrowseButton" to="." method="_on_browse_button_pressed"]
+[connection signal="pressed" from="VBox/Scroll/Content/ActionsSection/InstantiateButton" to="." method="_on_instantiate_template_pressed"]
+[connection signal="pressed" from="VBox/Scroll/Content/ActionsSection/AutoRigButton" to="." method="_on_auto_rig_active_pressed"]
+[connection signal="pressed" from="VBox/Scroll/Content/ActionsSection/BuildSaveButton" to="." method="_on_build_and_save_pressed"]
+[connection signal="pressed" from="VBox/Scroll/Content/MultiLimbSection/WingsButton" to="." method="_on_add_wings_pressed"]
+[connection signal="pressed" from="VBox/Scroll/Content/MultiLimbSection/ExtraArmsButton" to="." method="_on_add_extra_arms_pressed"]
+[connection signal="pressed" from="VBox/Scroll/Content/MultiLimbSection/TailButton" to="." method="_on_add_tail_segment_pressed"]
+[connection signal="dir_selected" from="FileDialog" to="." method="_on_dir_selected"]

@@ -114,6 +114,34 @@ func _run_tests() -> bool:
 
 	print("  Assertion OK: Dynamic prefix inference matched all %d bones without explicit prefix setting." % res2.get("matched", 0))
 
+	# Step 4: Test Quadruped Template & Rigging
+	print("\n--- Testing Quadruped Rigging Template ---")
+	var quad_scene = load("res://scenes/quadruped_rig_template.tscn")
+	if not quad_scene:
+		push_error("Could not load quadruped_rig_template.tscn")
+		return false
+
+	var quad_root = quad_scene.instantiate()
+	root.add_child(quad_root)
+
+	var quad_skeleton = quad_root.get_node_or_null("Skeleton2D") as AutoRigImporter
+	if not quad_skeleton:
+		push_error("Could not find Skeleton2D AutoRigImporter in quadruped template")
+		return false
+
+	quad_skeleton.character_sprites_dir = "res://sprites/fenrir"
+	quad_skeleton.character_prefix = "fenrir"
+	quad_skeleton.reset_sprite_offsets = true
+
+	var quad_res = quad_skeleton.execute_auto_rig(true)
+	if not quad_res.get("success", false) or quad_res.get("matched", 0) != 20:
+		push_error("Quadruped auto-rig failed! Result: %s" % str(quad_res))
+		return false
+
+	print("  Assertion OK: Quadruped rig matched all 20 bones with fenrir sprites.")
+	quad_root.queue_free()
+	root_node.queue_free()
+
 	return true
 
 

@@ -21,6 +21,8 @@ func _init() -> void:
 	var character_name := ""
 	var assets_dir := ""
 	var target_scene := ""
+	var rig_type := "biped"
+	var custom_template := ""
 
 	var i := 0
 	while i < args.size():
@@ -34,6 +36,12 @@ func _init() -> void:
 		elif arg == "--target-scene" and i + 1 < args.size():
 			target_scene = args[i + 1]
 			i += 2
+		elif arg == "--rig-type" and i + 1 < args.size():
+			rig_type = args[i + 1].to_lower()
+			i += 2
+		elif arg == "--template" and i + 1 < args.size():
+			custom_template = args[i + 1]
+			i += 2
 		else:
 			i += 1
 
@@ -44,14 +52,23 @@ func _init() -> void:
 	if target_scene.is_empty():
 		target_scene = "res://scenes/" + character_name + "_character.tscn"
 
+	var template_path := custom_template
+	if template_path.is_empty():
+		if rig_type == "quadruped":
+			template_path = "res://scenes/quadruped_rig_template.tscn"
+		else:
+			template_path = "res://scenes/character_rig_template.tscn"
+
 	print(JSON.stringify({
 		"status": "starting",
 		"character_name": character_name,
 		"assets_dir": assets_dir,
-		"target_scene": target_scene
+		"target_scene": target_scene,
+		"rig_type": rig_type,
+		"template": template_path
 	}))
 
-	var success := _build_rig(character_name, assets_dir, target_scene)
+	var success := _build_rig(character_name, assets_dir, target_scene, template_path)
 	if success:
 		print(JSON.stringify({
 			"status": "success",
@@ -67,8 +84,7 @@ func _init() -> void:
 		quit(1)
 
 
-func _build_rig(char_name: String, dir_path: String, out_scene_path: String) -> bool:
-	var template_path := "res://scenes/character_rig_template.tscn"
+func _build_rig(char_name: String, dir_path: String, out_scene_path: String, template_path: String = "res://scenes/character_rig_template.tscn") -> bool:
 	var scene_res := load(template_path) as PackedScene
 	if not scene_res:
 		push_error("Could not load template: %s" % template_path)

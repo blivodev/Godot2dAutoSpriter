@@ -5,3 +5,8 @@ config_version=5
 
 config/name="Godot2dAutoSpriter"
 config/features=PackedStringArray("4.7", "Forward Plus")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_2d_auto_spriter/plugin.cfg")
+
