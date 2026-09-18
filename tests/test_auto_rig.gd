@@ -122,15 +122,18 @@ func _generate_fixture_sprites() -> bool:
 
 	for bone_name in BONE_NAMES:
 		var file_path = SPRITE_DIR.path_join("warrior_%s.png" % bone_name)
+		# Preserve existing detailed sprites if already generated
+		if FileAccess.file_exists(file_path):
+			continue
+
 		var img := Image.create(32, 32, false, Image.FORMAT_RGBA8)
-		# Draw a small distinct colored box with alpha
 		img.fill(Color(0.2, 0.6, 0.9, 0.85))
 		var err = img.save_png(file_path)
 		if err != OK:
 			push_error("Failed to save fixture image: %s" % file_path)
 			return false
 
-	print("Generated %d fixture PNGs in %s" % [BONE_NAMES.size(), SPRITE_DIR])
+	print("Validated %d fixture PNGs in %s" % [BONE_NAMES.size(), SPRITE_DIR])
 	return true
 
 
