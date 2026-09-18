@@ -491,6 +491,81 @@ def assemble_godot_rig(
         }, indent=2)
 
 
+# ==============================================================================
+# MCP TOOL 4: setup_comfyui_environment
+# ==============================================================================
+@mcp.tool()
+def setup_comfyui_environment(
+    action: str = "check"
+) -> str:
+    """
+    Checks, verifies, or automatically installs required ComfyUI components:
+    custom node packs (LayerDiffuse, IP-Adapter, ControlNet-aux), input control templates,
+    and neural network model weights.
+
+    Args:
+        action: One of 'check', 'install_nodes', 'install_inputs', 'install_models', 'install_all'.
+
+    Returns:
+        JSON string reporting current status and operation results.
+    """
+    from scripts.setup_comfyui import (
+        find_comfyui_paths,
+        install_custom_nodes,
+        install_inputs,
+        install_models,
+        NODE_REPOSITORIES,
+        MODEL_MANIFEST
+    )
+
+    comfy_root, custom_nodes, models_dir, py_bin = find_comfyui_paths()
+
+    if action == "install_nodes" and custom_nodes:
+        install_custom_nodes(custom_nodes, py_bin)
+    elif action == "install_inputs":
+        install_inputs(comfy_root)
+    elif action == "install_models" and models_dir:
+        install_models(models_dir, include_checkpoint=False)
+    elif action == "install_all":
+        if custom_nodes:
+            install_custom_nodes(custom_nodes, py_bin)
+        install_inputs(comfy_root)
+        if models_dir:
+            install_models(models_dir, include_checkpoint=False)
+
+    nodes_status = {}
+    if custom_nodes and custom_nodes.is_dir():
+        for k in NODE_REPOSITORIES.keys():
+            nodes_status[k] = (custom_nodes / k).is_dir()
+
+    models_status = {}
+    if models_dir and models_dir.is_dir():
+        for rel, info in MODEL_MANIFEST.items():
+            p = models_dir / rel
+            models_status[p.name] = {
+                "installed": p.is_file(),
+                "size_mb": round(p.stat().st_size / (1024*1024), 1) if p.is_file() else 0.0,
+                "expected_mb": info["size_mb"],
+                "desc": info["desc"]
+            }
+
+    inputs_status = {
+        "biped_template": (PROJECT_ROOT / "workflows" / "inputs" / "exploded_openpose_template.png").is_file(),
+        "quadruped_template": (PROJECT_ROOT / "workflows" / "inputs" / "exploded_quadruped_openpose_template.png").is_file()
+    }
+
+    return json.dumps({
+        "status": "ready",
+        "action": action,
+        "comfyui_detected": comfy_root is not None,
+        "comfyui_path": str(comfy_root) if comfy_root else None,
+        "models_directory": str(models_dir) if models_dir else None,
+        "custom_nodes": nodes_status,
+        "inputs": inputs_status,
+        "models": models_status
+    }, indent=2)
+
+
 if __name__ == "__main__":
     # Start FastMCP server via standard I/O for MCP clients
     mcp.run()

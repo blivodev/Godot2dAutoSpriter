@@ -63,6 +63,48 @@ Result: `res://scenes/sorceress_character.tscn` is created and rigged on your di
 
 ---
 
+## ⚙️ Automated ComfyUI Setup on Any Device (`setup_comfyui.py`)
+
+When running on a new computer or fresh ComfyUI installation, run the automated asset & dependency installer:
+
+```bash
+# 1. Run diagnostic check of nodes, inputs, and models
+python scripts/setup_comfyui.py --check
+
+# 2. Automatically clone required custom nodes and install input control sheets
+python scripts/setup_comfyui.py --nodes --inputs
+
+# 3. Download essential neural models (ControlNet OpenPose, Anime LoRA, LayerDiffuse)
+python scripts/setup_comfyui.py --models
+
+# 4. Or perform complete 1-step installation
+python scripts/setup_comfyui.py --all
+
+# 5. (Optional) Download the full 6.6 GB Animagine XL 3.1 SDXL Checkpoint:
+python scripts/setup_comfyui.py --checkpoint
+```
+
+### Components Managed by the Installer:
+1. **Custom Node Packs**:
+   * `comfyui-layerdiffuse`: True alpha RGBA channel synthesis without background bleeding.
+   * `ComfyUI_IPAdapter_plus`: Character design consistency and reference conditioning.
+   * `comfyui_controlnet_aux`: OpenPose skeletal analyzers and processors.
+2. **Input Control Sheets** (Installed directly into ComfyUI `input/` folder):
+   * `exploded_openpose_template.png`: Humanoid biped 18-keypoint exploded canvas (1536x1536).
+   * `exploded_quadruped_openpose_template.png`: Quadruped / beast exploded canvas with tail and 4 paws.
+3. **Model Weights**:
+   * `thibaud_xl_openpose.safetensors` (SDXL OpenPose ControlNet in `models/controlnet/`)
+   * `flat2DAnimerge_v10.safetensors` (Anime Flat-Color / Cel-Shading LoRA in `models/loras/`)
+   * `layer_xl_transparent_conv.safetensors` & `vae_transparent_decoder.safetensors` (LayerDiffuse models in `models/layer_model/`)
+   * `animagineXL_v31.safetensors` (SDXL Anime Checkpoint in `models/checkpoints/`)
+
+### Via MCP Server Tool:
+You can also trigger setup or check status directly through any MCP-connected AI agent:
+* `setup_comfyui_environment(action="check")`
+* `setup_comfyui_environment(action="install_all")`
+
+---
+
 ## 💻 How to Run Without an MCP (CLI & Scripts)
 
 You can run the full pipeline directly from your terminal or command prompt without any AI agent.
@@ -308,6 +350,8 @@ Godot2dAutoSpriter/
 │   └── fenrir_character.tscn                  # Pre-rigged Beast / Quadruped character
 ├── scripts/
 │   ├── create_character.py                    # Standalone 1-command character CLI builder
+│   ├── setup_comfyui.py                       # Automated ComfyUI nodes, inputs & models installer
+│   ├── generate_openpose_templates.py         # OpenPose exploded skeleton template generator
 │   ├── headless_rig_builder.gd                # Headless CLI entry point for scene packing
 │   ├── generate_sample_sprites.py             # Multi-archetype stylized sprite generator
 │   └── save_rigged_warrior.gd                 # Scene packing utility script
@@ -319,7 +363,11 @@ Godot2dAutoSpriter/
 ├── tests/
 │   └── test_auto_rig.gd                       # Headless test suite (Biped & Quadruped)
 └── workflows/
-    └── comfyui_exploded_sprite_workflow.json  # ComfyUI API workflow definition
+    ├── comfyui_exploded_sprite_workflow.json  # Humanoid Biped ComfyUI workflow
+    ├── comfyui_exploded_quadruped_workflow.json # Quadruped / Beast ComfyUI workflow
+    └── inputs/
+        ├── exploded_openpose_template.png     # Humanoid 18-keypoint control canvas
+        └── exploded_quadruped_openpose_template.png # Quadruped control canvas
 ```
 
 ---
