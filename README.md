@@ -2,165 +2,173 @@
 
 An automated 2D asset generation and cut-out sprite rigging pipeline for Godot 4, designed for high-volume character rosters in 2D/2.5D MOBAs, brawlers, and fighting games.
 
-This repository bridges **ComfyUI generative AI workflows** (using ControlNet OpenPose, LayerDiffuse, and SAM) with **Godot 4's 2D skeletal animation system (`Skeleton2D` / `Bone2D`)**.
+This system connects **ComfyUI generative AI workflows** (using ControlNet OpenPose, LayerDiffuse, and SAM) with **Godot 4's 2D skeletal animation system (`Skeleton2D` / `Bone2D`)**, fully orchestrated by a **Python Model Context Protocol (MCP) server** for AI coding assistants.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Components
 
-* **Exploded Sprite Generation (ComfyUI)**: Architecture for generating modular character sprite sheets where limbs are cleanly detached in space with native alpha transparency (no chroma-key halos).
-* **Automated Limb Segmentation (SAM)**: Crops and exports individual body segments into strict, script-readable naming conventions (`[CharacterName]_[bone_name].png`).
-* **Godot 4 `@tool` Auto-Rigger (`auto_rig_importer.gd`)**:
-  * Runs directly inside the Godot 4 Editor Inspector.
-  * Recursively traverses any `Skeleton2D` hierarchy.
-  * Matches bone names against PNG filenames via normalized suffix matching.
-  * Automatically loads and assigns transparent textures to placeholder `Sprite2D` nodes.
-  * Preserves manual bone rest transforms and custom offsets.
-* **Master Character Rig Template**: Includes `scenes/character_rig_template.tscn` pre-configured with a 15-part MOBA/brawler bone hierarchy.
-* **Automated Test Suite**: Includes a headless Godot test suite (`tests/test_auto_rig.gd`) verifying bone matching, dynamic prefix resolution, and texture loading.
+1. **ComfyUI Front-End & Chained Separation**:
+   * **Base Generation**: Text-to-Image stage creating 2D anime-style sprites (clean cel-shading, crisp outlines, flat colors).
+   * **Bridge to Exploded Separation**: Chains base generation via **IP-Adapter** + **OpenPose ControlNet** + **LayerDiffuse** to render the exact character with limbs detached across an orthographic canvas with true alpha transparency.
+   * **VRAM Management**: Sequential queueing and model offloading to run locally on consumer GPUs (8GB–12GB VRAM).
+2. **Model Context Protocol (MCP) Server (`server.py`)**:
+   * Exposes end-to-end pipeline tools (`generate_character_sprites`, `slice_character_limbs`, `assemble_godot_rig`) to AI agents (Claude Desktop, Cline, Cursor, OpenCode).
+3. **Headless Godot 4 Rig Builder (`scripts/headless_rig_builder.gd`)**:
+   * Executes via Godot CLI without GUI to bind sliced transparent PNGs to the master `Skeleton2D` template and pack ready-to-use `.tscn` character scenes.
+4. **Godot 4 `@tool` Auto-Rigging Importer (`auto_rig_importer.gd`)**:
+   * Runs inside the Godot Editor Inspector for manual/interactive auto-rigging with 1-click trigger buttons.
+5. **Master Rig Template (`scenes/character_rig_template.tscn`)**:
+   * Complete 15-bone MOBA/brawler hierarchy with zero-warning leaf-bone setup.
 
 ---
 
-## 🏗️ Architecture: ComfyUI "Exploded Sprite" Pipeline
+## 🏗️ ComfyUI Front-End & Pipeline Architecture
 
 ```mermaid
 flowchart TD
-    subgraph GEN["1. Base Generation & True Alpha"]
-        CKPT["Load Checkpoint (SD1.5 / SDXL)"] --> LD_APPLY["LayeredDiffusionApply (Config: Foreground RGBA)"]
-        CLIP["CLIP Text Encode (Prompt)"] --> KAMP["KSampler"]
-        LD_APPLY -->|"MODEL (Modified for Alpha)"| KAMP
-        LATENT["Empty Latent Image (2048x2048)"] --> KAMP
+    subgraph STAGE1["Stage 1: Base Character Generation"]
+        PROMPT["Anime Archetype Prompt<br/>(e.g., 'cyberpunk blade assassin')"] --> KAMP1["KSampler (Base Character)"]
+        CKPT["Anime Checkpoint<br/>(Animagine XL / Pony)"] --> KAMP1
+        LORA["Flat Color / Cel-Shade LoRA"] --> KAMP1
+        KAMP1 --> BASE_IMG["Base Character Concept (1024x1024)"]
     end
 
-    subgraph CN["2. Exploded OpenPose Guidance"]
-        POSE_IMG["Load Image (Exploded OpenPose Canvas)"] --> CN_APPLY["Apply ControlNet (Advanced)"]
-        CN_MODEL["ControlNet Model (OpenPose)"] --> CN_APPLY
-        CLIP --> CN_APPLY
-        CN_APPLY -->|"CONDITIONING (Exploded Limbs)"| KAMP
+    subgraph STAGE2["Stage 2: IP-Adapter Bridge & Exploded Alpha Separation"]
+        BASE_IMG --> IP_ADAPT["IP-Adapter Advanced (SDXL)"]
+        IP_ADAPT -->|"Visual Style / Costume Conditioning"| KAMP2["KSampler (Exploded Pass)"]
+        
+        POSE_MAP["Exploded OpenPose Canvas (1536x1536)"] --> CN_OPENPOSE["ControlNet OpenPose (0.90 Strength)"]
+        CN_OPENPOSE -->|"Detached Limb Geometry"| KAMP2
+        
+        CKPT --> LD_APPLY["LayeredDiffusionApply (Foreground Transparent)"]
+        LD_APPLY -->|"Model with Alpha Injection"| KAMP2
+        
+        KAMP2 --> LD_DEC["LayeredDiffusionDecodeRGBA"]
+        LD_DEC --> EXPLODED_IMG["Exploded RGBA Sheet (True Alpha)"]
     end
 
-    subgraph DECODE["3. Alpha Reconstruction"]
-        KAMP -->|"LATENT"| LD_DEC["LayeredDiffusionDecodeRGBA"]
-        CKPT -->|"VAE"| LD_DEC
-        LD_DEC -->|"4-Channel RGBA Image"| SAM_STAGE
+    subgraph STAGE3["Stage 3: SAM Slicing & Export"]
+        EXPLODED_IMG --> SAM["SAM / GroundingDINO Limb Slicer"]
+        SAM --> CROPS["15x Individual Limb PNGs<br/>[character_name]_[bone_name].png"]
     end
 
-    subgraph SAM_STAGE["4. SAM Detection, Cropping & Batch Export"]
-        GD_LOAD["GroundingDinoModelLoader"] --> GD_SAM["GroundingDinoSAMSegment (Impact Pack)"]
-        SAM_LOAD["SAMModelLoader (vit_h)"] --> GD_SAM
-        GD_SAM -->|"Segmented Masks (Per Bone)"| CROP["Crop Image by Mask (With 8px Padding)"]
-        CROP --> SAVE["Save Image Extended / ImpactSaveImage<br/>Format: [CharacterName]_[bone_name].png"]
+    subgraph STAGE4["Stage 4: Headless Godot Assembly"]
+        CROPS --> MCP_RIG["MCP: assemble_godot_rig"]
+        MCP_RIG --> GODOT_CLI["Godot 4 Headless CLI"]
+        GODOT_CLI --> SCENE["Packed Character Scene<br/>res://scenes/[character_name].tscn"]
     end
 ```
 
-### 1. ControlNet (OpenPose): Forcing Disconnected Limbs
-* **Exploded Pose Template**: A 2048×2048 orthographic T-pose map where all joints are translated away from adjacent bones (e.g. head shifted +200px up, arms separated horizontally by 120px, legs separated by 120px).
-* **Node**: `Apply ControlNet (Advanced)`.
-* **Recommended Settings**:
-  * Strength: `0.85` – `0.95`
-  * Ending Step: `0.90` (releases guidance during final 10% steps to allow natural joint capping without limb fusion).
-* **Prompt Reinforcement**:
-  * *Positive*: `2d game cut-out puppet, exploded character sheet, modular separated body parts, anatomical cutouts, flat 2.5d orthographic perspective, neutral lighting, clean borders`.
-  * *Negative*: `connected limbs, merged body, overlapping parts, perspective distortion, isometric, volumetric shading artifacts`.
+### 1. Base Generation Node Setup
+* **Recommended Checkpoint**: `animagineXL_v31.safetensors` or `ponyDiffusionV6XL.safetensors`.
+* **LoRA Pairing**: `flat2DAnimerge_v10.safetensors` (strength `0.7` – `0.85`) to enforce clean anime cel-shading, vibrant flat tones, and bold vector-like outlines.
+* **Sampling**: `dpmpp_2m` with `karras` scheduler, 28–32 steps, CFG `7.0`.
+* **Resolution**: 1024×1024 for the base concept pass.
 
-### 2. LayerDiffuse (`LayeredDiffusionApply`): Native Alpha Transparency
-* **Extension**: `ComfyUI-layerdiffusion` (by Lvmin Zhang).
-* **Node Insertion**: Place `LayeredDiffusionApply` between `Load Checkpoint` and `KSampler`.
-* **Config**: `SD15 - Foreground Transparent` or `SDXL - Foreground Transparent`.
-* **Decoding**: Replace standard `VAE Decode` with `LayeredDiffusionDecodeRGBA` to generate genuine 4-channel RGBA output without chroma fringe.
+### 2. Bridge to Exploded Separation (IP-Adapter + OpenPose + LayerDiffuse)
+To retain the character's costume, palette, and design across the exploded limbs:
+1. **IP-Adapter**: Feed the base concept image into `IPAdapterAdvanced` (weight `0.75` – `0.85`). This injects the character's visual identity directly into the second diffusion pass.
+2. **Exploded OpenPose ControlNet**:
+   * Uses an orthographic exploded pose map where limbs are detached by 120px–200px.
+   * `Apply ControlNet (Advanced)` with strength `0.90`, ending at step `0.90` (allowing final 10% steps to naturally cap joint ends without limb fusion).
+3. **LayerDiffuse (`LayeredDiffusionApply`)**:
+   * Placed between Model and KSampler with config `SDXL - Foreground Transparent`.
+   * Decoded via `LayeredDiffusionDecodeRGBA` for true 4-channel RGBA output with zero green-screen halo.
 
-### 3. SAM (Segment Anything Model) & Automated Cropping
-* **Extension**: `ComfyUI-Impact-Pack` / `ComfyUI-Segment-Anything`.
-* **Model**: `sam_vit_h_4b8939.pth` + `GroundingDINO_SwinT_OGC.pth`.
-* **Detection & Cropping**: Segment by detection tags (`head . torso . pelvis . upper arm . forearm . hand . thigh . shin . foot`) or coordinate-guided boxes, followed by `Crop Image by Mask` with `8px` padding.
+### 3. Hardware & VRAM Optimization
+* **Sequential Execution**: Run Stage 1 (Base Gen) and Stage 2 (Exploded Pass) sequentially in the queue rather than in parallel latents.
+* **Model Unloading**: SAM and GroundingDINO weights (~2.5 GB) are loaded only after diffusion completes, freeing VRAM during the KSampler passes.
+* **Flag Recommendation**: Start ComfyUI with `--medvram` or `--lowvram` if running on 8GB GPUs.
 
-### 4. Output Naming Schema
-Output files follow the pattern `[CharacterName]_[bone_name].png`:
-```text
-warrior_head.png
-warrior_torso.png
-warrior_pelvis.png
-warrior_arm_upper_L.png
-warrior_arm_lower_L.png
-warrior_hand_L.png
-warrior_arm_upper_R.png
-warrior_arm_lower_R.png
-warrior_hand_R.png
-warrior_leg_upper_L.png
-warrior_leg_lower_L.png
-warrior_foot_L.png
-warrior_leg_upper_R.png
-warrior_leg_lower_R.png
-warrior_foot_R.png
+---
+
+## 🤖 Model Context Protocol (MCP) Server
+
+The repository includes a production-ready Python MCP server (`server.py`) built on `FastMCP`.
+
+### Exposed MCP Tools
+
+| Tool | Parameters | Description |
+| :--- | :--- | :--- |
+| **`generate_character_sprites`** | `character_name: str`<br/>`archetype_prompt: str`<br/>`seed: int = -1` | Sends prompt to local ComfyUI API (`/prompt` & WebSocket), monitors generation, and exports exploded RGBA sheet. Includes local fallback generator. |
+| **`slice_character_limbs`** | `character_name: str`<br/>`input_image_path: str`<br/>`output_dir: str = ""` | Runs SAM / connected-component alpha segmentation to crop and export 15 transparent limb PNGs matching the strict naming convention. |
+| **`assemble_godot_rig`** | `character_name: str`<br/>`assets_dir: str`<br/>`target_scene_path: str = ""` | Calls Godot 4 in headless mode to bind the sliced PNGs to the master `Skeleton2D` template and pack a new character `.tscn`. |
+
+### Client Configuration (`mcpServers`)
+
+To register the server in **Claude Desktop**, **Cline**, **Windsurf**, or **Cursor**, add the following snippet to your MCP configuration file (e.g., `%APPDATA%\Claude\claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "godot2d-auto-spriter": {
+      "command": "python",
+      "args": [
+        "D:/Projects/Godot2dAutoSpriter/server.py"
+      ],
+      "env": {
+        "COMFYUI_HOST": "127.0.0.1:8188",
+        "GODOT_BIN": "Godot_v4.7.2-stable_win64_console.exe"
+      }
+    }
+  }
+}
 ```
 
 ---
 
-## 🎮 Godot 4 Auto-Rigging Usage
+## 🎮 Headless Godot 4 Rig Assembly
 
-### Hierarchy Layout
-The master rig template (`scenes/character_rig_template.tscn`) uses the following structure:
-
-```text
-CharacterRoot (Node2D)
-  └─ Skeleton2D (AutoRigImporter.gd attached)
-       └─ pelvis (Bone2D)
-            ├─ Sprite2D (placeholder texture)
-            ├─ torso (Bone2D)
-            │    ├─ Sprite2D
-            │    ├─ head (Bone2D)
-            │    │    └─ Sprite2D
-            │    ├─ arm_upper_L (Bone2D)
-            │    │    └─ Sprite2D
-            │    │         └─ arm_lower_L (Bone2D)
-            │    │              └─ Sprite2D
-            │    │                   └─ hand_L (Bone2D)
-            │    │                        └─ Sprite2D
-...
-```
-
-### Running in the Godot 4 Editor
-1. Open the project in **Godot 4.x**.
-2. Open `scenes/character_rig_template.tscn`.
-3. Select the `Skeleton2D` node in the Scene tree.
-4. In the **Inspector**:
-   * Set **`Character Sprites Dir`** to the folder containing your exported PNGs (e.g., `res://sprites/warrior`).
-   * *(Optional)* Set **`Character Prefix`** (e.g., `warrior`). If left blank, the script automatically parses everything following the first underscore delimiter (`_`).
-   * Toggle **`Reset Sprite Offsets`** if you want to zero out placeholder offsets.
-5. Click **`Trigger Auto Rig`**.
-6. The editor automatically assigns textures to the matching `Sprite2D` nodes, outputs confirmation logs, and marks the scene as modified for saving (<kbd>Ctrl</kbd> + <kbd>S</kbd>).
-
----
-
-## 🧪 Running the Test Suite Headless
-
-You can execute the automated test suite from the terminal or CI/CD pipelines without opening the GUI:
+You can run the headless scene generator from any terminal or script:
 
 ```bash
 # Windows
-Godot_v4.7.2-stable_win64_console.exe --headless --script tests/test_auto_rig.gd
+Godot_v4.7.2-stable_win64_console.exe --headless --script scripts/headless_rig_builder.gd -- \
+  --character-name warrior \
+  --assets-dir res://sprites/warrior \
+  --target-scene res://scenes/warrior_character.tscn
 
 # Linux / macOS
-godot --headless --script tests/test_auto_rig.gd
+godot --headless --script scripts/headless_rig_builder.gd -- \
+  --character-name warrior \
+  --assets-dir res://sprites/warrior \
+  --target-scene res://scenes/warrior_character.tscn
 ```
 
-**Expected Output:**
+### Standard Bone Suffix Naming Convention
 ```text
-==========================================
-Starting Godot 4 AutoRigImporter Test Suite
-==========================================
-Generated 15 fixture PNGs in res://sprites/warrior
+[character_name]_head.png
+[character_name]_torso.png
+[character_name]_pelvis.png
+[character_name]_arm_upper_L.png
+[character_name]_arm_lower_L.png
+[character_name]_hand_L.png
+[character_name]_arm_upper_R.png
+[character_name]_arm_lower_R.png
+[character_name]_hand_R.png
+[character_name]_leg_upper_L.png
+[character_name]_leg_lower_L.png
+[character_name]_foot_L.png
+[character_name]_leg_upper_R.png
+[character_name]_leg_lower_R.png
+[character_name]_foot_R.png
+```
 
---- [AutoRigImporter] Starting Auto-Rigging Sequence ---
-[AutoRigImporter] Indexed 15 sprite files from: res://sprites/warrior
-[AutoRigImporter] Found 15 Bone2D nodes in skeleton 'Skeleton2D'
-  ✓ Assigned [warrior_pelvis.png] -> Bone2D: 'pelvis' (Sprite: 'Sprite2D')
-  ✓ Assigned [warrior_torso.png] -> Bone2D: 'torso' (Sprite: 'Sprite2D')
-  ✓ Assigned [warrior_head.png] -> Bone2D: 'head' (Sprite: 'Sprite2D')
-  ...
---- [AutoRigImporter] Finished Auto-Rigging ---
-Successfully rigged 15/15 visual bones.
-[ALL TESTS PASSED SUCCESSFULLY!]
+---
+
+## 🧪 Testing
+
+Run the full automated test suite headless:
+
+```bash
+Godot_v4.7.2-stable_win64_console.exe --headless --script tests/test_auto_rig.gd
+```
+
+To test the MCP server tools directly in Python:
+
+```bash
+python -c "import server; print(server.assemble_godot_rig('warrior', 'res://sprites/warrior'))"
 ```
 
 ---
@@ -169,19 +177,27 @@ Successfully rigged 15/15 visual bones.
 
 ```text
 Godot2dAutoSpriter/
-├── .gitignore                     # Godot 4 ignore configuration
-├── project.godot                  # Godot 4 project definitions
-├── auto_rig_importer.gd           # Core @tool AutoRigImporter script
+├── server.py                                  # FastMCP server exposing 3 agentic tools
+├── auto_rig_importer.gd                       # Core @tool Godot 4 script for Skeleton2D
+├── project.godot                              # Godot 4 engine project definition
+├── .gitignore                                 # Godot 4 ignore patterns
+├── README.md                                  # Complete architecture & documentation
 ├── scenes/
-│   └── character_rig_template.tscn # 15-bone MOBA/brawler Skeleton2D scene
+│   ├── character_rig_template.tscn            # Master 15-bone Skeleton2D template
+│   └── warrior_rigged.tscn                    # Pre-rigged assembled character scene
+├── scripts/
+│   ├── headless_rig_builder.gd                # Headless CLI entry point for Godot scene assembly
+│   ├── generate_sample_sprites.py             # Stylized cut-out sprite generator
+│   └── save_rigged_warrior.gd                 # Helper script for packing scenes
 ├── sprites/
-│   └── warrior/                   # 15 sample transparent limb sprites
+│   └── warrior/                               # 15 distinct, transparent limb sprites
 ├── tests/
-│   └── test_auto_rig.gd           # Headless automated test suite
-└── README.md                      # Pipeline architecture & documentation
+│   └── test_auto_rig.gd                       # Headless test suite (15/15 assertions)
+└── workflows/
+    └── comfyui_exploded_sprite_workflow.json  # ComfyUI API workflow definition
 ```
 
 ---
 
 ## 📄 License
-MIT License. Free to use and modify for commercial and non-commercial game projects.
+MIT License. Free to use for commercial and non-commercial game development.

@@ -276,7 +276,7 @@ def draw_foot(draw, w, h, s, is_left=True):
     hx1 = max(cx - 15*s * dir_mul, cx - 8*s * dir_mul)
     draw.rectangle([hx0, cy + 4*s, hx1, cy + 8*s], fill=GOLD_MID)
 
-def generate_all(out_dir):
+def generate_all(out_dir, prefix="warrior"):
     os.makedirs(out_dir, exist_ok=True)
     parts = {
         "head": ((64, 64), draw_head),
@@ -298,7 +298,7 @@ def generate_all(out_dir):
 
     for name, (size, fn) in parts.items():
         img = create_sprite(size, fn)
-        out_path = os.path.join(out_dir, f"warrior_{name}.png")
+        out_path = os.path.join(out_dir, f"{prefix}_{name}.png")
         img.save(out_path, "PNG")
         print(f"Generated {out_path} ({size[0]}x{size[1]}, True Alpha)")
 

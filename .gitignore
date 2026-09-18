@@ -2,6 +2,10 @@
 .godot/
 *.translation
 
+# Python ignores
+__pycache__/
+*.pyc
+
 # System files
 .DS_Store
 Thumbs.db
