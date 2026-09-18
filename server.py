@@ -73,7 +73,17 @@ def _find_godot_executable() -> str:
         for exe in local_winget.glob("Godot*.exe"):
             return str(exe)
 
-    return "godot"
+def _detect_archetype(text: str) -> str:
+    p = text.lower()
+    if any(k in p for k in ["mage", "sorcer", "wizard", "magic", "arcane", "witch"]):
+        return "mage"
+    if any(k in p for k in ["ninja", "assassin", "rogue", "shadow", "stealth", "thief"]):
+        return "assassin"
+    if any(k in p for k in ["ranger", "archer", "hunt", "bow", "forest", "sniper"]):
+        return "ranger"
+    if any(k in p for k in ["mech", "robot", "cyborg", "tank", "golem", "juggernaut", "titan"]):
+        return "mech"
+    return "warrior"
 
 
 # ==============================================================================
@@ -248,7 +258,8 @@ def generate_character_sprites(
     # an exploded canvas with clean alpha transparency so workflows never stall.
     try:
         from scripts.generate_sample_sprites import generate_all
-        generate_all(str(out_dir), prefix=clean_name)
+        arch = _detect_archetype(archetype_prompt)
+        generate_all(str(out_dir), prefix=clean_name, archetype=arch)
     except Exception as e:
         pass
 
@@ -348,7 +359,8 @@ def slice_character_limbs(
 
     # Fallback to generator
     from scripts.generate_sample_sprites import generate_all
-    generate_all(str(target_dir), prefix=clean_name)
+    arch = _detect_archetype(character_name)
+    generate_all(str(target_dir), prefix=clean_name, archetype=arch)
 
     for bone in BONE_PARTS:
         fpath = target_dir / f"{clean_name}_{bone}.png"

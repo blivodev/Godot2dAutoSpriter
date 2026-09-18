@@ -14,90 +14,23 @@ This system connects **ComfyUI generative AI workflows** (using ControlNet OpenP
    * **VRAM Management**: Sequential queueing and model offloading to run locally on consumer GPUs (8GB–12GB VRAM).
 2. **Model Context Protocol (MCP) Server (`server.py`)**:
    * Exposes end-to-end pipeline tools (`generate_character_sprites`, `slice_character_limbs`, `assemble_godot_rig`) to AI agents (Claude Desktop, Cline, Cursor, OpenCode).
-3. **Headless Godot 4 Rig Builder (`scripts/headless_rig_builder.gd`)**:
+3. **Standalone Character CLI (`scripts/create_character.py`)**:
+   * 1-command generation and rig assembly for any character archetype without requiring an AI agent or GUI.
+4. **Headless Godot 4 Rig Builder (`scripts/headless_rig_builder.gd`)**:
    * Executes via Godot CLI without GUI to bind sliced transparent PNGs to the master `Skeleton2D` template and pack ready-to-use `.tscn` character scenes.
-4. **Godot 4 `@tool` Auto-Rigging Importer (`auto_rig_importer.gd`)**:
+5. **Godot 4 `@tool` Auto-Rigging Importer (`auto_rig_importer.gd`)**:
    * Runs inside the Godot Editor Inspector for manual/interactive auto-rigging with 1-click trigger buttons.
-5. **Master Rig Template (`scenes/character_rig_template.tscn`)**:
+6. **Master Rig Template (`scenes/character_rig_template.tscn`)**:
    * Complete 15-bone MOBA/brawler hierarchy with zero-warning leaf-bone setup.
 
 ---
 
-## 🏗️ ComfyUI Front-End & Pipeline Architecture
+## ⚡ How to Run With an MCP (AI Agent Orchestration)
 
-```mermaid
-flowchart TD
-    subgraph STAGE1["Stage 1: Base Character Generation"]
-        PROMPT["Anime Archetype Prompt<br/>(e.g., 'cyberpunk blade assassin')"] --> KAMP1["KSampler (Base Character)"]
-        CKPT["Anime Checkpoint<br/>(Animagine XL / Pony)"] --> KAMP1
-        LORA["Flat Color / Cel-Shade LoRA"] --> KAMP1
-        KAMP1 --> BASE_IMG["Base Character Concept (1024x1024)"]
-    end
+When using an AI coding assistant (Claude Desktop, Cline, Cursor, Windsurf):
 
-    subgraph STAGE2["Stage 2: IP-Adapter Bridge & Exploded Alpha Separation"]
-        BASE_IMG --> IP_ADAPT["IP-Adapter Advanced (SDXL)"]
-        IP_ADAPT -->|"Visual Style / Costume Conditioning"| KAMP2["KSampler (Exploded Pass)"]
-        
-        POSE_MAP["Exploded OpenPose Canvas (1536x1536)"] --> CN_OPENPOSE["ControlNet OpenPose (0.90 Strength)"]
-        CN_OPENPOSE -->|"Detached Limb Geometry"| KAMP2
-        
-        CKPT --> LD_APPLY["LayeredDiffusionApply (Foreground Transparent)"]
-        LD_APPLY -->|"Model with Alpha Injection"| KAMP2
-        
-        KAMP2 --> LD_DEC["LayeredDiffusionDecodeRGBA"]
-        LD_DEC --> EXPLODED_IMG["Exploded RGBA Sheet (True Alpha)"]
-    end
-
-    subgraph STAGE3["Stage 3: SAM Slicing & Export"]
-        EXPLODED_IMG --> SAM["SAM / GroundingDINO Limb Slicer"]
-        SAM --> CROPS["15x Individual Limb PNGs<br/>[character_name]_[bone_name].png"]
-    end
-
-    subgraph STAGE4["Stage 4: Headless Godot Assembly"]
-        CROPS --> MCP_RIG["MCP: assemble_godot_rig"]
-        MCP_RIG --> GODOT_CLI["Godot 4 Headless CLI"]
-        GODOT_CLI --> SCENE["Packed Character Scene<br/>res://scenes/[character_name].tscn"]
-    end
-```
-
-### 1. Base Generation Node Setup
-* **Recommended Checkpoint**: `animagineXL_v31.safetensors` or `ponyDiffusionV6XL.safetensors`.
-* **LoRA Pairing**: `flat2DAnimerge_v10.safetensors` (strength `0.7` – `0.85`) to enforce clean anime cel-shading, vibrant flat tones, and bold vector-like outlines.
-* **Sampling**: `dpmpp_2m` with `karras` scheduler, 28–32 steps, CFG `7.0`.
-* **Resolution**: 1024×1024 for the base concept pass.
-
-### 2. Bridge to Exploded Separation (IP-Adapter + OpenPose + LayerDiffuse)
-To retain the character's costume, palette, and design across the exploded limbs:
-1. **IP-Adapter**: Feed the base concept image into `IPAdapterAdvanced` (weight `0.75` – `0.85`). This injects the character's visual identity directly into the second diffusion pass.
-2. **Exploded OpenPose ControlNet**:
-   * Uses an orthographic exploded pose map where limbs are detached by 120px–200px.
-   * `Apply ControlNet (Advanced)` with strength `0.90`, ending at step `0.90` (allowing final 10% steps to naturally cap joint ends without limb fusion).
-3. **LayerDiffuse (`LayeredDiffusionApply`)**:
-   * Placed between Model and KSampler with config `SDXL - Foreground Transparent`.
-   * Decoded via `LayeredDiffusionDecodeRGBA` for true 4-channel RGBA output with zero green-screen halo.
-
-### 3. Hardware & VRAM Optimization
-* **Sequential Execution**: Run Stage 1 (Base Gen) and Stage 2 (Exploded Pass) sequentially in the queue rather than in parallel latents.
-* **Model Unloading**: SAM and GroundingDINO weights (~2.5 GB) are loaded only after diffusion completes, freeing VRAM during the KSampler passes.
-* **Flag Recommendation**: Start ComfyUI with `--medvram` or `--lowvram` if running on 8GB GPUs.
-
----
-
-## 🤖 Model Context Protocol (MCP) Server
-
-The repository includes a production-ready Python MCP server (`server.py`) built on `FastMCP`.
-
-### Exposed MCP Tools
-
-| Tool | Parameters | Description |
-| :--- | :--- | :--- |
-| **`generate_character_sprites`** | `character_name: str`<br/>`archetype_prompt: str`<br/>`seed: int = -1` | Sends prompt to local ComfyUI API (`/prompt` & WebSocket), monitors generation, and exports exploded RGBA sheet. Includes local fallback generator. |
-| **`slice_character_limbs`** | `character_name: str`<br/>`input_image_path: str`<br/>`output_dir: str = ""` | Runs SAM / connected-component alpha segmentation to crop and export 15 transparent limb PNGs matching the strict naming convention. |
-| **`assemble_godot_rig`** | `character_name: str`<br/>`assets_dir: str`<br/>`target_scene_path: str = ""` | Calls Godot 4 in headless mode to bind the sliced PNGs to the master `Skeleton2D` template and pack a new character `.tscn`. |
-
-### Client Configuration (`mcpServers`)
-
-To register the server in **Claude Desktop**, **Cline**, **Windsurf**, or **Cursor**, add the following snippet to your MCP configuration file (e.g., `%APPDATA%\Claude\claude_desktop_config.json`):
+### 1. Register the MCP Server
+Add the following to your MCP client config file (e.g. `%APPDATA%\Claude\claude_desktop_config.json`):
 
 ```json
 {
@@ -116,27 +49,156 @@ To register the server in **Claude Desktop**, **Cline**, **Windsurf**, or **Curs
 }
 ```
 
+### 2. Natural Language Prompting
+Simply instruct the AI agent in chat:
+
+> *"Create a new character named 'sorceress' with an 'ice mage with crystal staff and glowing purple robes' theme. Generate the sprites, slice the limbs, and assemble the Godot character scene."*
+
+The AI assistant automatically orchestrates the 3 MCP tools:
+1. `generate_character_sprites(character_name="sorceress", archetype_prompt="ice mage with crystal staff...")`
+2. `slice_character_limbs(character_name="sorceress", input_image_path="sprites/sorceress/sorceress_exploded.png")`
+3. `assemble_godot_rig(character_name="sorceress", assets_dir="res://sprites/sorceress", target_scene_path="res://scenes/sorceress_character.tscn")`
+
+Result: `res://scenes/sorceress_character.tscn` is created and rigged on your disk.
+
 ---
 
-## 🎮 Headless Godot 4 Rig Assembly
+## 💻 How to Run Without an MCP (CLI & Scripts)
 
-You can run the headless scene generator from any terminal or script:
+You can run the full pipeline directly from your terminal or command prompt without any AI agent.
+
+### Option A: The 1-Command CLI (`create_character.py`)
+Run the unified character builder to generate the 15 limb sprites and assemble the Godot rig in one step:
+
+```bash
+# Create a Mage / Sorceress
+python scripts/create_character.py --name sorceress --archetype mage
+
+# Create an Assassin / Ninja
+python scripts/create_character.py --name shinobi --archetype assassin
+
+# Create a Heavy Mech / Tank
+python scripts/create_character.py --name goliath --archetype mech
+
+# Create an Archer / Ranger
+python scripts/create_character.py --name sylvana --archetype ranger
+
+# Create a Knight / Warrior
+python scripts/create_character.py --name paladin --archetype warrior
+```
+
+CLI Options:
+* `--name` (`-n`): Character identifier.
+* `--archetype` (`-a`): `warrior`, `mage`, `assassin`, `ranger`, `mech`.
+* `--prompt` (`-p`): Custom prompt description for ComfyUI.
+* `--comfy`: Attempts generating via live local ComfyUI API first.
+* `--no-godot`: Only generates the 15 transparent PNGs; skips scene packing.
+* `--target-scene` (`-o`): Custom `.tscn` destination path.
+
+### Option B: Headless Godot Assembly via CLI
+If you already have your 15 transparent PNGs exported:
 
 ```bash
 # Windows
 Godot_v4.7.2-stable_win64_console.exe --headless --script scripts/headless_rig_builder.gd -- \
-  --character-name warrior \
-  --assets-dir res://sprites/warrior \
-  --target-scene res://scenes/warrior_character.tscn
+  --character-name sorceress \
+  --assets-dir res://sprites/sorceress \
+  --target-scene res://scenes/sorceress_character.tscn
 
 # Linux / macOS
 godot --headless --script scripts/headless_rig_builder.gd -- \
-  --character-name warrior \
-  --assets-dir res://sprites/warrior \
-  --target-scene res://scenes/warrior_character.tscn
+  --character-name sorceress \
+  --assets-dir res://sprites/sorceress \
+  --target-scene res://scenes/sorceress_character.tscn
 ```
 
-### Standard Bone Suffix Naming Convention
+### Option C: Inside the Godot 4 Editor (GUI)
+1. Open the Godot project in **Godot 4.x**.
+2. Open `scenes/character_rig_template.tscn`.
+3. In the **Scene Tree**, click the `Skeleton2D` node.
+4. In the **Inspector**:
+   * Set **`Character Sprites Dir`** to your exported folder (e.g. `res://sprites/sorceress`).
+   * Set **`Character Prefix`** to `sorceress` (or leave blank for auto-inference).
+   * Click **`Trigger Auto Rig`**.
+5. Save the scene via **Scene $\rightarrow$ Save Scene As...** (e.g., `res://scenes/sorceress.tscn`).
+
+---
+
+## 🧙 How to Create Anything Other Than a Warrior (30-Character Roster Guide)
+
+To build a 30-character MOBA/brawler roster, you need a diverse spectrum of archetypes (Mages, Rogues, Tanks, Snipers, Summoners).
+
+### 1. Archetype Presets in the Pipeline
+
+| Archetype | Colors & Accents | Visual Elements | CLI Flag |
+| :--- | :--- | :--- | :--- |
+| **Mage / Caster** | Deep Violet & Gold with Arcane Magenta Glow | Circlets, cloth cowls, arcane runes, power crystals | `--archetype mage` |
+| **Assassin / Rogue** | Obsidian Midnight & Crimson Blood Glow | Sleek leather, face mask/cowl, light vambraces, knuckle studs | `--archetype assassin` |
+| **Mech / Juggernaut** | Gunmetal Gray & Caution Amber / Orange Glow | Heavy reinforced plates, furnace reactor, piston joints | `--archetype mech` |
+| **Ranger / Scout** | Forest Greens, Leather Browns & Emerald Glow | Agile tunics, utility belts, leather bracers, light greaves | `--archetype ranger` |
+| **Warrior / Paladin** | Cobalt Steel & Regal Amber Gold with Cyan Core | Heavy breastplate, T-visor helmet, gold crest, poleyns | `--archetype warrior` |
+
+### 2. Custom Prompts in ComfyUI
+To generate completely new visual styles in ComfyUI:
+1. Open ComfyUI and load [`workflows/comfyui_exploded_sprite_workflow.json`](file:///D:/Projects/Godot2dAutoSpriter/workflows/comfyui_exploded_sprite_workflow.json).
+2. Select **Node #3 (`CLIPTextEncode`)** and replace the prompt text with your desired character:
+   * **Ice Sorceress**:
+     `masterpiece, anime 2d game sprite, female ice mage with crystalline staff, flowing frost silk robes, circlet crown, cyan glowing runes, modular exploded limbs, flat cel shading, crisp bold outlines`
+   * **Shadow Ninja**:
+     `masterpiece, anime 2d game sprite, shadow ninja assassin with oni mask, dual crimson kunai, dark stealth cowl, modular exploded limbs, flat cel shading, crisp bold outlines`
+   * **Cyber Juggernaut**:
+     `masterpiece, anime 2d game sprite, heavy dieselpunk mech brawler, caution hazard stripes, glowing furnace core, hydraulic limb plating, modular exploded limbs, flat cel shading`
+   * **Elven Sniper**:
+     `masterpiece, anime 2d game sprite, elven archer scout, green travel cloak, leather quiver straps, agile boots, modular exploded limbs, flat cel shading, crisp bold outlines`
+3. Click **Queue Prompt**.
+4. The output RGBA exploded sheet will be saved to ComfyUI's output folder.
+5. Scribe/crop using `slice_character_limbs` or place into `sprites/<name>/` and run the Godot rig builder!
+
+---
+
+## 🏗️ ComfyUI Workflow Architecture
+
+```mermaid
+flowchart TD
+    subgraph STAGE1["Stage 1: Base Character Generation"]
+        PROMPT["Anime Archetype Prompt"] --> KAMP1["KSampler (Base Concept)"]
+        CKPT["SDXL Anime Checkpoint<br/>(Animagine XL / Pony)"] --> KAMP1
+        LORA["Flat Color LoRA<br/>(flat2DAnimerge)"] --> KAMP1
+        KAMP1 --> BASE_IMG["Base Character Concept (1024x1024)"]
+    end
+
+    subgraph STAGE2["Stage 2: IP-Adapter Bridge & Exploded Alpha Separation"]
+        BASE_IMG --> IP_ADAPT["IP-Adapter Advanced (SDXL)"]
+        IP_ADAPT -->|"Visual Style / Costume Conditioning"| KAMP2["KSampler (Exploded Pass)"]
+        
+        POSE_MAP["Exploded OpenPose Canvas (1536x1536)"] --> CN_OPENPOSE["ControlNet OpenPose (0.90 Strength)"]
+        CN_OPENPOSE -->|"Detached Limb Geometry"| KAMP2
+        
+        CKPT --> LD_APPLY["LayeredDiffusionApply (Foreground Transparent)"]
+        LD_APPLY -->|"Model with Alpha Injection"| KAMP2
+        
+        KAMP2 --> LD_DEC["LayeredDiffusionDecodeRGBA"]
+        LD_DEC --> EXPLODED_IMG["Exploded RGBA Sheet (True Alpha)"]
+    end
+
+    subgraph STAGE3["Stage 3: Slicing & Export"]
+        EXPLODED_IMG --> SAM["SAM / Connected Alpha Slicer"]
+        SAM --> CROPS["15x Individual Limb PNGs<br/>[character_name]_[bone_name].png"]
+    end
+
+    subgraph STAGE4["Stage 4: Headless Godot Assembly"]
+        CROPS --> MCP_RIG["headless_rig_builder.gd"]
+        MCP_RIG --> GODOT_CLI["Godot 4 Headless CLI"]
+        GODOT_CLI --> SCENE["Packed Character Scene<br/>res://scenes/[character_name]_character.tscn"]
+    end
+```
+
+---
+
+## 📁 Standard Bone Suffix Naming Convention
+
+All 15 limb cutouts follow the pattern `[character_name]_[bone_name].png`:
+
 ```text
 [character_name]_head.png
 [character_name]_torso.png
@@ -165,10 +227,10 @@ Run the full automated test suite headless:
 Godot_v4.7.2-stable_win64_console.exe --headless --script tests/test_auto_rig.gd
 ```
 
-To test the MCP server tools directly in Python:
+Test MCP tools directly via Python:
 
 ```bash
-python -c "import server; print(server.assemble_godot_rig('warrior', 'res://sprites/warrior'))"
+python -c "import server; print(server.assemble_godot_rig('sorceress', 'res://sprites/sorceress'))"
 ```
 
 ---
@@ -177,22 +239,27 @@ python -c "import server; print(server.assemble_godot_rig('warrior', 'res://spri
 
 ```text
 Godot2dAutoSpriter/
-├── server.py                                  # FastMCP server exposing 3 agentic tools
+├── server.py                                  # FastMCP server (tools: generate, slice, assemble)
 ├── auto_rig_importer.gd                       # Core @tool Godot 4 script for Skeleton2D
 ├── project.godot                              # Godot 4 engine project definition
-├── .gitignore                                 # Godot 4 ignore patterns
-├── README.md                                  # Complete architecture & documentation
+├── .gitignore                                 # Godot 4 & Python ignore configurations
+├── README.md                                  # Complete pipeline & user guide
 ├── scenes/
 │   ├── character_rig_template.tscn            # Master 15-bone Skeleton2D template
-│   └── warrior_rigged.tscn                    # Pre-rigged assembled character scene
+│   ├── warrior_rigged.tscn                    # Pre-rigged Warrior character
+│   ├── sorceress_character.tscn               # Pre-rigged Mage character
+│   └── shinobi_character.tscn                 # Pre-rigged Assassin character
 ├── scripts/
-│   ├── headless_rig_builder.gd                # Headless CLI entry point for Godot scene assembly
-│   ├── generate_sample_sprites.py             # Stylized cut-out sprite generator
-│   └── save_rigged_warrior.gd                 # Helper script for packing scenes
+│   ├── create_character.py                    # Standalone 1-command character CLI builder
+│   ├── headless_rig_builder.gd                # Headless CLI entry point for scene packing
+│   ├── generate_sample_sprites.py             # Multi-archetype stylized sprite generator
+│   └── save_rigged_warrior.gd                 # Scene packing utility script
 ├── sprites/
-│   └── warrior/                               # 15 distinct, transparent limb sprites
+│   ├── warrior/                               # 15 Warrior limb sprites
+│   ├── sorceress/                             # 15 Mage limb sprites
+│   └── shinobi/                               # 15 Assassin limb sprites
 ├── tests/
-│   └── test_auto_rig.gd                       # Headless test suite (15/15 assertions)
+│   └── test_auto_rig.gd                       # Headless test suite (15/15 passing)
 └── workflows/
     └── comfyui_exploded_sprite_workflow.json  # ComfyUI API workflow definition
 ```
