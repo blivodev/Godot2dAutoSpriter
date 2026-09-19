@@ -28,7 +28,7 @@ import urllib.parse
 import subprocess
 import webbrowser
 import threading
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 
 from server import get_project_root, PROJECT_ROOT
@@ -63,7 +63,7 @@ def _check_comfyui_status() -> dict:
 
     try:
         req = urllib.request.Request(comfy_url)
-        with urllib.request.urlopen(req, timeout=1.5) as resp:
+        with urllib.request.urlopen(req, timeout=3.0) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             ckpts = data.get("CheckpointLoaderSimple", {}).get("input", {}).get("required", {}).get("ckpt_name", [[]])[0]
             all_ckpts = sorted(list(set(ckpts + disk_ckpts)))
@@ -1516,7 +1516,19 @@ async function checkStatus() {
         });
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn("[STATUS] Status check failed:", e);
+    const gBadge = document.getElementById("badge-godot");
+    const cBadge = document.getElementById("badge-comfy");
+    if (gBadge && gBadge.textContent.includes("Checking")) {
+      gBadge.className = "badge badge-offline";
+      gBadge.innerHTML = '<span class="badge-dot"></span> Godot 4: Offline';
+    }
+    if (cBadge && cBadge.textContent.includes("Checking")) {
+      cBadge.className = "badge badge-offline";
+      cBadge.innerHTML = '<span class="badge-dot"></span> ComfyUI: Offline';
+    }
+  }
 }
 
 // ---- Gallery ----
@@ -1590,7 +1602,7 @@ async function runPipeline(actionType) {
 
   // For rig_only, just call assemble endpoint
   if (actionType === 'rig_only') {
-    log("\n---", "warn");
+    log("\\n---", "warn");
     log(`[RIG] Re-rigging skeleton for '${name}' (${rig})...`, "gi");
     try {
       const r = await fetch('/api/assemble', {
@@ -1614,7 +1626,7 @@ async function runPipeline(actionType) {
     return;
   }
 
-  log("\n========================================================", "ci");
+  log("\\n========================================================", "ci");
   log(`[PIPELINE] Starting generation for '${name}'...`, "ci");
   log(`[ENGINE] Mode: ${mode.toUpperCase()} | Style: ${artStyle.toUpperCase()} | Detail: ${detailLevel}${actionType === 'sprites_only' ? ' | Sprites Only' : ''}`, "ci");
 
@@ -2108,7 +2120,8 @@ def run_server(port=PORT, open_browser=True):
     server = None
     for p in range(port, port + 10):
         try:
-            server = HTTPServer((HOST, p), AutoSpriterHandler)
+            server = ThreadingHTTPServer((HOST, p), AutoSpriterHandler)
+            server.daemon_threads = True
             actual_port = p
             break
         except OSError:
