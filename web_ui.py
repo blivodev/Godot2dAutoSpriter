@@ -3,11 +3,12 @@
 web_ui.py - Godot 2D Auto Spriter & Rigger Web Dashboard
 
 A self-contained, browser-based graphical user interface for:
-- Creating 2D humanoid and creature character rosters (aliens, beasts, elves, demons, skeletons, mechs)
-- Configuring custom prompts, anatomy species, seeds, and control parameters
-- Triggering ComfyUI diffusion or procedural creature & humanoid sprite generation
+- Creating 2D humanoid and creature character rosters
+- Presets: Cyber Alien, Elf Mage, Demon Fiend, Skeleton Lich, Dragonkin, Dire Beast, Mantis, Paladin, Heavy Mech
+- Full "✨ Custom" mode with interactive anatomy mix & match, appendages (wings/tail), and color pickers
+- Triggering ComfyUI diffusion or procedural multi-species sprite generation
 - Auto-assembling Godot 4 Skeleton2D character scenes (.tscn)
-- 1-click launching into the Godot 4 editor
+- 1-click launching directly into the active 2D Godot 4 editor viewport
 - Inspecting generated transparent limb cutouts in an interactive gallery
 
 Can be run via:
@@ -97,7 +98,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             qs = urllib.parse.parse_qs(parsed.query)
             char_name = qs.get("char", [""])[0].strip().lower().replace(" ", "_")
             if not char_name:
-                char_name = "warrior"
+                char_name = "cyber_alien"
             
             sprites_dir = PROJECT_ROOT / "sprites" / char_name
             files = []
@@ -113,7 +114,6 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             return
 
         elif path.startswith("/sprites/"):
-            # Serve local sprite files safely
             rel = urllib.parse.unquote(path[len("/sprites/"):])
             file_path = PROJECT_ROOT / "sprites" / rel
             if file_path.is_file() and str(file_path.resolve()).startswith(str((PROJECT_ROOT / "sprites").resolve())):
@@ -174,7 +174,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             return
 
         elif path == "/api/open_folder":
-            char_name = payload.get("character", "warrior").strip().lower().replace(" ", "_")
+            char_name = payload.get("character", "cyber_alien").strip().lower().replace(" ", "_")
             folder = PROJECT_ROOT / "sprites" / char_name
             if folder.is_dir():
                 os.startfile(str(folder))
@@ -214,14 +214,39 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                     )
 
             if full_scene and full_scene.is_file():
+                res_scene = f"res://scenes/{full_scene.name}"
                 rel_scene = f"scenes/{full_scene.name}"
-                subprocess.Popen([godot_exe, "--path", str(PROJECT_ROOT), "-e", rel_scene], cwd=str(PROJECT_ROOT))
-                self._send_json({"status": "launched", "scene": str(full_scene), "message": f"Opened '{full_scene.name}' in Godot 4 Editor."})
+
+                # 1. Write open scene request for Godot editor plugin
+                try:
+                    (PROJECT_ROOT / ".godot").mkdir(parents=True, exist_ok=True)
+                    with open(PROJECT_ROOT / ".godot" / "open_scene_request.txt", "w", encoding="utf-8") as f:
+                        f.write(res_scene)
+                    with open(PROJECT_ROOT / "open_scene_request.txt", "w", encoding="utf-8") as f:
+                        f.write(res_scene)
+                except Exception:
+                    pass
+
+                # 2. Update project_metadata.cfg
+                try:
+                    meta_path = PROJECT_ROOT / ".godot" / "editor" / "project_metadata.cfg"
+                    if meta_path.is_file():
+                        content = meta_path.read_text(encoding="utf-8")
+                        if "[editor_metadata]" in content:
+                            content = content.replace("[editor_metadata]", f'[editor_metadata]\nopen_scenes=["{res_scene}"]\ncurrent_scene="{res_scene}"')
+                        else:
+                            content += f'\n[editor_metadata]\nopen_scenes=["{res_scene}"]\ncurrent_scene="{res_scene}"\n'
+                        meta_path.write_text(content, encoding="utf-8")
+                except Exception:
+                    pass
+
+                # 3. Launch Godot Editor GUI with --open-scene arg
+                subprocess.Popen([godot_exe, "--path", str(PROJECT_ROOT), "-e", "--", "--open-scene", res_scene], cwd=str(PROJECT_ROOT))
+                self._send_json({"status": "launched", "scene": str(full_scene), "message": f"Successfully launched Godot 4 Editor. Opening '{full_scene.name}' in 2D Viewport..."})
                 return
             else:
-                # Open the Godot project directly in the editor
                 subprocess.Popen([godot_exe, "--path", str(PROJECT_ROOT), "-e"], cwd=str(PROJECT_ROOT))
-                self._send_json({"status": "launched", "scene": "project", "message": "Opened Godot 2D Auto Spriter project in Godot 4 Editor."})
+                self._send_json({"status": "launched", "scene": "project", "message": "Opened Godot project in Godot 4 Editor."})
                 return
 
         self.send_response(404)
@@ -235,9 +260,9 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode("utf-8"))
 
     def _handle_generate(self, payload: dict) -> dict:
-        char_name = payload.get("character_name", "cyber_warrior").strip().lower().replace(" ", "_")
+        char_name = payload.get("character_name", "cyber_alien").strip().lower().replace(" ", "_")
         if not char_name:
-            char_name = "cyber_warrior"
+            char_name = "cyber_alien"
         concept = payload.get("concept", "cyberpunk warrior alien with glowing neon crest, modular chitin armor, plasma blade")
         archetype = payload.get("archetype", "warrior")
         rig_type = payload.get("rig_type", "biped")
@@ -245,6 +270,9 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         mode = payload.get("mode", "auto")
         seed = int(payload.get("seed", -1))
         auto_rig = payload.get("auto_rig", True)
+
+        custom_colors = payload.get("custom_colors")
+        custom_features = payload.get("custom_features")
 
         sprites_dir = PROJECT_ROOT / "sprites" / char_name
         sprites_dir.mkdir(parents=True, exist_ok=True)
@@ -272,18 +300,27 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 except Exception as e:
                     logs.append(f"[COMFYUI-WARN] API error: {e}")
             elif comfy_status.get("online", False) and not comfy_status.get("has_checkpoint", False):
-                logs.append(f"[COMFYUI-NOTICE] ComfyUI is running, but animagineXL checkpoint is not installed. Engaging Advanced Procedural Spriter...")
+                logs.append(f"[COMFYUI-NOTICE] ComfyUI online but animagineXL checkpoint is missing. Engaging Advanced Procedural Spriter...")
 
         if not comfy_used:
             from scripts.generate_sample_sprites import generate_all, generate_quadruped, detect_species
-            detected_sp = species if species != "auto" else detect_species(concept, archetype)
+            detected_sp = species if (species and species != "auto") else detect_species(concept, archetype)
             logs.append(f"[GENERATOR] Synthesizing {detected_sp.upper()} anatomy for '{char_name}' (Seed: {seed if seed >= 0 else 'Procedural'})...")
+            
             if rig_type == "quadruped" or archetype == "beast" or detected_sp == "beast":
                 parts = generate_quadruped(str(sprites_dir), prefix=char_name, archetype=archetype, prompt=concept, seed=seed)
             else:
-                parts = generate_all(str(sprites_dir), prefix=char_name, archetype=archetype, prompt=concept, seed=seed)
+                parts = generate_all(
+                    str(sprites_dir),
+                    prefix=char_name,
+                    archetype=archetype,
+                    prompt=concept,
+                    seed=seed,
+                    custom_colors=custom_colors,
+                    custom_features=custom_features
+                )
             parts = parts or []
-            logs.append(f"[GENERATOR] Successfully created {len(parts)} {detected_sp.upper()} transparent limb cutouts in: res://sprites/{char_name}")
+            logs.append(f"[GENERATOR] Created {len(parts)} {detected_sp.upper()} transparent limb cutouts in: res://sprites/{char_name}")
 
         # Assemble Godot rig if requested
         scene_path = f"res://scenes/{char_name}_character.tscn"
@@ -336,7 +373,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
 
 
 # ==============================================================================
-# Modern Embedded Web Dashboard (Single-File Autonomous Front-End)
+# Modern Embedded Web Dashboard
 # ==============================================================================
 HTML_PAGE = """<!DOCTYPE html>
 <html lang="en">
@@ -354,6 +391,7 @@ HTML_PAGE = """<!DOCTYPE html>
     --primary-hover: #79b8ff;
     --accent: #2ea043;
     --accent-purple: #bc8cff;
+    --accent-gold: #e3b341;
     --text: #e6edf3;
     --text-muted: #8b949e;
     --console-bg: #07090e;
@@ -392,6 +430,7 @@ HTML_PAGE = """<!DOCTYPE html>
 
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
 
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
   .btn-primary { background: var(--primary); color: #07090e; width: 100%; font-size: 14px; padding: 12px; font-weight: 700; }
@@ -418,9 +457,15 @@ HTML_PAGE = """<!DOCTYPE html>
   .sprite-thumb { width: 100%; height: 74px; object-fit: contain; background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 12px 12px; border-radius: 4px; }
   .sprite-name { font-size: 10px; color: var(--text-muted); margin-top: 4px; word-break: break-all; font-weight: 500; }
 
-  .quick-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-  .preset-pill { font-size: 11px; padding: 4px 10px; border-radius: 14px; background: #191f2b; border: 1px solid var(--border); cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
+  .quick-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .preset-pill { font-size: 11px; padding: 5px 11px; border-radius: 14px; background: #191f2b; border: 1px solid var(--border); cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
   .preset-pill:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+  .preset-custom { background: rgba(227, 179, 65, 0.15); border-color: rgba(227, 179, 65, 0.4); color: #f0c654; font-weight: 700; }
+  .preset-custom:hover { background: rgba(227, 179, 65, 0.25); border-color: #f0c654; color: #ffd666; }
+
+  .color-picker-box { display: flex; align-items: center; gap: 8px; background: var(--bg-input); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
+  .color-picker-box input[type="color"] { border: none; width: 28px; height: 28px; border-radius: 4px; background: transparent; cursor: pointer; }
+  .color-picker-box span { font-size: 11px; color: var(--text-muted); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -448,11 +493,12 @@ HTML_PAGE = """<!DOCTYPE html>
       </div>
 
       <div class="form-group">
-        <label>Quick Archetype & Creature Presets:</label>
+        <label>Archetype & Creature Presets:</label>
         <div class="quick-presets">
+          <span class="preset-pill preset-custom" onclick="applyCustomMode()">✨ Custom Creature</span>
           <span class="preset-pill" onclick="applyPreset('cyber_alien', 'cyberpunk warrior alien with neon bioluminescent crest, plasma blade and chitin plates', 'warrior', 'biped', 'alien')">👾 Cyber Alien</span>
           <span class="preset-pill" onclick="applyPreset('elven_sorceress', 'female elf sorceress with flowing purple hair, arcane glowing robes and crystal staff', 'mage', 'biped', 'humanoid')">🧝 Elf Mage</span>
-          <span class="preset-pill" onclick="applyPreset('winged_demon', 'crimson demon lord with obsidian curved horns, runic chest brand and shadow talons', 'assassin', 'biped', 'demon')">😈 Demon Fiend</span>
+          <span class="preset-pill" onclick="applyPreset('winged_demon', 'crimson demon lord with obsidian curved horns, runic chest brand, shadow talons and wings', 'assassin', 'biped', 'demon')">😈 Demon Fiend</span>
           <span class="preset-pill" onclick="applyPreset('skeleton_lich', 'undead skeleton lich with glowing cyan soul eyes, bone ribcage and tattered shroud', 'mage', 'biped', 'undead')">💀 Skeleton Lich</span>
           <span class="preset-pill" onclick="applyPreset('dragonkin_brawler', 'emerald dragonkin warrior with horned brow, ridge scales and reptilian claws', 'warrior', 'biped', 'reptilian')">🦎 Dragonkin</span>
           <span class="preset-pill" onclick="applyPreset('celestial_wolf', 'mythical celestial dire wolf with emerald predator eyes, multi tail and fur ruff', 'beast', 'quadruped', 'beast')">🐺 Dire Beast</span>
@@ -474,23 +520,116 @@ HTML_PAGE = """<!DOCTYPE html>
         </div>
         <div class="form-group">
           <label for="species">Species & Anatomy:</label>
-          <select id="species">
-            <option value="auto" selected>Auto-Detect from Concept Prompt</option>
-            <option value="alien">👾 Alien / Xenomorph (Elongated Cranium, Bio-Crest, Talons)</option>
+          <select id="species" onchange="onSpeciesDropdownChanged()">
+            <option value="custom">✨ Custom / Hybrid (User-Defined Anatomy)</option>
+            <option value="alien" selected>👾 Cyber Alien (Elongated Cranium, Bio-Crest, Talons)</option>
             <option value="humanoid">🧝 Human / Elf (Anime Face, Hair, Tunic/Robes, Boots)</option>
             <option value="demon">😈 Demon / Fiend (Curved Horns, Runic Brand, Talons)</option>
             <option value="undead">💀 Undead / Skeleton (Bone Skull, Ribcage, Soul Core)</option>
-            <option value="reptilian">🦎 Reptilian / Dragon (Snout, Ridge Horns, Scales)</option>
-            <option value="insectoid">🦗 Insectoid / Mantis (Antennae, Compound Eyes, Carapace)</option>
-            <option value="beast">🐺 Beast / Chimera (Predatory Snout, Paws, Fur)</option>
-            <option value="plant">🌿 Plant / Dryad (Bark Skin, Foliage, Floral Core)</option>
-            <option value="slime">💧 Slime / Elemental (Translucent Fluid, Core)</option>
-            <option value="mech">🤖 Cyborg / Mech (Visor Slits, Armor Plates, Pistons)</option>
+            <option value="reptilian">🦎 Dragonkin (Snout, Ridge Horns, Scales)</option>
+            <option value="beast">🐺 Dire Beast (Predatory Snout, Paws, Fur)</option>
+            <option value="insectoid">🦗 Mantis (Antennae, Compound Eyes, Carapace)</option>
+            <option value="mech">🤖 Heavy Mech (Visor Slits, Armor Plates, Pistons)</option>
+            <option value="auto">Auto-Detect from Concept Prompt</option>
           </select>
         </div>
       </div>
 
-      <div class="row-2">
+      <!-- Custom Design Studio (Anatomy Mix & Match & Colors) -->
+      <div id="custom-studio" class="accordion" style="border-color: rgba(227, 179, 65, 0.35);">
+        <div class="accordion-header" style="background: rgba(227, 179, 65, 0.1); color: #f0c654;" onclick="toggleCustomStudio()">
+          <span>🎨 Custom Creature Studio (Anatomy Mixing, Wings/Tail & Colors)</span>
+          <span id="custom-studio-arrow">▼</span>
+        </div>
+        <div id="custom-studio-body" class="accordion-content">
+          <div class="row-2" style="margin-bottom: 12px;">
+            <div class="form-group">
+              <label for="custom-head">Head Shape / Style:</label>
+              <select id="custom-head" onchange="syncCustomPrompt()">
+                <option value="alien">👾 Alien Cranium (Bio-Crest & Vents)</option>
+                <option value="humanoid">🧝 Humanoid / Elf (Anime Hair & Face)</option>
+                <option value="demon">😈 Demon Horns & Fangs</option>
+                <option value="undead">💀 Bony Skull & Soul Flame</option>
+                <option value="reptilian">🦎 Dragon Brow Horns & Snout</option>
+                <option value="insectoid">🦗 Mantis Antennae & Compound Eyes</option>
+                <option value="beast">🐺 Beast / Wolf Snout & Ears</option>
+                <option value="mech">🤖 Mech Visor & Armor Helmet</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="custom-torso">Torso Style:</label>
+              <select id="custom-torso" onchange="syncCustomPrompt()">
+                <option value="alien">Biomechanical Carapace & Core</option>
+                <option value="humanoid">Cloth Tunic / Robes / Vest</option>
+                <option value="demon">Muscular Demonic Runic Brand</option>
+                <option value="undead">Exposed Skeletal Ribcage</option>
+                <option value="reptilian">Overlapping Dragon Scutes</option>
+                <option value="insectoid">Segmented Chitin Thorax</option>
+                <option value="mech">Plated Armor & Furnace</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row-2" style="margin-bottom: 12px;">
+            <div class="form-group">
+              <label for="custom-hands">Hands / Claws Style:</label>
+              <select id="custom-hands" onchange="syncCustomPrompt()">
+                <option value="alien">Alien Elongated Talons</option>
+                <option value="humanoid">Humanoid Articulated Fingers</option>
+                <option value="demon">Sharp Obsidian Demonic Claws</option>
+                <option value="undead">Bony Skeletal Digits</option>
+                <option value="reptilian">Heavy Dragon Claws</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="custom-feet">Feet / Base Style:</label>
+              <select id="custom-feet" onchange="syncCustomPrompt()">
+                <option value="alien">Digitigrade Alien Talons</option>
+                <option value="humanoid">Adventurer Boots / Sandals</option>
+                <option value="demon">Cloven Hooves / Raptor Spurs</option>
+                <option value="undead">Skeletal Foot Bones</option>
+                <option value="reptilian">Raptor / Dragon Claw Feet</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row-2" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label>Custom Appendages:</label>
+              <div style="display: flex; gap: 16px; align-items: center; padding-top: 4px;">
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text);">
+                  <input type="checkbox" id="custom-wings" onchange="syncCustomPrompt()"> 🪽 Add Wings
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text);">
+                  <input type="checkbox" id="custom-tail" onchange="syncCustomPrompt()"> 🐉 Add Tail
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <label style="margin-bottom: 8px;">Interactive Custom Color Palette:</label>
+          <div class="row-4" style="margin-bottom: 6px;">
+            <div class="color-picker-box">
+              <input type="color" id="col-primary" value="#2b4764" onchange="syncCustomPrompt()">
+              <span>Body / Skin</span>
+            </div>
+            <div class="color-picker-box">
+              <input type="color" id="col-accent" value="#d79c29" onchange="syncCustomPrompt()">
+              <span>Cloth / Hair</span>
+            </div>
+            <div class="color-picker-box">
+              <input type="color" id="col-glow" value="#00f0ff" onchange="syncCustomPrompt()">
+              <span>Glow / Eyes</span>
+            </div>
+            <div class="color-picker-box">
+              <input type="color" id="col-outline" value="#121824" onchange="syncCustomPrompt()">
+              <span>Outline</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row-2" style="margin-top: 14px;">
         <div class="form-group">
           <label for="rig-type">Rig Architecture:</label>
           <select id="rig-type">
@@ -499,7 +638,7 @@ HTML_PAGE = """<!DOCTYPE html>
           </select>
         </div>
         <div class="form-group">
-          <label for="archetype">Palette & Theme Accent:</label>
+          <label for="archetype">Color Accent Fallback:</label>
           <select id="archetype">
             <option value="warrior" selected>Warrior (Paladin Cobalt & Regal Amber Gold)</option>
             <option value="mage">Mage (Deep Arcane Violet & Arcane Magenta)</option>
@@ -511,7 +650,7 @@ HTML_PAGE = """<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- Advanced Accordion -->
+      <!-- Advanced Tuning -->
       <div class="accordion">
         <div class="accordion-header" onclick="toggleAccordion()">
           <span>Advanced Tuning Parameters (Seed, Engine, Paths)</span>
@@ -562,7 +701,7 @@ HTML_PAGE = """<!DOCTYPE html>
           <span>Execution Log Console</span>
           <span id="status-pill" style="font-size: 11px; color: var(--text-muted);">Idle</span>
         </div>
-        <div id="console" class="console">[System Ready] Enter a character concept or pick a preset above to begin.</div>
+        <div id="console" class="console">[System Ready] Enter a character concept, choose a preset, or click ✨ Custom Creature!</div>
       </div>
 
       <!-- Assets Preview Card -->
@@ -614,6 +753,51 @@ HTML_PAGE = """<!DOCTYPE html>
     }
   }
 
+  function toggleCustomStudio(forceOpen = false) {
+    const b = document.getElementById("custom-studio-body");
+    const arr = document.getElementById("custom-studio-arrow");
+    if (forceOpen || !b.classList.contains("open")) {
+      b.classList.add("open");
+      arr.textContent = "▲";
+    } else {
+      b.classList.remove("open");
+      arr.textContent = "▼";
+    }
+  }
+
+  function applyCustomMode() {
+    document.getElementById("char-name").value = "custom_creature";
+    document.getElementById("species").value = "custom";
+    document.getElementById("target-scene").value = `res://scenes/custom_creature_character.tscn`;
+    toggleCustomStudio(true);
+    syncCustomPrompt();
+    log(`[CUSTOM] Activated Custom Creature Studio. Customize anatomy, wings, and colors!`, "info");
+    refreshGallery();
+  }
+
+  function onSpeciesDropdownChanged() {
+    const sp = document.getElementById("species").value;
+    if (sp === "custom") {
+      toggleCustomStudio(true);
+    }
+  }
+
+  function syncCustomPrompt() {
+    const head = document.getElementById("custom-head").value;
+    const torso = document.getElementById("custom-torso").value;
+    const wings = document.getElementById("custom-wings").checked;
+    const tail = document.getElementById("custom-tail").checked;
+    const pCol = document.getElementById("col-primary").value;
+    const gCol = document.getElementById("col-glow").value;
+
+    let desc = `custom hybrid creature with ${head} head silhouette, ${torso} body`;
+    if (wings) desc += ", large spreading wings";
+    if (tail) desc += ", articulated tail";
+    desc += `, primary color ${pCol} and glowing core ${gCol}`;
+
+    document.getElementById("concept").value = desc;
+  }
+
   function applyPreset(name, concept, arch, rig, species = "auto") {
     document.getElementById("char-name").value = name;
     document.getElementById("concept").value = concept;
@@ -622,6 +806,25 @@ HTML_PAGE = """<!DOCTYPE html>
     document.getElementById("species").value = species;
     document.getElementById("target-scene").value = `res://scenes/${name}_character.tscn`;
     currentCharacter = name;
+
+    // Adjust studio defaults for visual convenience
+    if (species === "alien") {
+      document.getElementById("custom-head").value = "alien";
+      document.getElementById("custom-torso").value = "alien";
+      document.getElementById("col-primary").value = "#2b4764";
+      document.getElementById("col-glow").value = "#00f0ff";
+    } else if (species === "demon") {
+      document.getElementById("custom-head").value = "demon";
+      document.getElementById("custom-torso").value = "demon";
+      document.getElementById("col-primary").value = "#5f1c2a";
+      document.getElementById("col-glow").value = "#ff2d1e";
+    } else if (species === "undead") {
+      document.getElementById("custom-head").value = "undead";
+      document.getElementById("custom-torso").value = "undead";
+      document.getElementById("col-primary").value = "#a09b91";
+      document.getElementById("col-glow").value = "#00f0ff";
+    }
+
     log(`[PRESET] Loaded '${name}' (${species.toUpperCase()}, ${rig.toUpperCase()})`, "info");
     refreshGallery();
   }
@@ -647,7 +850,7 @@ HTML_PAGE = """<!DOCTYPE html>
           cBadge.innerHTML = `<span class="badge-dot"></span> ComfyUI: Ready (${d.comfyui.node_count} nodes)`;
         } else {
           cBadge.className = "badge badge-notice";
-          cBadge.innerHTML = `<span class="badge-dot"></span> ComfyUI: No Checkpoint (Using Smart Spriter)`;
+          cBadge.innerHTML = `<span class="badge-dot"></span> ComfyUI: Online (Using Smart Spriter)`;
         }
       } else {
         cBadge.className = "badge badge-offline";
@@ -692,6 +895,22 @@ HTML_PAGE = """<!DOCTYPE html>
     const mode = document.getElementById("engine-mode").value;
     const seed = document.getElementById("seed").value;
 
+    const customColors = {
+      primary: document.getElementById("col-primary").value,
+      accent: document.getElementById("col-accent").value,
+      glow: document.getElementById("col-glow").value,
+      outline: document.getElementById("col-outline").value
+    };
+
+    const customFeatures = {
+      head_style: document.getElementById("custom-head").value,
+      torso_style: document.getElementById("custom-torso").value,
+      hand_style: document.getElementById("custom-hands").value,
+      foot_style: document.getElementById("custom-feet").value,
+      has_wings: document.getElementById("custom-wings").checked,
+      has_tail: document.getElementById("custom-tail").checked
+    };
+
     btn.disabled = true;
     document.getElementById("status-pill").textContent = "Processing...";
     log(`\\n========================================================`, "info");
@@ -707,6 +926,8 @@ HTML_PAGE = """<!DOCTYPE html>
           archetype: archetype,
           rig_type: rig,
           species: species,
+          custom_colors: (species === "custom" ? customColors : null),
+          custom_features: (species === "custom" ? customFeatures : null),
           mode: mode,
           seed: seed,
           auto_rig: (actionType !== 'sprites_only')

@@ -66,6 +66,15 @@ func _update_dir_from_name() -> void:
 	dir_input.text = "res://sprites/" + cname
 
 
+func populate_from_scene(scene_path: String) -> void:
+	var base_name := scene_path.get_file().get_basename()
+	base_name = base_name.trim_suffix("_character").trim_suffix("_rigged")
+	if char_name_edit:
+		char_name_edit.text = base_name
+		_update_dir_from_name()
+
+
+
 func _on_rig_type_selected(index: int) -> void:
 	custom_template_box.visible = (index == 2)
 

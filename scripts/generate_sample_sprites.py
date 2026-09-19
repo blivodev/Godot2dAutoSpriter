@@ -45,14 +45,58 @@ def detect_species(prompt: str, archetype: str = "") -> str:
     return "humanoid"
 
 
-def build_palette(prompt: str, archetype: str = "", seed: int = 42) -> dict:
+def hex_to_rgba(h_str: str, default=(128, 128, 128, 255)):
+    if not h_str or not isinstance(h_str, str):
+        return default
+    h = h_str.strip().lstrip("#")
+    if len(h) == 6:
+        try:
+            return (int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16), 255)
+        except Exception:
+            return default
+    return default
+
+
+def build_palette(prompt: str, archetype: str = "", seed: int = 42, custom_colors: dict = None) -> dict:
     """
     Extracts explicit colors from prompt or deterministically synthesizes
     a rich, harmonious 8-color palette tailored to the creature/humanoid type.
+    Accepts optional custom_colors dict with 'primary', 'accent', 'glow', 'outline' hex values.
     """
     p = (prompt + " " + archetype).lower()
     rng = random.Random(seed if seed >= 0 else hash(prompt + archetype) & 0x7fffffff)
-    species = detect_species(prompt, archetype)
+    species = custom_colors.get("species") if (custom_colors and custom_colors.get("species")) else detect_species(prompt, archetype)
+
+    if custom_colors and any(k in custom_colors for k in ["primary", "accent", "glow", "outline"]):
+        p_col = hex_to_rgba(custom_colors.get("primary"), (60, 75, 100, 255))
+        a_col = hex_to_rgba(custom_colors.get("accent"), (215, 165, 45, 255))
+        g_col = hex_to_rgba(custom_colors.get("glow"), (0, 240, 255, 255))
+        out_col = hex_to_rgba(custom_colors.get("outline"), (16, 18, 22, 255))
+
+        skin_dark = (max(0, p_col[0] - 35), max(0, p_col[1] - 35), max(0, p_col[2] - 35), 255)
+        skin_mid = p_col
+        skin_light = (min(255, p_col[0] + 45), min(255, p_col[1] + 45), min(255, p_col[2] + 45), 255)
+
+        accent_dark = (max(0, a_col[0] - 40), max(0, a_col[1] - 40), max(0, a_col[2] - 40), 255)
+        accent_mid = a_col
+        accent_light = (min(255, a_col[0] + 45), min(255, a_col[1] + 45), min(255, a_col[2] + 45), 255)
+
+        glow = g_col
+        glow_core = (min(255, g_col[0] + 70), min(255, g_col[1] + 70), min(255, g_col[2] + 70), 255)
+        outline = out_col
+
+        return {
+            "species": species,
+            "primary_dark": skin_dark,
+            "primary_mid": skin_mid,
+            "primary_light": skin_light,
+            "accent_dark": accent_dark,
+            "accent_mid": accent_mid,
+            "accent_light": accent_light,
+            "glow": glow,
+            "glow_core": glow_core,
+            "outline": outline,
+        }
 
     # Color keyword mapping
     has_cyan = any(k in p for k in ["cyan", "neon", "plasma", "blue", "azure", "electric", "ice", "frost", "sapphire", "crystal"])
@@ -847,36 +891,91 @@ def draw_beast_tail(draw, w, h, s, theme, seg_idx=1):
     draw.line([(cx - (r-4)*s, cy), (cx + (r-4)*s, cy)], fill=theme["primary_light"], width=2*s)
 
 
+def draw_wing_upper(draw, w, h, s, theme, is_left=True):
+    cx, cy = w // 2, h // 2
+    dir_mul = 1 if is_left else -1
+    draw.polygon([
+        (cx - 14*s * dir_mul, cy + 20*s),
+        (cx + 16*s * dir_mul, cy - 20*s),
+        (cx + 20*s * dir_mul, cy - 14*s),
+        (cx - 6*s * dir_mul, cy + 24*s)
+    ], fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
+    draw.polygon([
+        (cx - 10*s * dir_mul, cy + 18*s),
+        (cx + 14*s * dir_mul, cy - 16*s),
+        (cx + 2*s * dir_mul, cy + 16*s),
+        (cx - 4*s * dir_mul, cy + 22*s)
+    ], fill=theme["primary_light"])
+
+
+def draw_wing_lower(draw, w, h, s, theme, is_left=True):
+    cx, cy = w // 2, h // 2
+    dir_mul = 1 if is_left else -1
+    draw.polygon([
+        (cx - 16*s * dir_mul, cy - 18*s),
+        (cx + 18*s * dir_mul, cy + 14*s),
+        (cx + 6*s * dir_mul, cy + 22*s),
+        (cx - 12*s * dir_mul, cy - 4*s)
+    ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+    draw.line([(cx - 14*s * dir_mul, cy - 14*s), (cx + 16*s * dir_mul, cy + 12*s)], fill=theme["glow"], width=s)
+
+
 # ==============================================================================
 # Public Generation APIs
 # ==============================================================================
 
-def generate_all(out_dir, prefix="warrior", archetype="warrior", prompt="", seed=-1):
+def generate_all(out_dir, prefix="warrior", archetype="warrior", prompt="", seed=-1, custom_colors=None, custom_features=None):
     """
-    Generates all 15 limb sprites for any creature or humanoid.
-    Dynamically responds to prompt concepts, seeds, and archetypes.
+    Generates all limb sprites for any creature or humanoid.
+    Dynamically responds to prompt concepts, seeds, custom colors, and custom anatomical features.
     """
     os.makedirs(out_dir, exist_ok=True)
-    theme = build_palette(prompt, archetype, seed)
+    theme = build_palette(prompt, archetype, seed, custom_colors)
     s_int = seed if seed >= 0 else 42
+    feat = custom_features or {}
+
+    head_sp = feat.get("head_style") or theme["species"]
+    torso_sp = feat.get("torso_style") or theme["species"]
+    hand_sp = feat.get("hand_style") or theme["species"]
+    foot_sp = feat.get("foot_style") or theme["species"]
+
+    theme_head = dict(theme, species=head_sp)
+    theme_torso = dict(theme, species=torso_sp)
+    theme_hand = dict(theme, species=hand_sp)
+    theme_foot = dict(theme, species=foot_sp)
 
     parts = {
-        "head": ((64, 64), lambda d, w, h, s: draw_head(d, w, h, s, theme, s_int)),
-        "torso": ((72, 64), lambda d, w, h, s: draw_torso(d, w, h, s, theme, s_int)),
-        "pelvis": ((64, 48), lambda d, w, h, s: draw_pelvis(d, w, h, s, theme, s_int)),
+        "head": ((64, 64), lambda d, w, h, s: draw_head(d, w, h, s, theme_head, s_int)),
+        "torso": ((72, 64), lambda d, w, h, s: draw_torso(d, w, h, s, theme_torso, s_int)),
+        "pelvis": ((64, 48), lambda d, w, h, s: draw_pelvis(d, w, h, s, theme_torso, s_int)),
         "arm_upper_L": ((44, 56), lambda d, w, h, s: draw_arm_upper(d, w, h, s, theme, True)),
         "arm_lower_L": ((36, 52), lambda d, w, h, s: draw_arm_lower(d, w, h, s, theme, True)),
-        "hand_L": ((32, 32), lambda d, w, h, s: draw_hand(d, w, h, s, theme, True)),
+        "hand_L": ((32, 32), lambda d, w, h, s: draw_hand(d, w, h, s, theme_hand, True)),
         "arm_upper_R": ((44, 56), lambda d, w, h, s: draw_arm_upper(d, w, h, s, theme, False)),
         "arm_lower_R": ((36, 52), lambda d, w, h, s: draw_arm_lower(d, w, h, s, theme, False)),
-        "hand_R": ((32, 32), lambda d, w, h, s: draw_hand(d, w, h, s, theme, False)),
+        "hand_R": ((32, 32), lambda d, w, h, s: draw_hand(d, w, h, s, theme_hand, False)),
         "leg_upper_L": ((40, 56), lambda d, w, h, s: draw_leg_upper(d, w, h, s, theme, True)),
         "leg_lower_L": ((36, 56), lambda d, w, h, s: draw_leg_lower(d, w, h, s, theme, True)),
-        "foot_L": ((48, 32), lambda d, w, h, s: draw_foot(d, w, h, s, theme, True)),
+        "foot_L": ((48, 32), lambda d, w, h, s: draw_foot(d, w, h, s, theme_foot, True)),
         "leg_upper_R": ((40, 56), lambda d, w, h, s: draw_leg_upper(d, w, h, s, theme, False)),
         "leg_lower_R": ((36, 56), lambda d, w, h, s: draw_leg_lower(d, w, h, s, theme, False)),
-        "foot_R": ((48, 32), lambda d, w, h, s: draw_foot(d, w, h, s, theme, False)),
+        "foot_R": ((48, 32), lambda d, w, h, s: draw_foot(d, w, h, s, theme_foot, False)),
     }
+
+    # Optional wings (if prompt mentions wings or requested in custom features)
+    has_wings = feat.get("has_wings", False) or any(k in prompt.lower() for k in ["wing", "winged", "angel", "fairy", "bat"])
+    if has_wings:
+        parts["wing_upper_L"] = ((48, 64), lambda d, w, h, s: draw_wing_upper(d, w, h, s, theme, True))
+        parts["wing_upper_R"] = ((48, 64), lambda d, w, h, s: draw_wing_upper(d, w, h, s, theme, False))
+        parts["wing_lower_L"] = ((48, 64), lambda d, w, h, s: draw_wing_lower(d, w, h, s, theme, True))
+        parts["wing_lower_R"] = ((48, 64), lambda d, w, h, s: draw_wing_lower(d, w, h, s, theme, False))
+
+    # Optional tail
+    has_tail = feat.get("has_tail", False) or any(k in prompt.lower() for k in ["tail", "devil tail", "dragon tail", "lizard tail"])
+    if has_tail:
+        parts["tail_01"] = ((36, 36), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 1))
+        parts["tail_02"] = ((32, 32), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 2))
+        parts["tail_03"] = ((28, 28), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 3))
 
     generated_paths = []
     for name, (size, fn) in parts.items():

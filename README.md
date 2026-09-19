@@ -52,13 +52,17 @@ The project provides a self-contained, browser-based graphical dashboard for tri
 Once launched, your default web browser automatically opens to `http://localhost:8080`.
 
 ### 🎨 Dashboard Features:
-1. **Convenient Presets**: Pre-loaded with ready-to-generate concepts:
-   * 👾 *Cyber Alien* (`cyberpunk warrior alien with neon bioluminescent crest`)
-   * ⚔️ *Paladin* (`holy paladin in cobalt and gold armor with glowing sword`)
-   * ❄️ *Ice Mage* (`ice sorceress with crystal staff and glowing purple runes`)
-   * 🥷 *Shadow Ninja* (`shadow ninja assassin with dual kunai and crimson glow`)
-   * 🤖 *Diesel Mech* (`heavy dieselpunk juggernaut with caution stripes and furnace`)
-   * 🐺 *Dire Beast* (`celestial dire wolf chimera with emerald core and armored paws`)
+1. **Convenient Presets & Custom Studio**:
+   * **✨ Custom Creature**: Dedicated studio mode allowing full creative freedom! Mix & match anatomies (alien, demon, undead, reptilian, insectoid, mech, humanoid head/torso/hands/feet), toggle appendages (wings, tail), and pick custom interactive hex colors (`Body/Skin`, `Cloth/Hair`, `Glow/Eyes`, `Outline`).
+   * **👾 Cyber Alien**: Cyberpunk warrior alien with neon bioluminescent crest, plasma blade, and chitin plates.
+   * **🧝 Elf Mage**: Arcane sorceress with flowing hair, glowing robes, and crystal staff.
+   * **😈 Demon Fiend**: Crimson fiend with obsidian horns, runic chest brand, shadow talons, and wings.
+   * **💀 Skeleton Lich**: Undead lich with glowing cyan soul eyes, bone ribcage, and tattered shroud.
+   * **🦎 Dragonkin**: Emerald dragonkin warrior with horned brow, ridge scales, and reptilian claws.
+   * **🐺 Dire Beast**: Mythical celestial dire wolf with emerald predator eyes, multi-tail, and fur ruff.
+   * **🦗 Mantis**: Insectoid mantis assassin with compound phosphor eyes, chitin carapace, and scythe claws.
+   * **⚔️ Paladin**: Noble human paladin in regal blue and gold armor with glowing blade.
+   * **🤖 Heavy Mech**: Heavy dieselpunk mech juggernaut with caution hazard stripes and furnace core.
 2. **Custom Parameter Tuning**:
    * **Seed**: Random or manual seed input for deterministic re-generation.
    * **Diffusion Steps (15–50)** & **CFG Scale (4.0–12.0)**.
@@ -71,7 +75,7 @@ Once launched, your default web browser automatically opens to `http://localhost
    * Inspect generated transparent PNG cutouts directly in the browser with dark checkerboard preview.
 5. **Direct System Integration**:
    * **"Open Sprite Folder"**: Opens Windows Explorer directly to the character's asset folder.
-   * **"Open Rigged Scene in Godot"**: Launches the Godot 4 editor directly into the generated `.tscn` file.
+   * **"Open Rigged Scene in Godot"**: Launches Godot 4 editor and automatically opens the character scene directly in the active 2D workspace viewport via `addons/godot_2d_auto_spriter`.
 6. **ComfyUI Diagnostics**:
    * Real-time indicator of Godot and ComfyUI backend status, plus 1-click installer trigger.
 
