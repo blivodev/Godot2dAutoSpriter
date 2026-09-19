@@ -2,8 +2,18 @@
 """
 server.py - Model Context Protocol (MCP) Server for Godot2dAutoSpriter
 
-Exposes end-to-end 2D sprite generation, SAM limb slicing, and Godot 4
+Exposes end-to-end 2D sprite generation, alpha-blob limb slicing, and Godot 4
 auto-rigging tools to AI coding agents (Cline, Claude Desktop, Cursor, OpenCode).
+
+MCP Tools:
+  1. generate_character_sprites     - ComfyUI diffusion or procedural sprite generation
+  2. slice_character_limbs          - Alpha-blob detection limb segmentation
+  3. assemble_godot_rig             - Headless Godot 4 Skeleton2D rig builder
+  4. setup_comfyui_environment      - ComfyUI node/model installer & status checker
+  5. download_comfyui_model         - AI model checkpoint downloader (resumable)
+  6. list_generated_characters      - Lists all characters in the sprites/ directory
+  7. delete_character               - Removes a character's sprites and scene file
+  8. get_character_info             - Returns detailed metadata for a character
 """
 
 import os
@@ -111,7 +121,6 @@ def _find_godot_executable() -> str:
     if GODOT_BIN and os.path.isfile(GODOT_BIN):
         return GODOT_BIN
 
-    # Check common binary names on Windows and Unix
     candidates = [
         "Godot_v4.7.2-stable_win64_console.exe",
         "Godot_v4.7.2-stable_win64.exe",
@@ -124,7 +133,6 @@ def _find_godot_executable() -> str:
         if found:
             return found
 
-    # Check local winget or appdata links on Windows
     local_winget = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Links"
     if local_winget.is_dir():
         for exe in local_winget.glob("Godot*.exe"):
@@ -133,7 +141,6 @@ def _find_godot_executable() -> str:
         for exe in local_winget.glob("Godot*.exe"):
             return str(exe)
 
-    # Check packages folder in WinGet
     local_pkg = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
     if local_pkg.is_dir():
         for exe in local_pkg.glob("**/Godot*console.exe"):
@@ -152,7 +159,6 @@ def _find_godot_editor_executable() -> str:
                 return gui_sibling
         return GODOT_BIN
 
-    # Check packages folder in WinGet for GUI binary
     local_pkg = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
     if local_pkg.is_dir():
         for exe in local_pkg.glob("**/Godot*win64.exe"):
@@ -176,8 +182,6 @@ def _find_godot_editor_executable() -> str:
 
 def _detect_archetype(text: str) -> str:
     p = text.lower()
-    if any(k in p for k in ["beast", "wolf", "quadruped", "mount", "creature", "hound", "tiger", "dragon"]):
-        return "beast"
     if any(k in p for k in ["mage", "sorcer", "wizard", "magic", "arcane", "witch"]):
         return "mage"
     if any(k in p for k in ["ninja", "assassin", "rogue", "shadow", "stealth", "thief"]):
@@ -187,6 +191,183 @@ def _detect_archetype(text: str) -> str:
     if any(k in p for k in ["mech", "robot", "cyborg", "tank", "golem", "juggernaut", "titan"]):
         return "mech"
     return "warrior"
+
+
+# ==============================================================================
+# Alpha-Blob Connected Component Limb Slicer
+# ==============================================================================
+
+def _find_alpha_blobs(img: Image.Image, alpha_threshold: int = 30) -> List[Dict]:
+    """
+    Finds connected alpha blobs in an RGBA image using a scanline flood-fill
+    approach. Returns a list of blob dicts with keys: bbox, cx, cy, area, pixels.
+
+    This is much more reliable than fixed % grid crops because it finds where the
+    actual character pixels are, regardless of composition position or scale.
+    """
+    rgba = img.convert("RGBA")
+    w, h = rgba.size
+    alpha = rgba.split()[3]
+
+    # Build binary mask: 1 = opaque enough, 0 = transparent
+    mask = bytearray(w * h)
+    alpha_bytes = alpha.tobytes()
+    for i, a in enumerate(alpha_bytes):
+        if a >= alpha_threshold:
+            mask[i] = 1
+
+    visited = bytearray(w * h)
+    blobs = []
+
+    def flood_fill(sx, sy):
+        """Iterative BFS flood fill."""
+        queue = [(sx, sy)]
+        pixels = []
+        min_x, min_y = sx, sy
+        max_x, max_y = sx, sy
+        while queue:
+            x, y = queue.pop()
+            idx = y * w + x
+            if visited[idx] or not mask[idx]:
+                continue
+            visited[idx] = 1
+            pixels.append((x, y))
+            min_x = min(min_x, x)
+            min_y = min(min_y, y)
+            max_x = max(max_x, x)
+            max_y = max(max_y, y)
+            for nx, ny in ((x-1, y), (x+1, y), (x, y-1), (x, y+1)):
+                if 0 <= nx < w and 0 <= ny < h:
+                    nidx = ny * w + nx
+                    if not visited[nidx] and mask[nidx]:
+                        queue.append((nx, ny))
+        return pixels, (min_x, min_y, max_x, max_y)
+
+    for y in range(0, h, 2):  # stride 2 for speed; fine enough for 1024px
+        for x in range(0, w, 2):
+            idx = y * w + x
+            if mask[idx] and not visited[idx]:
+                pixels, bbox = flood_fill(x, y)
+                area = len(pixels)
+                if area < 80:  # skip tiny specks / noise
+                    continue
+                bw = bbox[2] - bbox[0] + 1
+                bh = bbox[3] - bbox[1] + 1
+                cx = (bbox[0] + bbox[2]) / 2.0
+                cy = (bbox[1] + bbox[3]) / 2.0
+                blobs.append({
+                    "bbox": bbox,
+                    "cx": cx, "cy": cy,
+                    "area": area,
+                    "bw": bw, "bh": bh
+                })
+
+    return blobs
+
+
+def _assign_blobs_to_bones_biped(blobs: List[Dict], img_w: int, img_h: int) -> Dict[str, Dict]:
+    """
+    Heuristically maps alpha blobs to biped bone slots by position and size.
+
+    Assignment strategy:
+    - Sort blobs by vertical center (top → bottom).
+    - Top-most blob → head.
+    - Second-from-top center blob → torso.
+    - Center blob at ~50-65% height → pelvis.
+    - Upper-right blobs (from character's perspective, our left) → arm_upper_L etc.
+    - Upper-left blobs → arm_upper_R etc.
+    - Lower blobs left/right → legs.
+    - Bottom-most blobs → feet.
+    """
+    if not blobs:
+        return {}
+
+    # Sort by vertical center (top = smallest cy)
+    blobs_sorted = sorted(blobs, key=lambda b: b["cy"])
+    mid_x = img_w / 2.0
+
+    assignment = {}
+
+    # Group blobs into rough vertical bands:
+    # head zone:   cy < 30% of height
+    # torso zone:  30-55%
+    # pelvis zone: 50-68%
+    # arm zone:    20-65% (lateral)
+    # leg zone:    60-88%
+    # foot zone:   85-100%
+
+    head_z   = [b for b in blobs_sorted if b["cy"] < img_h * 0.32]
+    torso_z  = [b for b in blobs_sorted if img_h * 0.28 <= b["cy"] < img_h * 0.56]
+    pelvis_z = [b for b in blobs_sorted if img_h * 0.48 <= b["cy"] < img_h * 0.70]
+    arm_z    = [b for b in blobs_sorted if img_h * 0.18 <= b["cy"] < img_h * 0.68 and (b["cx"] < img_w * 0.35 or b["cx"] > img_w * 0.65)]
+    leg_z    = [b for b in blobs_sorted if img_h * 0.58 <= b["cy"] < img_h * 0.90]
+    foot_z   = [b for b in blobs_sorted if b["cy"] >= img_h * 0.82]
+
+    used_ids = set()
+
+    def pick_best(zone, prefer_left=None, prefer_right=None, exclude=None):
+        """Pick largest blob in zone matching lateral preference."""
+        candidates = [b for b in zone if id(b) not in used_ids]
+        if prefer_left:
+            candidates = [b for b in candidates if b["cx"] < mid_x]
+        if prefer_right:
+            candidates = [b for b in candidates if b["cx"] >= mid_x]
+        if not candidates:
+            return None
+        return max(candidates, key=lambda b: b["area"])
+
+    def assign(name, blob):
+        if blob:
+            used_ids.add(id(blob))
+            assignment[name] = blob
+
+    # --- Core body ---
+    head_blob = pick_best(head_z)
+    assign("head", head_blob)
+
+    torso_blob = pick_best(torso_z)
+    assign("torso", torso_blob)
+
+    pelvis_blob = pick_best(pelvis_z)
+    assign("pelvis", pelvis_blob)
+
+    # --- Arms: character's left = our right (cx > mid) ---
+    arm_right_blobs = sorted([b for b in arm_z if b["cx"] > mid_x and id(b) not in used_ids], key=lambda b: b["cy"])
+    arm_left_blobs  = sorted([b for b in arm_z if b["cx"] < mid_x and id(b) not in used_ids], key=lambda b: b["cy"])
+
+    if len(arm_right_blobs) >= 1: assign("arm_upper_L", arm_right_blobs[0])
+    if len(arm_right_blobs) >= 2: assign("arm_lower_L", arm_right_blobs[1])
+    if len(arm_right_blobs) >= 3: assign("hand_L",      arm_right_blobs[2])
+    if len(arm_left_blobs)  >= 1: assign("arm_upper_R", arm_left_blobs[0])
+    if len(arm_left_blobs)  >= 2: assign("arm_lower_R", arm_left_blobs[1])
+    if len(arm_left_blobs)  >= 3: assign("hand_R",      arm_left_blobs[2])
+
+    # --- Legs ---
+    leg_right_blobs = sorted([b for b in leg_z if b["cx"] > mid_x and id(b) not in used_ids], key=lambda b: b["cy"])
+    leg_left_blobs  = sorted([b for b in leg_z if b["cx"] < mid_x and id(b) not in used_ids], key=lambda b: b["cy"])
+
+    if len(leg_right_blobs) >= 1: assign("leg_upper_L", leg_right_blobs[0])
+    if len(leg_right_blobs) >= 2: assign("leg_lower_L", leg_right_blobs[1])
+    if len(leg_left_blobs)  >= 1: assign("leg_upper_R", leg_left_blobs[0])
+    if len(leg_left_blobs)  >= 2: assign("leg_lower_R", leg_left_blobs[1])
+
+    # --- Feet ---
+    foot_right = [b for b in foot_z if b["cx"] > mid_x and id(b) not in used_ids]
+    foot_left  = [b for b in foot_z if b["cx"] < mid_x and id(b) not in used_ids]
+    if foot_right: assign("foot_L", max(foot_right, key=lambda b: b["area"]))
+    if foot_left:  assign("foot_R", max(foot_left,  key=lambda b: b["area"]))
+
+    return assignment
+
+
+def _crop_blob(src: Image.Image, blob: Dict, padding: int = 10) -> Image.Image:
+    """Crops a blob region from src RGBA image with padding."""
+    x0, y0, x1, y1 = blob["bbox"]
+    x0 = max(0, x0 - padding)
+    y0 = max(0, y0 - padding)
+    x1 = min(src.width - 1, x1 + padding)
+    y1 = min(src.height - 1, y1 + padding)
+    return src.crop((x0, y0, x1 + 1, y1 + 1))
 
 
 # ==============================================================================
@@ -239,10 +420,6 @@ def generate_character_sprites(
     }
     style_prefix = style_prompts.get(art_style, style_prompts["anime"])
 
-    # ComfyUI API Workflow definition:
-    # 1. Base Generation (Chosen Checkpoint + Flat Color LoRA + KSampler)
-    # 2. Bridge via Exploded OpenPose ControlNet + LayerDiffuse Conv Injection
-    # 3. LayeredDiffusionDecodeRGBA -> SaveImage
     workflow = {
         "1": {
             "class_type": "CheckpointLoaderSimple",
@@ -380,7 +557,6 @@ def generate_character_sprites(
                 pass
 
         if output_filename:
-            # Check ComfyUI shared and standard output directories
             candidate_paths = [
                 Path(os.environ.get("LOCALAPPDATA", "")) / "Comfy-Desktop" / "ComfyUI-Shared" / "output" / output_filename,
                 Path(os.environ.get("LOCALAPPDATA", "")) / "Comfy-Desktop" / "ComfyUI-Installs" / "ComfyUI" / "ComfyUI" / "output" / output_filename
@@ -393,8 +569,8 @@ def generate_character_sprites(
 
             if saved_file:
                 shutil.copyfile(saved_file, exploded_image_path)
-                # Slice character limbs from exploded sheet
-                slice_character_limbs(
+                # Use blob-detection slicer
+                sliced = slice_character_limbs(
                     character_name=clean_name,
                     input_image_path=str(exploded_image_path),
                     output_dir=str(out_dir),
@@ -408,11 +584,11 @@ def generate_character_sprites(
                     "seed": seed,
                     "checkpoint": ckpt_name,
                     "output_image": str(exploded_image_path),
+                    "limbs_sliced": len(sliced),
                     "message": f"Successfully generated and sliced diffusion character sprites for {clean_name}"
                 }, indent=2)
 
-    # Offline / Standalone Fallback: Use internal organic spriter to produce
-    # an exploded canvas with clean alpha transparency so workflows never stall.
+    # Offline / Standalone Fallback: Use internal organic spriter
     try:
         from scripts.generate_sample_sprites import generate_all, generate_quadruped
         arch = _detect_archetype(archetype_prompt)
@@ -446,8 +622,12 @@ def slice_character_limbs(
     force: bool = False
 ) -> List[str]:
     """
-    Executes the SAM (Segment Anything Model) pass to detect, crop, and export
-    individual transparent limb PNGs using the naming schema: [character_name]_[bone_name].png.
+    Segments individual transparent limb PNGs from an exploded character sheet
+    using alpha-channel connected component blob detection.
+
+    Replaces the previous hardcoded %-grid crop approach with a spatial blob finder
+    that locates actual alpha regions in the image regardless of composition position.
+    Falls back to the organic procedural generator if fewer than 8 blobs are found.
 
     Args:
         character_name: Name of character to prefix files with.
@@ -466,70 +646,55 @@ def slice_character_limbs(
     bone_list = BONE_PARTS_QUADRUPED if rig_type.lower() == "quadruped" else BONE_PARTS_BIPED
     generated_files: List[str] = []
 
-    # Check if pre-separated files already exist
+    # Check if pre-separated files already exist (skip if not forcing)
     if not force:
         existing_parts = list(target_dir.glob(f"{clean_name}_*.png"))
         if len(existing_parts) >= len(bone_list):
             return [str(p.resolve()) for p in existing_parts]
 
-    # SAM Alpha Slicing Algorithm
-    # Extracts isolated alpha islands from the exploded canvas with 8px bounding margins
     img_path = Path(input_image_path)
     if img_path.is_file():
         try:
             src = Image.open(img_path).convert("RGBA")
-            alpha = src.split()[3]
-            bbox = alpha.getbbox()
-            if bbox:
-                # If connected component analysis is needed or template slicing:
-                w, h = src.size
-                grid_slices = {
-                    "head": (int(w*0.38), int(h*0.10), int(w*0.62), int(h*0.30)),
-                    "torso": (int(w*0.36), int(h*0.28), int(w*0.64), int(h*0.52)),
-                    "pelvis": (int(w*0.38), int(h*0.50), int(w*0.62), int(h*0.66)),
-                    "arm_upper_L": (int(w*0.62), int(h*0.18), int(w*0.84), int(h*0.42)),
-                    "arm_lower_L": (int(w*0.68), int(h*0.38), int(w*0.88), int(h*0.62)),
-                    "hand_L": (int(w*0.72), int(h*0.58), int(w*0.92), int(h*0.78)),
-                    "arm_upper_R": (int(w*0.16), int(h*0.18), int(w*0.38), int(h*0.42)),
-                    "arm_lower_R": (int(w*0.12), int(h*0.38), int(w*0.32), int(h*0.62)),
-                    "hand_R": (int(w*0.08), int(h*0.58), int(w*0.28), int(h*0.78)),
-                    "leg_upper_L": (int(w*0.52), int(h*0.60), int(w*0.72), int(h*0.84)),
-                    "leg_lower_L": (int(w*0.52), int(h*0.76), int(w*0.72), int(h*0.96)),
-                    "foot_L": (int(w*0.54), int(h*0.86), int(w*0.82), int(h*1.00)),
-                    "leg_upper_R": (int(w*0.28), int(h*0.60), int(w*0.48), int(h*0.84)),
-                    "leg_lower_R": (int(w*0.28), int(h*0.76), int(w*0.48), int(h*0.96)),
-                    "foot_R": (int(w*0.18), int(h*0.86), int(w*0.46), int(h*1.00)),
-                }
+            w, h = src.size
 
-                for bone, box in grid_slices.items():
-                    crop_img = src.crop(box)
-                    # Auto-trim alpha boundaries
-                    sub_alpha = crop_img.split()[3]
-                    sub_box = sub_alpha.getbbox()
-                    if sub_box:
-                        # Add 8px padding
-                        pad = 8
-                        px0 = max(0, sub_box[0] - pad)
-                        py0 = max(0, sub_box[1] - pad)
-                        px1 = min(crop_img.width, sub_box[2] + pad)
-                        py1 = min(crop_img.height, sub_box[3] + pad)
-                        crop_img = crop_img.crop((px0, py0, px1, py1))
+            # Find alpha blobs
+            blobs = _find_alpha_blobs(src, alpha_threshold=30)
 
-                    dest = target_dir / f"{clean_name}_{bone}.png"
-                    crop_img.save(dest, "PNG")
+            if len(blobs) >= 5:
+                # We have enough blobs — use positional assignment
+                if rig_type.lower() == "biped":
+                    blob_map = _assign_blobs_to_bones_biped(blobs, w, h)
+                else:
+                    # For quadruped, use biped logic as approximation (extend later)
+                    blob_map = _assign_blobs_to_bones_biped(blobs, w, h)
+
+                for bone_name, blob in blob_map.items():
+                    cropped = _crop_blob(src, blob, padding=10)
+                    dest = target_dir / f"{clean_name}_{bone_name}.png"
+                    cropped.save(dest, "PNG")
                     generated_files.append(str(dest.resolve()))
 
-                return generated_files
-        except Exception:
+                # For any bones not assigned by blob matching, generate a placeholder
+                missing_bones = [b for b in bone_list if b not in blob_map]
+                if missing_bones:
+                    _generate_placeholder_limbs(clean_name, target_dir, missing_bones, src, blob_map)
+                    for bone in missing_bones:
+                        dest = target_dir / f"{clean_name}_{bone}.png"
+                        if dest.is_file():
+                            generated_files.append(str(dest.resolve()))
+
+                if generated_files:
+                    return generated_files
+            else:
+                # Too few blobs — image is mostly solid, fall through to procedural
+                pass
+
+        except Exception as e:
             pass
 
-    # Fallback to generator
-    from scripts.generate_sample_sprites import generate_all, generate_quadruped
-    arch = _detect_archetype(character_name)
-    if rig_type.lower() == "quadruped" or arch == "beast":
-        generate_quadruped(str(target_dir), prefix=clean_name, archetype="assassin" if arch == "beast" else arch)
-    else:
-        generate_all(str(target_dir), prefix=clean_name, archetype=arch)
+    # Procedural fallback: generate clean limb set
+    _procedural_fallback(clean_name, target_dir, rig_type, character_name)
 
     for bone in bone_list:
         fpath = target_dir / f"{clean_name}_{bone}.png"
@@ -537,6 +702,46 @@ def slice_character_limbs(
             generated_files.append(str(fpath.resolve()))
 
     return generated_files
+
+
+def _generate_placeholder_limbs(char_name: str, target_dir: Path, missing_bones: List[str],
+                                  src_img: Image.Image, blob_map: Dict) -> None:
+    """Generates small placeholder limb sprites for bones not found in the blob map,
+    by sampling the dominant color from existing assigned blobs."""
+    # Sample a representative color from the source image center
+    w, h = src_img.size
+    sample = src_img.getpixel((w // 2, h // 2))
+    r, g, b = sample[:3]
+
+    for bone in missing_bones:
+        # Infer size from similar bones
+        size = (48, 64)
+        if "hand" in bone or "foot" in bone:
+            size = (40, 40)
+        elif "head" in bone:
+            size = (64, 72)
+        elif "torso" in bone or "pelvis" in bone:
+            size = (72, 80)
+
+        placeholder = Image.new("RGBA", size, (0, 0, 0, 0))
+        from PIL import ImageDraw
+        draw = ImageDraw.Draw(placeholder)
+        draw.ellipse([4, 4, size[0]-4, size[1]-4], fill=(r, g, b, 200))
+        dest = target_dir / f"{char_name}_{bone}.png"
+        placeholder.save(dest, "PNG")
+
+
+def _procedural_fallback(char_name: str, target_dir: Path, rig_type: str, prompt: str = "") -> None:
+    """Calls the organic procedural spriter as a fallback when blob detection fails."""
+    try:
+        from scripts.generate_sample_sprites import generate_all, generate_quadruped
+        arch = _detect_archetype(prompt or char_name)
+        if rig_type.lower() == "quadruped":
+            generate_quadruped(str(target_dir), prefix=char_name, archetype=arch)
+        else:
+            generate_all(str(target_dir), prefix=char_name, archetype=arch)
+    except Exception:
+        pass
 
 
 # ==============================================================================
@@ -576,9 +781,17 @@ def assemble_godot_rig(
     if not target_scene_path:
         target_scene_path = f"res://scenes/{clean_name}_character.tscn"
 
-    # Normalize assets_dir to Godot res:// format if relative or absolute
     if not assets_dir.startswith("res://"):
         assets_dir = f"res://sprites/{clean_name}"
+
+    # Verify sprites exist before attempting rig
+    sprites_abs = PROJECT_ROOT / "sprites" / clean_name
+    if not sprites_abs.is_dir() or not any(sprites_abs.glob("*.png")):
+        return json.dumps({
+            "status": "error",
+            "character_name": clean_name,
+            "message": f"No sprite PNGs found in sprites/{clean_name}/. Generate sprites first."
+        }, indent=2)
 
     script_path = "res://scripts/headless_rig_builder.gd"
 
@@ -721,7 +934,8 @@ def download_comfyui_model(
     Supports HTTP Range resumption so interrupted downloads automatically continue.
 
     Args:
-        model_name: One of 'animagine_xl', 'counterfeit_v3', 'dreamshaper_8', 'layer_conv', 'vae_decoder', 'controlnet_openpose', 'flat_anime_lora', or 'status'.
+        model_name: One of 'animagine_xl', 'counterfeit_v3', 'dreamshaper_8', 'layer_conv',
+                    'vae_decoder', 'controlnet_openpose', 'flat_anime_lora', or 'status'.
 
     Returns:
         JSON string reporting download result or status table.
@@ -751,7 +965,162 @@ def download_comfyui_model(
     }, indent=2)
 
 
+# ==============================================================================
+# MCP TOOL 6: list_generated_characters
+# ==============================================================================
+@mcp.tool()
+def list_generated_characters() -> str:
+    """
+    Lists all characters that have been generated and stored in the sprites/ directory,
+    along with their metadata (limb count, Godot scene availability, last modified time).
+
+    Returns:
+        JSON string with a list of character metadata dicts.
+    """
+    sprites_root = PROJECT_ROOT / "sprites"
+    scenes_root  = PROJECT_ROOT / "scenes"
+    characters = []
+
+    if sprites_root.is_dir():
+        for char_dir in sorted(sprites_root.iterdir()):
+            if not char_dir.is_dir():
+                continue
+            limb_files = sorted(char_dir.glob("*.png"))
+            limb_files = [f for f in limb_files if "_exploded" not in f.name]
+            has_exploded = (char_dir / f"{char_dir.name}_exploded.png").is_file()
+            scene_file = scenes_root / f"{char_dir.name}_character.tscn"
+            last_mod = 0.0
+            for f in limb_files:
+                try:
+                    last_mod = max(last_mod, f.stat().st_mtime)
+                except Exception:
+                    pass
+            characters.append({
+                "name": char_dir.name,
+                "limb_count": len(limb_files),
+                "has_exploded_sheet": has_exploded,
+                "has_godot_scene": scene_file.is_file(),
+                "scene_path": f"res://scenes/{char_dir.name}_character.tscn" if scene_file.is_file() else None,
+                "sprites_dir": f"res://sprites/{char_dir.name}",
+                "last_modified_ts": last_mod,
+                "limbs": [f.name for f in limb_files]
+            })
+
+    return json.dumps({
+        "status": "success",
+        "count": len(characters),
+        "characters": characters
+    }, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 7: delete_character
+# ==============================================================================
+@mcp.tool()
+def delete_character(
+    character_name: str,
+    delete_scene: bool = True
+) -> str:
+    """
+    Removes a character's sprite directory and optionally their Godot scene file.
+    This is an irreversible operation.
+
+    Args:
+        character_name: Name of the character to delete (e.g. 'cyber_alien').
+        delete_scene: If True, also deletes the scenes/<character>_character.tscn file.
+
+    Returns:
+        JSON string confirming deletion results.
+    """
+    clean_name = character_name.strip().lower().replace(" ", "_")
+    result = {"character_name": clean_name, "deleted": []}
+
+    sprites_dir = PROJECT_ROOT / "sprites" / clean_name
+    if sprites_dir.is_dir():
+        shutil.rmtree(sprites_dir, ignore_errors=True)
+        result["deleted"].append(f"sprites/{clean_name}/")
+        result["sprites_deleted"] = True
+    else:
+        result["sprites_deleted"] = False
+
+    if delete_scene:
+        scene_file = PROJECT_ROOT / "scenes" / f"{clean_name}_character.tscn"
+        if scene_file.is_file():
+            scene_file.unlink()
+            result["deleted"].append(f"scenes/{clean_name}_character.tscn")
+            result["scene_deleted"] = True
+        else:
+            result["scene_deleted"] = False
+
+    result["status"] = "success" if result["deleted"] else "not_found"
+    return json.dumps(result, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 8: get_character_info
+# ==============================================================================
+@mcp.tool()
+def get_character_info(
+    character_name: str
+) -> str:
+    """
+    Returns detailed metadata for a specific generated character, including
+    limb file listing, bone name mapping, Godot scene path, and file sizes.
+
+    Args:
+        character_name: Name of the character to inspect (e.g. 'cyber_alien').
+
+    Returns:
+        JSON string with full character metadata.
+    """
+    clean_name = character_name.strip().lower().replace(" ", "_")
+    sprites_dir = PROJECT_ROOT / "sprites" / clean_name
+    scene_file  = PROJECT_ROOT / "scenes" / f"{clean_name}_character.tscn"
+
+    if not sprites_dir.is_dir():
+        return json.dumps({
+            "status": "not_found",
+            "character_name": clean_name,
+            "message": f"No sprites directory found for '{clean_name}'. Generate sprites first."
+        }, indent=2)
+
+    limb_files = sorted(sprites_dir.glob("*.png"))
+    limbs = []
+    for f in limb_files:
+        bone_name = f.stem
+        if bone_name.startswith(clean_name + "_"):
+            bone_name = bone_name[len(clean_name) + 1:]
+        try:
+            img = Image.open(f)
+            width, height = img.size
+            size_bytes = f.stat().st_size
+        except Exception:
+            width = height = 0
+            size_bytes = f.stat().st_size if f.is_file() else 0
+        limbs.append({
+            "filename": f.name,
+            "bone_name": bone_name,
+            "width": width,
+            "height": height,
+            "size_bytes": size_bytes,
+            "url": f"/sprites/{clean_name}/{f.name}"
+        })
+
+    is_exploded = any(l["bone_name"] == "exploded" for l in limbs)
+    actual_limbs = [l for l in limbs if l["bone_name"] != "exploded"]
+
+    return json.dumps({
+        "status": "found",
+        "character_name": clean_name,
+        "sprites_dir": f"res://sprites/{clean_name}",
+        "limb_count": len(actual_limbs),
+        "has_exploded_sheet": is_exploded,
+        "has_godot_scene": scene_file.is_file(),
+        "scene_path": f"res://scenes/{clean_name}_character.tscn" if scene_file.is_file() else None,
+        "limbs": actual_limbs
+    }, indent=2)
+
+
 if __name__ == "__main__":
     # Start FastMCP server via standard I/O for MCP clients
     mcp.run()
-

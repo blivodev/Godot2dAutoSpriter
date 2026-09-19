@@ -5,11 +5,11 @@ web_ui.py - Godot 2D Auto Spriter & Rigger Web Dashboard
 A self-contained, browser-based graphical user interface for:
 - Creating 2D humanoid and creature character rosters
 - Presets: Cyber Alien, Elf Mage, Demon Fiend, Skeleton Lich, Dragonkin, Dire Beast, Mantis, Paladin, Heavy Mech
-- Full "✨ Custom" mode with interactive anatomy mix & match, appendages (wings/tail), and color pickers
+- Full "Custom" mode with interactive anatomy mix & match, appendages (wings/tail), and color pickers
 - Triggering ComfyUI diffusion or procedural multi-species sprite generation
 - Auto-assembling Godot 4 Skeleton2D character scenes (.tscn)
 - 1-click launching directly into the active 2D Godot 4 editor viewport
-- Inspecting generated transparent limb cutouts in an interactive gallery
+- Asset Library tab for browsing all generated characters and inspecting limb sprites
 
 Can be run via:
   python web_ui.py
@@ -24,6 +24,7 @@ import time
 import shutil
 import urllib.request
 import urllib.error
+import urllib.parse
 import subprocess
 import webbrowser
 import threading
@@ -127,8 +128,7 @@ def _bg_download(model_key: str):
 
 class AutoSpriterHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        # Silence default server access spam in console
-        pass
+        pass  # Silence default server access spam
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -168,18 +168,34 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             char_name = qs.get("char", [""])[0].strip().lower().replace(" ", "_")
             if not char_name:
                 char_name = "cyber_alien"
-            
+
             sprites_dir = PROJECT_ROOT / "sprites" / char_name
             files = []
             if sprites_dir.is_dir():
                 for p in sorted(sprites_dir.glob("*.png")):
+                    bone = p.stem[len(char_name)+1:] if p.stem.startswith(char_name + "_") else p.stem
+                    try:
+                        from PIL import Image as PILImage
+                        img = PILImage.open(p)
+                        pw, ph = img.size
+                    except Exception:
+                        pw, ph = 0, 0
                     files.append({
                         "name": p.name,
-                        "bone": p.stem[len(char_name)+1:] if p.stem.startswith(char_name + "_") else p.stem,
+                        "bone": bone,
                         "url": f"/sprites/{char_name}/{p.name}",
-                        "size_bytes": p.stat().st_size
+                        "size_bytes": p.stat().st_size,
+                        "width": pw,
+                        "height": ph
                     })
             self._send_json({"character": char_name, "count": len(files), "sprites": files})
+            return
+
+        elif path == "/api/characters":
+            # List all generated characters
+            import server as srv
+            result_str = srv.list_generated_characters()
+            self._send_json(json.loads(result_str))
             return
 
         elif path.startswith("/sprites/"):
@@ -228,7 +244,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             from scripts.setup_comfyui import check_status, install_custom_nodes, install_inputs, find_comfyui_paths
             action = payload.get("action", "check")
             comfy_root, custom_nodes, models_dir, py_bin = find_comfyui_paths()
-            
+
             if action == "install_nodes" and custom_nodes:
                 install_custom_nodes(custom_nodes, py_bin)
             elif action == "install_inputs":
@@ -277,14 +293,14 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             elif char_name:
                 full_scene = PROJECT_ROOT / "scenes" / f"{char_name}_character.tscn"
 
-            # If the target scene file doesn't exist yet, auto-assemble it if sprites exist!
+            # Auto-assemble if the scene file doesn't exist but sprites do
             if full_scene and not full_scene.is_file():
                 if not char_name:
                     char_name = full_scene.stem.replace("_character", "").replace("_rigged", "")
                 sprites_dir = PROJECT_ROOT / "sprites" / char_name
                 if sprites_dir.is_dir() and any(sprites_dir.glob("*.png")):
                     import server
-                    rig_type = "quadruped" if "quadruped" in str(full_scene).lower() or char_name == "fenrir" else "biped"
+                    rig_type = "quadruped" if char_name in ("fenrir", "celestial_wolf") else "biped"
                     server.assemble_godot_rig(
                         character_name=char_name,
                         assets_dir=f"res://sprites/{char_name}",
@@ -294,9 +310,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
 
             if full_scene and full_scene.is_file():
                 res_scene = f"res://scenes/{full_scene.name}"
-                rel_scene = f"scenes/{full_scene.name}"
 
-                # 1. Write open scene request for Godot editor plugin
                 try:
                     (PROJECT_ROOT / ".godot").mkdir(parents=True, exist_ok=True)
                     with open(PROJECT_ROOT / ".godot" / "open_scene_request.txt", "w", encoding="utf-8") as f:
@@ -306,7 +320,6 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 except Exception:
                     pass
 
-                # 2. Update project_metadata.cfg
                 try:
                     meta_path = PROJECT_ROOT / ".godot" / "editor" / "project_metadata.cfg"
                     if meta_path.is_file():
@@ -319,14 +332,40 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 except Exception:
                     pass
 
-                # 3. Launch Godot Editor GUI with --open-scene arg
                 subprocess.Popen([godot_exe, "--path", str(PROJECT_ROOT), "-e", "--", "--open-scene", res_scene], cwd=str(PROJECT_ROOT))
-                self._send_json({"status": "launched", "scene": str(full_scene), "message": f"Successfully launched Godot 4 Editor. Opening '{full_scene.name}' in 2D Viewport..."})
+                self._send_json({"status": "launched", "scene": str(full_scene), "message": f"Launched Godot 4 Editor — opening '{full_scene.name}'..."})
                 return
             else:
                 subprocess.Popen([godot_exe, "--path", str(PROJECT_ROOT), "-e"], cwd=str(PROJECT_ROOT))
                 self._send_json({"status": "launched", "scene": "project", "message": "Opened Godot project in Godot 4 Editor."})
                 return
+
+        elif path == "/api/character/delete":
+            char_name = payload.get("character_name", "").strip().lower().replace(" ", "_")
+            if not char_name:
+                self._send_json({"status": "error", "message": "character_name is required"}, 400)
+                return
+            import server as srv
+            result_str = srv.delete_character(char_name, delete_scene=True)
+            self._send_json(json.loads(result_str))
+            return
+
+        elif path == "/api/regenerate":
+            char_name = payload.get("character_name", "").strip().lower().replace(" ", "_")
+            if not char_name:
+                self._send_json({"status": "error", "message": "character_name is required"}, 400)
+                return
+            # Re-run procedural generation
+            import server as srv
+            from scripts.generate_sample_sprites import generate_all
+            sprites_dir = PROJECT_ROOT / "sprites" / char_name
+            sprites_dir.mkdir(parents=True, exist_ok=True)
+            try:
+                parts = generate_all(str(sprites_dir), prefix=char_name)
+                self._send_json({"status": "success", "character_name": char_name, "limb_count": len(parts or [])})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, 500)
+            return
 
         self.send_response(404)
         self.end_headers()
@@ -362,6 +401,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
 
         checkpoint = payload.get("checkpoint", "").strip() or "animagineXL_v31.safetensors"
         comfy_used = False
+
         if mode in ["auto", "comfyui"]:
             comfy_status = _check_comfyui_status()
             if comfy_status.get("online", False) and comfy_status.get("has_checkpoint", False):
@@ -376,26 +416,28 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                         checkpoint=checkpoint
                     )
                     gen_res = json.loads(gen_res_str)
-                    logs.append(f"[COMFYUI] Status: {gen_res.get('status')} (Source: {gen_res.get('source')})")
-                    comfy_used = (gen_res.get("source") == "comfyui_api")
+                    source = gen_res.get("source", "")
+                    logs.append(f"[COMFYUI] Status: {gen_res.get('status')} (Source: {source})")
+                    comfy_used = (source == "comfyui_api")
                     if comfy_used:
-                        logs.append(f"[COMFYUI] Successfully sliced diffusion limbs into: res://sprites/{char_name}")
+                        limbs = gen_res.get("limbs_sliced", "?")
+                        logs.append(f"[COMFYUI] Successfully sliced {limbs} diffusion limbs into: res://sprites/{char_name}")
                     else:
                         logs.append(f"[COMFYUI-WARN] {gen_res.get('note', 'Diffusion could not complete; fallback engaged.')}")
                 except Exception as e:
                     logs.append(f"[COMFYUI-WARN] API error: {e}")
             elif comfy_status.get("online", False) and not comfy_status.get("has_checkpoint", False):
-                logs.append(f"[COMFYUI-NOTICE] ComfyUI online but model '{checkpoint}' is missing. Engaging Advanced Procedural Spriter...")
+                logs.append(f"[COMFYUI-NOTICE] ComfyUI online but no checkpoint found. Using Smart Procedural Spriter...")
             elif mode == "comfyui":
                 logs.append(f"[COMFYUI-ERROR] ComfyUI is offline on 127.0.0.1:8188. Start ComfyUI to use diffusion mode.")
 
         if not comfy_used:
             if mode == "comfyui":
-                logs.append(f"[COMFYUI-WARN] 'ComfyUI Generative Diffusion Only' was requested but diffusion failed. Generating procedural sprites as fallback.")
+                logs.append(f"[FALLBACK] Generating procedural sprites (ComfyUI diffusion unavailable).")
             from scripts.generate_sample_sprites import generate_all, generate_quadruped, detect_species
-            detected_sp = species if (species and species != "auto") else detect_species(concept, archetype)
-            logs.append(f"[GENERATOR] Synthesizing {detected_sp.upper()} anatomy for '{char_name}' (Seed: {seed if seed >= 0 else 'Procedural'})...")
-            
+            detected_sp = species if (species and species not in ("auto", "custom")) else detect_species(concept, archetype)
+            logs.append(f"[GENERATOR] Synthesizing {detected_sp.upper()} anatomy for '{char_name}' (Seed: {seed if seed >= 0 else 'Random'})...")
+
             if rig_type.lower() == "quadruped":
                 parts = generate_quadruped(str(sprites_dir), prefix=char_name, archetype=archetype, prompt=concept, seed=seed)
             else:
@@ -409,9 +451,9 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                     custom_features=custom_features
                 )
             parts = parts or []
-            logs.append(f"[GENERATOR] Created {len(parts)} {detected_sp.upper()} transparent limb cutouts in: res://sprites/{char_name}")
+            logs.append(f"[GENERATOR] Created {len(parts)} transparent limb cutouts in: res://sprites/{char_name}")
 
-        # Assemble Godot rig if requested
+        # Assemble Godot rig
         scene_path = f"res://scenes/{char_name}_character.tscn"
         godot_success = False
         if auto_rig:
@@ -427,7 +469,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 rig_res = json.loads(rig_res_str)
                 godot_success = (rig_res.get("status") == "success")
                 if godot_success:
-                    logs.append(f"[GODOT] Scene assembled and saved successfully -> {scene_path}")
+                    logs.append(f"[GODOT] Scene assembled and saved -> {scene_path}")
                 else:
                     logs.append(f"[GODOT-ERROR] {rig_res.get('message', 'Rig build failed')}")
                     if rig_res.get("stderr"):
@@ -443,6 +485,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             "scene_path": scene_path,
             "sprites_dir": f"res://sprites/{char_name}",
             "godot_rigged": godot_success,
+            "comfy_used": comfy_used,
             "logs": logs
         }
 
@@ -450,7 +493,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         char_name = payload.get("character_name", "warrior").strip().lower().replace(" ", "_")
         rig_type = payload.get("rig_type", "biped")
         scene_path = f"res://scenes/{char_name}_character.tscn"
-        
+
         import server
         res_str = server.assemble_godot_rig(
             character_name=char_name,
@@ -462,7 +505,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
 
 
 # ==============================================================================
-# Modern Embedded Web Dashboard
+# Web Dashboard HTML
 # ==============================================================================
 HTML_PAGE = """<!DOCTYPE html>
 <html lang="en">
@@ -481,86 +524,171 @@ HTML_PAGE = """<!DOCTYPE html>
     --accent: #2ea043;
     --accent-purple: #bc8cff;
     --accent-gold: #e3b341;
+    --danger: #f85149;
     --text: #e6edf3;
     --text-muted: #8b949e;
     --console-bg: #07090e;
+    --tab-active: #151922;
+    --tab-inactive: #0f1219;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
   body { background-color: var(--bg-dark); color: var(--text); padding: 20px; line-height: 1.5; }
-  .container { max-width: 1240px; margin: 0 auto; }
-  
-  header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 22px; flex-wrap: wrap; gap: 12px; }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  /* Header */
+  header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
   .logo { display: flex; align-items: center; gap: 12px; }
-  .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--accent-purple)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 18px; }
-  .logo-text h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-  .logo-text p { font-size: 12px; color: var(--text-muted); }
-  
+  .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary), var(--accent-purple)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; font-size: 18px; flex-shrink: 0; }
+  .logo-text h1 { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo-text p { font-size: 11px; color: var(--text-muted); }
+
+  /* Badges */
   .badges { display: flex; gap: 8px; flex-wrap: wrap; }
   .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px; border: 1px solid transparent; }
-  .badge-dot { width: 8px; height: 8px; border-radius: 50%; }
-  .badge-online { background: rgba(46, 160, 67, 0.15); color: #3fb950; border-color: rgba(46, 160, 67, 0.3); }
-  .badge-online .badge-dot { background: #3fb950; box-shadow: 0 0 6px #3fb950; }
-  .badge-offline { background: rgba(248, 81, 73, 0.15); color: #f85149; border-color: rgba(248, 81, 73, 0.3); }
+  .badge-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .badge-online { background: rgba(46,160,67,0.15); color: #3fb950; border-color: rgba(46,160,67,0.3); }
+  .badge-online .badge-dot { background: #3fb950; box-shadow: 0 0 6px #3fb950; animation: pulse-green 2s infinite; }
+  .badge-offline { background: rgba(248,81,73,0.15); color: #f85149; border-color: rgba(248,81,73,0.3); }
   .badge-offline .badge-dot { background: #f85149; }
-  .badge-notice { background: rgba(210, 153, 34, 0.15); color: #d29922; border-color: rgba(210, 153, 34, 0.3); }
+  .badge-notice { background: rgba(210,153,34,0.15); color: #d29922; border-color: rgba(210,153,34,0.3); }
   .badge-notice .badge-dot { background: #d29922; }
+  @keyframes pulse-green { 0%,100%{box-shadow:0 0 4px #3fb950;} 50%{box-shadow:0 0 10px #3fb950;} }
 
-  .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 24px; margin-bottom: 24px; }
+  /* Tab Navigation */
+  .tab-nav { display: flex; gap: 2px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .tab-btn { padding: 9px 20px; background: var(--tab-inactive); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; color: var(--text-muted); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 7px; }
+  .tab-btn:hover { background: var(--bg-card); color: var(--text); }
+  .tab-btn.active { background: var(--tab-active); color: var(--primary); border-color: var(--border); border-bottom: 1px solid var(--tab-active); position: relative; bottom: -1px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Cards & Layout */
+  .grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 22px; }
   @media (max-width: 950px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .card-title { font-size: 14px; font-weight: 600; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; color: var(--primary); }
 
-  .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.35); }
-  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; color: var(--primary); }
-
-  .form-group { margin-bottom: 14px; }
-  label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
-  input[type="text"], select, textarea { width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; color: var(--text); font-size: 13px; transition: border-color 0.2s; }
-  input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15); }
-  textarea { resize: vertical; min-height: 75px; }
-
+  /* Form elements */
+  .form-group { margin-bottom: 13px; }
+  label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+  input[type="text"], select, textarea { width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; color: var(--text); font-size: 13px; transition: border-color 0.2s; }
+  input[type="text"]:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(88,166,255,0.12); }
+  textarea { resize: vertical; min-height: 72px; }
   .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
   .row-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
 
-  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
-  .btn-primary { background: var(--primary); color: #07090e; width: 100%; font-size: 14px; padding: 12px; font-weight: 700; }
-  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 15px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.18s; white-space: nowrap; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+  .btn-primary { background: linear-gradient(135deg, var(--primary), #4890e0); color: #07090e; width: 100%; font-size: 14px; padding: 12px; font-weight: 700; letter-spacing: 0.2px; }
+  .btn-primary:hover:not(:disabled) { background: linear-gradient(135deg, var(--primary-hover), #58a6ff); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(88,166,255,0.3); }
   .btn-secondary { background: #1c222e; border: 1px solid var(--border); color: var(--text); }
-  .btn-secondary:hover { background: #262e3d; border-color: #8b949e; }
+  .btn-secondary:hover:not(:disabled) { background: #232b3a; border-color: #8b949e; }
+  .btn-danger { background: rgba(248,81,73,0.15); border: 1px solid rgba(248,81,73,0.35); color: var(--danger); }
+  .btn-danger:hover:not(:disabled) { background: rgba(248,81,73,0.25); }
+  .btn-sm { padding: 5px 11px; font-size: 11px; }
   .btn-icon { padding: 6px 10px; font-size: 12px; }
+  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 
-  .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  /* Presets */
+  .quick-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .preset-pill { font-size: 11px; padding: 5px 11px; border-radius: 14px; background: #191f2b; border: 1px solid var(--border); cursor: pointer; color: var(--text-muted); transition: all 0.15s; user-select: none; }
+  .preset-pill:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+  .preset-pill.active { background: rgba(88,166,255,0.18); border-color: var(--primary); color: var(--primary); font-weight: 700; }
+  .preset-custom { border-color: rgba(227,179,65,0.35); color: #f0c654; }
+  .preset-custom:hover, .preset-custom.active { background: rgba(227,179,65,0.2); border-color: #f0c654; color: #ffd666; font-weight: 700; }
 
-  .accordion { border: 1px solid var(--border); border-radius: 8px; margin-top: 14px; overflow: hidden; }
-  .accordion-header { background: #11141c; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; justify-content: space-between; user-select: none; }
+  /* Accordion */
+  .accordion { border: 1px solid var(--border); border-radius: 8px; margin-top: 13px; overflow: hidden; }
+  .accordion-header { background: #11141c; padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; display: flex; justify-content: space-between; user-select: none; transition: color 0.15s; }
   .accordion-header:hover { color: var(--text); }
   .accordion-content { padding: 14px; background: var(--bg-card); display: none; }
   .accordion-content.open { display: block; }
 
-  .console { background: var(--console-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 12px; color: #7ee787; height: 260px; overflow-y: auto; white-space: pre-wrap; line-height: 1.45; }
-  .console .info { color: #58a6ff; }
+  /* Console */
+  .console { background: var(--console-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; font-size: 11.5px; color: #7ee787; height: 220px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; }
+  .console .ci { color: #58a6ff; } /* comfyui */
+  .console .gi { color: #a371f7; } /* godot */
+  .console .ok { color: #3fb950; } /* success */
   .console .warn { color: #d29922; }
   .console .err { color: #f85149; }
+  .console .gen { color: #79c0ff; } /* generator */
+  .console-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .console-toolbar span { font-size: 12px; font-weight: 600; color: var(--primary); }
 
-  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 10px; max-height: 280px; overflow-y: auto; padding: 4px; }
-  .sprite-card { background: #10131b; border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; }
-  .sprite-thumb { width: 100%; height: 74px; object-fit: contain; background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 12px 12px; border-radius: 4px; }
-  .sprite-name { font-size: 10px; color: var(--text-muted); margin-top: 4px; word-break: break-all; font-weight: 500; }
+  /* Gallery */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; max-height: 240px; overflow-y: auto; padding: 2px; }
+  .sprite-card { background: #10131b; border: 1px solid var(--border); border-radius: 6px; padding: 5px; text-align: center; cursor: pointer; transition: border-color 0.15s; }
+  .sprite-card:hover { border-color: var(--primary); }
+  .sprite-thumb { width: 100%; height: 68px; object-fit: contain; background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 12px 12px; border-radius: 4px; }
+  .sprite-name { font-size: 9.5px; color: var(--text-muted); margin-top: 3px; word-break: break-all; }
 
-  .quick-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-  .preset-pill { font-size: 11px; padding: 5px 11px; border-radius: 14px; background: #191f2b; border: 1px solid var(--border); cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
-  .preset-pill:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
-  .preset-pill.active { background: rgba(88, 166, 255, 0.2); border-color: var(--primary); color: var(--primary); font-weight: 700; box-shadow: 0 0 8px rgba(88, 166, 255, 0.35); }
-  .preset-custom { background: #191f2b; border-color: rgba(227, 179, 65, 0.35); color: #f0c654; }
-  .preset-custom:hover { background: rgba(227, 179, 65, 0.15); border-color: #f0c654; color: #ffd666; }
-  .preset-custom.active { background: rgba(227, 179, 65, 0.25); border-color: #f0c654; color: #ffd666; font-weight: 700; box-shadow: 0 0 10px rgba(227, 179, 65, 0.4); }
+  /* Color pickers */
+  .color-picker-box { display: flex; align-items: center; gap: 7px; background: var(--bg-input); padding: 5px 9px; border-radius: 6px; border: 1px solid var(--border); }
+  .color-picker-box input[type="color"] { border: none; width: 26px; height: 26px; border-radius: 4px; background: transparent; cursor: pointer; padding: 0; }
+  .color-picker-box span { font-size: 10.5px; color: var(--text-muted); font-weight: 600; }
 
-  .color-picker-box { display: flex; align-items: center; gap: 8px; background: var(--bg-input); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
-  .color-picker-box input[type="color"] { border: none; width: 28px; height: 28px; border-radius: 4px; background: transparent; cursor: pointer; }
-  .color-picker-box span { font-size: 11px; color: var(--text-muted); font-weight: 600; }
-
-  .progress-container { width: 100%; background: #07090e; border: 1px solid var(--border); border-radius: 6px; height: 16px; overflow: hidden; margin-top: 8px; position: relative; }
+  /* Progress bar */
+  .progress-container { width: 100%; background: #07090e; border: 1px solid var(--border); border-radius: 5px; height: 14px; overflow: hidden; position: relative; margin-top: 7px; }
   .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), #a371f7); width: 0%; transition: width 0.3s; }
-  .progress-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  .progress-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
+  /* Spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; flex-shrink: 0; }
+
+  /* ==== ASSET LIBRARY TAB ==== */
+  .library-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; min-height: 600px; }
+  @media (max-width: 900px) { .library-layout { grid-template-columns: 1fr; } }
+
+  .char-roster { display: flex; flex-direction: column; gap: 8px; max-height: 620px; overflow-y: auto; padding-right: 4px; }
+  .char-roster-item { background: #10131b; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px; }
+  .char-roster-item:hover { border-color: var(--primary); background: #141822; }
+  .char-roster-item.selected { border-color: var(--primary); background: rgba(88,166,255,0.08); }
+  .char-roster-thumb { width: 48px; height: 48px; object-fit: contain; background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 8px 8px; border-radius: 5px; flex-shrink: 0; }
+  .char-roster-thumb-placeholder { width: 48px; height: 48px; background: #1a1f2c; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .char-roster-info { flex: 1; min-width: 0; }
+  .char-roster-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .char-roster-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .lib-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+  .lib-badge-scene { background: rgba(46,160,67,0.2); color: #3fb950; border: 1px solid rgba(46,160,67,0.3); }
+  .lib-badge-no-scene { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid rgba(210,153,34,0.3); }
+
+  /* Viewer */
+  .viewer-panel { display: flex; flex-direction: column; gap: 14px; }
+  .viewer-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  .viewer-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .viewer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .viewer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; max-height: 480px; overflow-y: auto; padding: 2px; }
+  .viewer-sprite-card { background: #10131b; border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
+  .viewer-sprite-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(88,166,255,0.2); }
+  .viewer-sprite-img { width: 100%; height: 90px; object-fit: contain; background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 12px 12px; border-radius: 5px; }
+  .viewer-sprite-name { font-size: 10px; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
+  .viewer-sprite-size { font-size: 9px; color: #4a5568; }
+  .viewer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: var(--text-muted); gap: 10px; font-size: 13px; }
+  .viewer-empty-icon { font-size: 42px; opacity: 0.5; }
+
+  /* Library filters */
+  .lib-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+  .lib-search { flex: 1; min-width: 120px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px; padding: 7px 11px; color: var(--text); font-size: 12px; }
+  .lib-search:focus { border-color: var(--primary); outline: none; }
+
+  /* Lightbox */
+  .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; padding: 20px; }
+  .lightbox.open { display: flex; }
+  .lightbox-img-wrap { background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 16px 16px; border-radius: 10px; padding: 20px; display: flex; align-items: center; justify-content: center; max-width: 80vw; max-height: 70vh; }
+  .lightbox-img { max-width: 100%; max-height: 65vh; object-fit: contain; border-radius: 4px; }
+  .lightbox-meta { color: var(--text); text-align: center; }
+  .lightbox-meta h3 { font-size: 16px; font-weight: 700; }
+  .lightbox-meta p { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .lightbox-close { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text); font-size: 22px; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
+  .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+  /* Tooltip */
+  .tooltip-wrap { position: relative; display: inline-flex; }
+  .tooltip-wrap .tip { display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1c2333; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 11px; color: var(--text-muted); white-space: nowrap; z-index: 100; max-width: 260px; white-space: normal; text-align: center; line-height: 1.4; pointer-events: none; }
+  .tooltip-wrap:hover .tip { display: block; }
+  .help-icon { width: 18px; height: 18px; border-radius: 50%; background: #1c2333; border: 1px solid var(--border); color: var(--text-muted); font-size: 11px; font-weight: 700; cursor: default; display: inline-flex; align-items: center; justify-content: center; margin-left: 5px; }
 </style>
 </head>
 <body>
@@ -569,8 +697,8 @@ HTML_PAGE = """<!DOCTYPE html>
     <div class="logo">
       <div class="logo-icon">2D</div>
       <div class="logo-text">
-        <h1>Godot 2D Auto Spriter & Rigger</h1>
-        <p>Dynamic Multi-Species Creature & Humanoid Generator with 1-Click Godot 4 Auto-Rigging</p>
+        <h1>Godot 2D Auto Spriter &amp; Rigger</h1>
+        <p>Multi-Species Character Generator with Godot 4 Auto-Rigging &amp; Asset Library</p>
       </div>
     </div>
     <div class="badges">
@@ -579,711 +707,1010 @@ HTML_PAGE = """<!DOCTYPE html>
     </div>
   </header>
 
-  <div class="grid">
-    <!-- Configuration Column -->
-    <div class="card">
-      <div class="card-title">
-        <span>Character & Creature Creator</span>
-        <span style="font-size: 11px; color: var(--text-muted);">Procedural & Diffusion Controls</span>
-      </div>
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('generator')" id="tab-btn-generator">🚀 Generator</button>
+    <button class="tab-btn" onclick="switchTab('library')" id="tab-btn-library">📦 Asset Library</button>
+    <button class="tab-btn" onclick="switchTab('models')" id="tab-btn-models">🤖 AI Models</button>
+  </div>
 
-      <div class="form-group">
-        <label>Archetype & Creature Presets:</label>
-        <div class="quick-presets" id="preset-container">
-          <span class="preset-pill preset-custom" id="pill-custom" onclick="applyCustomMode()">✨ Custom Creature</span>
-          <span class="preset-pill" id="pill-cyber_alien" onclick="applyPreset('cyber_alien', 'cyberpunk warrior alien with neon bioluminescent crest, plasma blade and chitin plates', 'warrior', 'biped', 'alien')">👾 Cyber Alien</span>
-          <span class="preset-pill" id="pill-elven_sorceress" onclick="applyPreset('elven_sorceress', 'female elf sorceress with flowing purple hair, arcane glowing robes and crystal staff', 'mage', 'biped', 'humanoid')">🧝 Elf Mage</span>
-          <span class="preset-pill" id="pill-winged_demon" onclick="applyPreset('winged_demon', 'crimson demon lord with obsidian curved horns, runic chest brand, shadow talons and wings', 'assassin', 'biped', 'demon')">😈 Demon Fiend</span>
-          <span class="preset-pill" id="pill-skeleton_lich" onclick="applyPreset('skeleton_lich', 'undead skeleton lich with glowing cyan soul eyes, bone ribcage and tattered shroud', 'mage', 'biped', 'undead')">💀 Skeleton Lich</span>
-          <span class="preset-pill" id="pill-dragonkin_brawler" onclick="applyPreset('dragonkin_brawler', 'emerald dragonkin warrior with horned brow, ridge scales and reptilian claws', 'warrior', 'biped', 'reptilian')">🦎 Dragonkin</span>
-          <span class="preset-pill" id="pill-celestial_wolf" onclick="applyPreset('celestial_wolf', 'mythical celestial dire wolf with emerald predator eyes, multi tail and fur ruff', 'beast', 'quadruped', 'beast')">🐺 Dire Beast</span>
-          <span class="preset-pill" id="pill-mantis_stalker" onclick="applyPreset('mantis_stalker', 'insectoid mantis assassin with compound phosphor eyes, chitin carapace and scythe claws', 'assassin', 'biped', 'insectoid')">🦗 Mantis</span>
-          <span class="preset-pill" id="pill-holy_paladin" onclick="applyPreset('holy_paladin', 'noble human paladin in regal blue and gold armor with glowing blade', 'warrior', 'biped', 'humanoid')">⚔️ Paladin</span>
-          <span class="preset-pill" id="pill-diesel_mech" onclick="applyPreset('diesel_mech', 'heavy dieselpunk mech juggernaut with caution hazard stripes and furnace core', 'mech', 'biped', 'mech')">🤖 Heavy Mech</span>
+  <!-- ======================================================= -->
+  <!-- TAB 1: GENERATOR                                        -->
+  <!-- ======================================================= -->
+  <div class="tab-content active" id="tab-generator">
+    <div class="grid">
+      <!-- Left: Character Creation Form -->
+      <div class="card">
+        <div class="card-title">
+          <span>Character &amp; Creature Creator</span>
+          <span style="font-size: 11px; color: var(--text-muted);">Procedural &amp; Diffusion Controls</span>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="concept">Visual Concept Description (Free-Form Text Prompt):</label>
-        <textarea id="concept">cyberpunk warrior alien with neon bioluminescent crest, modular chitin armor, plasma blade</textarea>
-      </div>
-
-      <div class="row-2">
         <div class="form-group">
-          <label for="char-name">Character Identifier:</label>
-          <input type="text" id="char-name" value="cyber_alien">
+          <label>Archetype &amp; Creature Presets:</label>
+          <div class="quick-presets" id="preset-container">
+            <span class="preset-pill preset-custom" id="pill-custom" onclick="applyCustomMode()">✨ Custom Creature</span>
+            <span class="preset-pill" id="pill-cyber_alien" onclick="applyPreset('cyber_alien','cyberpunk warrior alien with neon bioluminescent crest, plasma blade and chitin plates','warrior','biped','alien')">👾 Cyber Alien</span>
+            <span class="preset-pill" id="pill-elven_sorceress" onclick="applyPreset('elven_sorceress','female elf sorceress with flowing purple hair, arcane glowing robes and crystal staff','mage','biped','humanoid')">🧝 Elf Mage</span>
+            <span class="preset-pill" id="pill-winged_demon" onclick="applyPreset('winged_demon','crimson demon lord with obsidian curved horns, runic chest brand, shadow talons and wings','assassin','biped','demon')">😈 Demon Fiend</span>
+            <span class="preset-pill" id="pill-skeleton_lich" onclick="applyPreset('skeleton_lich','undead skeleton lich with glowing cyan soul eyes, bone ribcage and tattered shroud','mage','biped','undead')">💀 Skeleton Lich</span>
+            <span class="preset-pill" id="pill-dragonkin_brawler" onclick="applyPreset('dragonkin_brawler','emerald dragonkin warrior with horned brow, ridge scales and reptilian claws','warrior','biped','reptilian')">🦎 Dragonkin</span>
+            <span class="preset-pill" id="pill-celestial_wolf" onclick="applyPreset('celestial_wolf','mythical celestial dire wolf with emerald predator eyes, multi tail and fur ruff','beast','quadruped','beast')">🐺 Dire Beast</span>
+            <span class="preset-pill" id="pill-mantis_stalker" onclick="applyPreset('mantis_stalker','insectoid mantis assassin with compound phosphor eyes, chitin carapace and scythe claws','assassin','biped','insectoid')">🦗 Mantis</span>
+            <span class="preset-pill" id="pill-holy_paladin" onclick="applyPreset('holy_paladin','noble human paladin in regal blue and gold armor with glowing blade','warrior','biped','humanoid')">⚔️ Paladin</span>
+            <span class="preset-pill" id="pill-diesel_mech" onclick="applyPreset('diesel_mech','heavy dieselpunk mech juggernaut with caution hazard stripes and furnace core','mech','biped','mech')">🤖 Heavy Mech</span>
+          </div>
         </div>
+
         <div class="form-group">
-          <label for="species">Species & Anatomy:</label>
-          <select id="species" onchange="onSpeciesDropdownChanged()">
-            <option value="custom">✨ Custom / Hybrid (User-Defined Anatomy)</option>
-            <option value="alien" selected>👾 Cyber Alien (Elongated Cranium, Bio-Crest, Talons)</option>
-            <option value="humanoid">🧝 Human / Elf (Anime Face, Hair, Tunic/Robes, Boots)</option>
-            <option value="demon">😈 Demon / Fiend (Curved Horns, Runic Brand, Talons)</option>
-            <option value="undead">💀 Undead / Skeleton (Bone Skull, Ribcage, Soul Core)</option>
-            <option value="reptilian">🦎 Dragonkin (Snout, Ridge Horns, Scales)</option>
-            <option value="beast">🐺 Dire Beast (Predatory Snout, Paws, Fur)</option>
-            <option value="insectoid">🦗 Mantis (Antennae, Compound Eyes, Carapace)</option>
-            <option value="mech">🤖 Heavy Mech (Visor Slits, Armor Plates, Pistons)</option>
-            <option value="auto">Auto-Detect from Concept Prompt</option>
-          </select>
+          <label for="concept">Visual Concept Description (Free-Form Text Prompt):</label>
+          <textarea id="concept">cyberpunk warrior alien with neon bioluminescent crest, modular chitin armor, plasma blade</textarea>
         </div>
-      </div>
 
-      <!-- Custom Design Studio (Anatomy Mix & Match & Colors) -->
-      <div id="custom-studio" class="accordion" style="border-color: rgba(227, 179, 65, 0.35);">
-        <div class="accordion-header" style="background: rgba(227, 179, 65, 0.1); color: #f0c654;" onclick="toggleCustomStudio()">
-          <span>🎨 Custom Creature Studio (Anatomy Mixing, Wings/Tail & Colors)</span>
-          <span id="custom-studio-arrow">▼</span>
+        <div class="row-2">
+          <div class="form-group">
+            <label for="char-name">Character Identifier:</label>
+            <input type="text" id="char-name" value="cyber_alien">
+          </div>
+          <div class="form-group">
+            <label for="species">Species &amp; Anatomy:</label>
+            <select id="species" onchange="onSpeciesDropdownChanged()">
+              <option value="custom">✨ Custom / Hybrid (User-Defined)</option>
+              <option value="alien" selected>👾 Cyber Alien (Cranium, Bio-Crest, Talons)</option>
+              <option value="humanoid">🧝 Human / Elf (Anime Face, Hair, Boots)</option>
+              <option value="demon">😈 Demon / Fiend (Horns, Runic Brand, Talons)</option>
+              <option value="undead">💀 Undead / Skeleton (Skull, Ribcage, Soul)</option>
+              <option value="reptilian">🦎 Dragonkin (Snout, Ridge Horns, Scales)</option>
+              <option value="beast">🐺 Dire Beast (Predatory Snout, Paws, Fur)</option>
+              <option value="insectoid">🦗 Mantis (Antennae, Compound Eyes, Carapace)</option>
+              <option value="mech">🤖 Heavy Mech (Visor, Armor Plates, Pistons)</option>
+              <option value="auto">Auto-Detect from Prompt</option>
+            </select>
+          </div>
         </div>
-        <div id="custom-studio-body" class="accordion-content">
-          <div class="row-2" style="margin-bottom: 12px;">
-            <div class="form-group">
-              <label for="custom-head">Head Shape / Style:</label>
-              <select id="custom-head" onchange="syncCustomPrompt()">
-                <option value="alien">👾 Alien Cranium (Bio-Crest & Vents)</option>
-                <option value="humanoid">🧝 Humanoid / Elf (Anime Hair & Face)</option>
-                <option value="demon">😈 Demon Horns & Fangs</option>
-                <option value="undead">💀 Bony Skull & Soul Flame</option>
-                <option value="reptilian">🦎 Dragon Brow Horns & Snout</option>
-                <option value="insectoid">🦗 Mantis Antennae & Compound Eyes</option>
-                <option value="beast">🐺 Beast / Wolf Snout & Ears</option>
-                <option value="mech">🤖 Mech Visor & Armor Helmet</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="custom-torso">Torso Style:</label>
-              <select id="custom-torso" onchange="syncCustomPrompt()">
-                <option value="alien">Biomechanical Carapace & Core</option>
-                <option value="humanoid">Cloth Tunic / Robes / Vest</option>
-                <option value="demon">Muscular Demonic Runic Brand</option>
-                <option value="undead">Exposed Skeletal Ribcage</option>
-                <option value="reptilian">Overlapping Dragon Scutes</option>
-                <option value="insectoid">Segmented Chitin Thorax</option>
-                <option value="mech">Plated Armor & Furnace</option>
-              </select>
-            </div>
-          </div>
 
-          <div class="row-2" style="margin-bottom: 12px;">
-            <div class="form-group">
-              <label for="custom-hands">Hands / Claws Style:</label>
-              <select id="custom-hands" onchange="syncCustomPrompt()">
-                <option value="alien">Alien Elongated Talons</option>
-                <option value="humanoid">Humanoid Articulated Fingers</option>
-                <option value="demon">Sharp Obsidian Demonic Claws</option>
-                <option value="undead">Bony Skeletal Digits</option>
-                <option value="reptilian">Heavy Dragon Claws</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="custom-feet">Feet / Base Style:</label>
-              <select id="custom-feet" onchange="syncCustomPrompt()">
-                <option value="alien">Digitigrade Alien Talons</option>
-                <option value="humanoid">Adventurer Boots / Sandals</option>
-                <option value="demon">Cloven Hooves / Raptor Spurs</option>
-                <option value="undead">Skeletal Foot Bones</option>
-                <option value="reptilian">Raptor / Dragon Claw Feet</option>
-              </select>
-            </div>
+        <!-- Custom Design Studio -->
+        <div id="custom-studio" class="accordion" style="border-color: rgba(227,179,65,0.35);">
+          <div class="accordion-header" style="background: rgba(227,179,65,0.08); color: #f0c654;" onclick="toggleCustomStudio()">
+            <span>🎨 Custom Creature Studio (Anatomy, Wings/Tail &amp; Colors)</span>
+            <span id="custom-studio-arrow">▼</span>
           </div>
-
-          <div class="row-2" style="margin-bottom: 14px;">
-            <div class="form-group">
+          <div id="custom-studio-body" class="accordion-content">
+            <div class="row-2" style="margin-bottom:12px;">
+              <div class="form-group">
+                <label for="custom-head">Head Shape / Style:</label>
+                <select id="custom-head" onchange="syncCustomPrompt()">
+                  <option value="alien">👾 Alien Cranium (Bio-Crest &amp; Vents)</option>
+                  <option value="humanoid" selected>🧝 Humanoid / Elf (Anime Hair &amp; Face)</option>
+                  <option value="demon">😈 Demon Horns &amp; Fangs</option>
+                  <option value="undead">💀 Bony Skull &amp; Soul Flame</option>
+                  <option value="reptilian">🦎 Dragon Brow Horns &amp; Snout</option>
+                  <option value="insectoid">🦗 Mantis Antennae &amp; Compound Eyes</option>
+                  <option value="beast">🐺 Beast / Wolf Snout &amp; Ears</option>
+                  <option value="mech">🤖 Mech Visor &amp; Armor Helmet</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="custom-torso">Torso Style:</label>
+                <select id="custom-torso" onchange="syncCustomPrompt()">
+                  <option value="alien">Biomechanical Carapace &amp; Core</option>
+                  <option value="humanoid">Cloth Tunic / Robes / Vest</option>
+                  <option value="demon">Muscular Demonic Runic Brand</option>
+                  <option value="undead" selected>Exposed Skeletal Ribcage</option>
+                  <option value="reptilian">Overlapping Dragon Scutes</option>
+                  <option value="insectoid">Segmented Chitin Thorax</option>
+                  <option value="mech">Plated Armor &amp; Furnace Core</option>
+                </select>
+              </div>
+            </div>
+            <div class="row-2" style="margin-bottom:12px;">
+              <div class="form-group">
+                <label for="custom-hands">Hands / Claws Style:</label>
+                <select id="custom-hands" onchange="syncCustomPrompt()">
+                  <option value="alien">Alien Elongated Talons</option>
+                  <option value="humanoid" selected>Humanoid Articulated Fingers</option>
+                  <option value="demon">Sharp Obsidian Demonic Claws</option>
+                  <option value="undead">Bony Skeletal Digits</option>
+                  <option value="reptilian">Heavy Dragon Claws</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="custom-feet">Feet / Base Style:</label>
+                <select id="custom-feet" onchange="syncCustomPrompt()">
+                  <option value="alien">Digitigrade Alien Talons</option>
+                  <option value="humanoid">Adventurer Boots / Sandals</option>
+                  <option value="demon">Cloven Hooves / Raptor Spurs</option>
+                  <option value="undead" selected>Skeletal Foot Bones</option>
+                  <option value="reptilian">Raptor / Dragon Claw Feet</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
               <label>Custom Appendages:</label>
-              <div style="display: flex; gap: 16px; align-items: center; padding-top: 4px;">
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text);">
+              <div style="display:flex;gap:18px;align-items:center;padding-top:4px;">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;">
                   <input type="checkbox" id="custom-wings" onchange="syncCustomPrompt()"> 🪽 Add Wings
                 </label>
-                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text);">
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;">
                   <input type="checkbox" id="custom-tail" onchange="syncCustomPrompt()"> 🐉 Add Tail
                 </label>
               </div>
             </div>
-          </div>
-
-          <label style="margin-bottom: 8px;">Interactive Custom Color Palette:</label>
-          <div class="row-4" style="margin-bottom: 6px;">
-            <div class="color-picker-box">
-              <input type="color" id="col-primary" value="#2b4764" onchange="syncCustomPrompt()">
-              <span>Body / Skin</span>
-            </div>
-            <div class="color-picker-box">
-              <input type="color" id="col-accent" value="#d79c29" onchange="syncCustomPrompt()">
-              <span>Cloth / Hair</span>
-            </div>
-            <div class="color-picker-box">
-              <input type="color" id="col-glow" value="#00f0ff" onchange="syncCustomPrompt()">
-              <span>Glow / Eyes</span>
-            </div>
-            <div class="color-picker-box">
-              <input type="color" id="col-outline" value="#121824" onchange="syncCustomPrompt()">
-              <span>Outline</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="row-2" style="margin-top: 14px;">
-        <div class="form-group">
-          <label for="rig-type">Rig Architecture:</label>
-          <select id="rig-type">
-            <option value="biped" selected>Humanoid Biped (15 bones)</option>
-            <option value="quadruped">Beast / Quadruped (20 bones)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="archetype">Color Accent Fallback:</label>
-          <select id="archetype">
-            <option value="warrior" selected>Warrior (Paladin Cobalt & Regal Amber Gold)</option>
-            <option value="mage">Mage (Deep Arcane Violet & Arcane Magenta)</option>
-            <option value="assassin">Assassin (Midnight Obsidian & Crimson Blood)</option>
-            <option value="ranger">Ranger (Forest Greens & Emerald Nature)</option>
-            <option value="mech">Mech (Gunmetal & Amber Furnace Core)</option>
-            <option value="beast">Beast (Shadow Fur & Emerald Core)</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Advanced Tuning -->
-      <div class="accordion">
-        <div class="accordion-header" onclick="toggleAccordion()">
-          <span>Advanced Tuning Parameters (Seed, Engine, Paths)</span>
-          <span id="accordion-arrow">▼</span>
-        </div>
-        <div id="accordion-body" class="accordion-content">
-          <div class="row-2">
-            <div class="form-group">
-              <label for="engine-mode">Generation Engine:</label>
-              <select id="engine-mode">
-                <option value="auto" selected>Auto (ComfyUI with Smart Spriter Fallback)</option>
-                <option value="comfyui">ComfyUI Generative Diffusion Only</option>
-                <option value="local">Smart Procedural Spriter (Offline / Instant)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="model-checkpoint">AI Model Checkpoint:</label>
-              <select id="model-checkpoint">
-                <option value="animagineXL_v31.safetensors" selected>Animagine XL 3.1 (SDXL Premier Anime Checkpoint) [INSTALLED]</option>
-                <option value="counterfeit_v3.safetensors">Counterfeit V3.0 (SD 1.5 Lightweight Anime)</option>
-                <option value="dreamshaper_8.safetensors">DreamShaper 8 (SD 1.5 Game Concept Art)</option>
-              </select>
-            </div>
-          </div>
-          <div class="row-2">
-            <div class="form-group">
-              <label for="seed">Variation Seed (-1 for Random):</label>
-              <div style="display: flex; gap: 8px;">
-                <input type="text" id="seed" value="-1">
-                <button type="button" class="btn btn-secondary btn-icon" onclick="randomizeSeed()" title="Roll new random seed">🎲 Random</button>
+            <label style="margin-bottom:8px;display:block;">Interactive Custom Color Palette:</label>
+            <div class="row-4" style="margin-bottom:4px;">
+              <div class="color-picker-box">
+                <input type="color" id="col-primary" value="#2b4764" onchange="syncCustomPrompt()">
+                <span>Body / Skin</span>
+              </div>
+              <div class="color-picker-box">
+                <input type="color" id="col-accent" value="#d79c29" onchange="syncCustomPrompt()">
+                <span>Cloth / Hair</span>
+              </div>
+              <div class="color-picker-box">
+                <input type="color" id="col-glow" value="#00f0ff" onchange="syncCustomPrompt()">
+                <span>Glow / Eyes</span>
+              </div>
+              <div class="color-picker-box">
+                <input type="color" id="col-outline" value="#121824" onchange="syncCustomPrompt()">
+                <span>Outline</span>
               </div>
             </div>
-            <div class="form-group">
-              <label for="target-scene">Target Godot Scene Destination:</label>
-              <input type="text" id="target-scene" value="res://scenes/cyber_alien_character.tscn">
+          </div>
+        </div>
+
+        <div class="row-2" style="margin-top:14px;">
+          <div class="form-group">
+            <label for="rig-type">Rig Architecture:</label>
+            <select id="rig-type">
+              <option value="biped" selected>Humanoid Biped (15 bones)</option>
+              <option value="quadruped">Beast / Quadruped (20 bones)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="archetype">Color Accent Fallback:</label>
+            <select id="archetype">
+              <option value="warrior" selected>Warrior (Cobalt &amp; Amber Gold)</option>
+              <option value="mage">Mage (Deep Arcane Violet &amp; Magenta)</option>
+              <option value="assassin">Assassin (Midnight Obsidian &amp; Crimson)</option>
+              <option value="ranger">Ranger (Forest Greens &amp; Emerald)</option>
+              <option value="mech">Mech (Gunmetal &amp; Amber Furnace)</option>
+              <option value="beast">Beast (Shadow Fur &amp; Emerald Core)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Advanced Tuning -->
+        <div class="accordion">
+          <div class="accordion-header" onclick="toggleAccordion()">
+            <span>Advanced Tuning Parameters (Seed, Engine, Paths)</span>
+            <span id="accordion-arrow">▼</span>
+          </div>
+          <div id="accordion-body" class="accordion-content">
+            <div class="row-2">
+              <div class="form-group">
+                <label>Generation Engine:
+                  <span class="tooltip-wrap"><span class="help-icon">?</span>
+                    <span class="tip">Auto: tries ComfyUI diffusion first, falls back to procedural spriter.<br>ComfyUI Only: fails if ComfyUI is offline.<br>Procedural: fast offline Pillow-based spriter, always works.</span>
+                  </span>
+                </label>
+                <select id="engine-mode">
+                  <option value="auto" selected>Auto (ComfyUI with Smart Spriter Fallback)</option>
+                  <option value="comfyui">ComfyUI Generative Diffusion Only</option>
+                  <option value="local">Smart Procedural Spriter (Offline / Instant)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>AI Model Checkpoint:
+                  <span class="tooltip-wrap"><span class="help-icon">?</span>
+                    <span class="tip">Select the ComfyUI checkpoint to use for AI generation. Only active when using ComfyUI engine mode. Installed models shown with [INSTALLED].</span>
+                  </span>
+                </label>
+                <select id="model-checkpoint">
+                  <option value="animagineXL_v31.safetensors" selected>Animagine XL 3.1 (SDXL Premier Anime) [INSTALLED]</option>
+                  <option value="counterfeit_v3.safetensors">Counterfeit V3.0 (SD 1.5 Lightweight Anime)</option>
+                  <option value="dreamshaper_8.safetensors">DreamShaper 8 (SD 1.5 Game Concept Art)</option>
+                </select>
+              </div>
+            </div>
+            <div class="row-2">
+              <div class="form-group">
+                <label>Variation Seed (-1 for Random):</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="seed" value="-1">
+                  <button type="button" class="btn btn-secondary btn-icon" onclick="randomizeSeed()" title="Roll random seed">🎲</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Target Godot Scene Destination:</label>
+                <input type="text" id="target-scene" value="res://scenes/cyber_alien_character.tscn">
+              </div>
             </div>
           </div>
         </div>
+
+        <div style="margin-top:18px;">
+          <button id="btn-generate" class="btn btn-primary" onclick="runPipeline('generate')">
+            🚀 Generate &amp; Assemble Full Character Scene
+          </button>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" onclick="runPipeline('sprites_only')">🎨 Generate Sprites Only</button>
+          <button class="btn btn-secondary" onclick="runPipeline('rig_only')">🦴 Auto-Rig Skeleton Scene</button>
+        </div>
       </div>
 
-      <div style="margin-top: 18px;">
-        <button id="btn-generate" class="btn btn-primary" onclick="runPipeline('generate')">
-          🚀 Generate & Assemble Full Character Scene
-        </button>
-      </div>
+      <!-- Right: Console + Asset Preview -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <!-- Console -->
+        <div class="card">
+          <div class="console-toolbar">
+            <span>Execution Log Console</span>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="status-pill" style="font-size:11px;color:var(--text-muted);">Idle</span>
+              <button class="btn btn-secondary btn-sm" onclick="clearConsole()">Clear</button>
+            </div>
+          </div>
+          <div id="console" class="console">[System Ready] Select a preset or click ✨ Custom Creature to start!</div>
+        </div>
 
-      <div class="actions">
-        <button class="btn btn-secondary" onclick="runPipeline('sprites_only')">🎨 Generate Sprites Only</button>
-        <button class="btn btn-secondary" onclick="runPipeline('rig_only')">🦴 Auto-Rig Skeleton Scene</button>
+        <!-- Assets Preview -->
+        <div class="card" style="flex:1;">
+          <div class="card-title">
+            <span>Transparent Limb Cutouts</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="openExplorer()">📁 Open Folder</button>
+              <button class="btn btn-secondary btn-sm" onclick="openInGodot()">🎮 Open in Godot</button>
+            </div>
+          </div>
+          <div id="sprite-gallery" class="gallery">
+            <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:30px 0;font-size:12px;">Generate a character to see limb cutouts here.</div>
+          </div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <!-- Live Console & Asset Output Column -->
-    <div style="display: flex; flex-direction: column; gap: 24px;">
-      <!-- Console Card -->
-      <div class="card">
-        <div class="card-title">
-          <span>Execution Log Console</span>
-          <span id="status-pill" style="font-size: 11px; color: var(--text-muted);">Idle</span>
+  <!-- ======================================================= -->
+  <!-- TAB 2: ASSET LIBRARY                                    -->
+  <!-- ======================================================= -->
+  <div class="tab-content" id="tab-library">
+    <div class="card" style="margin-bottom:16px;padding:14px 18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <span style="font-size:14px;font-weight:600;color:var(--primary);">📦 Generated Character Asset Library</span>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary btn-sm" onclick="refreshLibrary()">🔄 Refresh</button>
+          <span id="lib-char-count" style="font-size:12px;color:var(--text-muted);align-self:center;"></span>
         </div>
-        <div id="console" class="console">[System Ready] Enter a character concept, choose a preset, or click ✨ Custom Creature!</div>
       </div>
-
-      <!-- AI Model Downloader Card -->
-      <div class="card">
-        <div class="card-title">
-          <span>AI Diffusion Checkpoints</span>
-          <span id="model-status-pill" style="font-size: 11px; color: var(--text-muted);">Checking...</span>
+    </div>
+    <div class="library-layout">
+      <!-- Roster -->
+      <div>
+        <div class="lib-toolbar">
+          <input class="lib-search" type="text" id="lib-search" placeholder="🔍 Filter characters..." oninput="filterRoster()">
         </div>
-        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
-          Download state-of-the-art anime AI checkpoints into ComfyUI for local generative diffusion.
-        </p>
-        <div class="row-2" style="margin-bottom: 6px;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <select id="model-select">
-              <option value="counterfeit_v3" selected>Counterfeit V3.0 (SD 1.5 ~2 GB - Fast Anime)</option>
-              <option value="animagine_xl">Animagine XL 3.1 (SDXL ~6.6 GB - Premier Anime)</option>
-              <option value="dreamshaper_8">DreamShaper 8 (SD 1.5 ~2 GB - Game Concept)</option>
-            </select>
-          </div>
-          <button id="btn-download-model" class="btn btn-secondary" onclick="startModelDownload()">⬇️ Download Model</button>
-        </div>
-        <div id="model-progress-wrap" style="display: none; margin-top: 8px;">
-          <div class="progress-container">
-            <div id="model-progress-bar" class="progress-bar"></div>
-            <div id="model-progress-text" class="progress-text">0%</div>
-          </div>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between;">
-            <span id="model-dl-info">Starting...</span>
-            <span id="model-dl-speed">0.0 MB/s</span>
-          </div>
+        <div id="char-roster" class="char-roster">
+          <div style="text-align:center;color:var(--text-muted);padding:40px 0;font-size:13px;">Loading characters...</div>
         </div>
       </div>
 
-      <!-- Assets Preview Card -->
-      <div class="card" style="flex: 1;">
-        <div class="card-title">
-          <span>Transparent Limb Cutouts</span>
-          <div style="display: flex; gap: 6px;">
-            <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 11px;" onclick="openExplorer()">📁 Open Folder</button>
-            <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 11px;" onclick="openInGodot()">🎮 Open in Godot</button>
-          </div>
+      <!-- Viewer -->
+      <div class="card viewer-panel">
+        <div id="viewer-empty" class="viewer-empty">
+          <div class="viewer-empty-icon">🎮</div>
+          <div>Select a character from the roster to view their sprites.</div>
         </div>
-        <div id="sprite-gallery" class="gallery">
-          <!-- Filled dynamically via JS -->
+        <div id="viewer-content" style="display:none;">
+          <div class="viewer-header">
+            <div>
+              <div class="viewer-title" id="viewer-char-name">—</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:2px;" id="viewer-char-meta"></div>
+            </div>
+            <div class="viewer-actions">
+              <button class="btn btn-secondary btn-sm" onclick="openExplorerFor(viewingChar)">📁 Folder</button>
+              <button class="btn btn-secondary btn-sm" onclick="openGodotFor(viewingChar)">🎮 Godot</button>
+              <button class="btn btn-secondary btn-sm" onclick="rerigChar(viewingChar)">🦴 Re-Rig</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteChar(viewingChar)">🗑️ Delete</button>
+            </div>
+          </div>
+          <div id="viewer-grid" class="viewer-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- TAB 3: AI MODELS                                        -->
+  <!-- ======================================================= -->
+  <div class="tab-content" id="tab-models">
+    <div class="card">
+      <div class="card-title">
+        <span>AI Diffusion Checkpoints</span>
+        <span id="model-status-pill" style="font-size:11px;color:var(--text-muted);">Checking...</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
+        Download state-of-the-art anime AI checkpoints into ComfyUI for local generative diffusion.
+        These models run entirely locally — no internet connection required after download.
+      </p>
+      <div class="row-2" style="margin-bottom:8px;max-width:600px;">
+        <div class="form-group" style="margin-bottom:0;">
+          <select id="model-select">
+            <option value="animagine_xl">Animagine XL 3.1 (SDXL ~6.6 GB - Premier Anime)</option>
+            <option value="counterfeit_v3">Counterfeit V3.0 (SD 1.5 ~2 GB - Fast Anime)</option>
+            <option value="dreamshaper_8">DreamShaper 8 (SD 1.5 ~2 GB - Game Concept)</option>
+            <option value="flat_anime_lora">Flat 2D Anime LoRA (~150 MB - Style modifier)</option>
+            <option value="controlnet_openpose">ControlNet OpenPose XL (~2.5 GB - Pose guidance)</option>
+          </select>
+        </div>
+        <button id="btn-download-model" class="btn btn-secondary" onclick="startModelDownload()">⬇️ Download Model</button>
+      </div>
+      <div id="model-progress-wrap" style="display:none;margin-top:8px;max-width:600px;">
+        <div class="progress-container">
+          <div id="model-progress-bar" class="progress-bar"></div>
+          <div id="model-progress-text" class="progress-text">0%</div>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;display:flex;justify-content:space-between;">
+          <span id="model-dl-info">Starting...</span>
+          <span id="model-dl-speed">0.0 MB/s</span>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;">Model Status</div>
+        <div id="model-catalog-list" style="display:flex;flex-direction:column;gap:8px;max-width:700px;">
+          <div style="color:var(--text-muted);font-size:12px;">Loading...</div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightboxDirect()">&times;</button>
+  <div class="lightbox-img-wrap">
+    <img class="lightbox-img" id="lightbox-img" src="" alt="">
+  </div>
+  <div class="lightbox-meta">
+    <h3 id="lightbox-title"></h3>
+    <p id="lightbox-meta"></p>
+  </div>
+</div>
+
 <script>
-  let currentCharacter = "cyber_alien";
+// ---- Global State ----
+let currentCharacter = "cyber_alien";
+let viewingChar = "";
+let allLibraryChars = [];
 
-  function log(msg, type = "normal") {
-    const c = document.getElementById("console");
-    const span = document.createElement("span");
-    if (type === "info") span.className = "info";
-    if (type === "warn") span.className = "warn";
-    if (type === "err") span.className = "err";
-    span.textContent = msg + "\\n";
-    c.appendChild(span);
-    c.scrollTop = c.scrollHeight;
+// ---- Tab Switching ----
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('tab-btn-' + name).classList.add('active');
+  if (name === 'library') refreshLibrary();
+  if (name === 'models') checkModelStatus();
+}
+
+// ---- Console ----
+function log(msg, type = "normal") {
+  const c = document.getElementById("console");
+  const span = document.createElement("span");
+  if (type === "ci") span.className = "ci";
+  else if (type === "gi") span.className = "gi";
+  else if (type === "ok") span.className = "ok";
+  else if (type === "warn") span.className = "warn";
+  else if (type === "err") span.className = "err";
+  else if (type === "gen") span.className = "gen";
+  span.textContent = msg + "\\n";
+  c.appendChild(span);
+  c.scrollTop = c.scrollHeight;
+}
+function clearConsole() {
+  document.getElementById("console").innerHTML = "";
+  log("[Console cleared]", "warn");
+}
+
+// ---- Helpers ----
+function randomizeSeed() {
+  const s = Math.floor(Math.random() * 2147483647);
+  document.getElementById("seed").value = s;
+  log(`[SEED] New variation seed: ${s}`, "ci");
+}
+
+function toggleAccordion() {
+  const b = document.getElementById("accordion-body");
+  const a = document.getElementById("accordion-arrow");
+  b.classList.toggle("open");
+  a.textContent = b.classList.contains("open") ? "▲" : "▼";
+}
+
+function toggleCustomStudio(forceOpen) {
+  const b = document.getElementById("custom-studio-body");
+  const a = document.getElementById("custom-studio-arrow");
+  if (forceOpen === true) {
+    b.classList.add("open");
+    a.textContent = "▲";
+  } else if (forceOpen === false) {
+    b.classList.remove("open");
+    a.textContent = "▼";
+  } else {
+    b.classList.toggle("open");
+    a.textContent = b.classList.contains("open") ? "▲" : "▼";
   }
+}
 
-  function randomizeSeed() {
-    const newSeed = Math.floor(Math.random() * 2147483647);
-    document.getElementById("seed").value = newSeed;
-    log(`[SEED] Generated random variation seed: ${newSeed}`, "info");
-  }
+function setActivePill(pillId) {
+  document.querySelectorAll('.preset-pill').forEach(el => el.classList.remove('active'));
+  const p = document.getElementById(pillId);
+  if (p) p.classList.add('active');
+}
 
-  function toggleAccordion() {
-    const b = document.getElementById("accordion-body");
-    const arr = document.getElementById("accordion-arrow");
-    if (b.classList.contains("open")) {
-      b.classList.remove("open");
-      arr.textContent = "▼";
-    } else {
-      b.classList.add("open");
-      arr.textContent = "▲";
-    }
-  }
+// ---- Preset Logic ----
+function applyCustomMode() {
+  setActivePill('pill-custom');
+  document.getElementById("char-name").value = "custom_creature";
+  document.getElementById("species").value = "custom";
+  document.getElementById("target-scene").value = "res://scenes/custom_creature_character.tscn";
+  toggleCustomStudio(true);
+  syncCustomPrompt(true);
+  log("[CUSTOM] Activated Custom Creature Studio — mix anatomy, add wings/tail, set colors!", "ci");
+  refreshGallery();
+}
 
-  function toggleCustomStudio(forceOpen = false) {
-    const b = document.getElementById("custom-studio-body");
-    const arr = document.getElementById("custom-studio-arrow");
-    if (forceOpen || !b.classList.contains("open")) {
-      b.classList.add("open");
-      arr.textContent = "▲";
-    } else {
-      b.classList.remove("open");
-      arr.textContent = "▼";
-    }
-  }
-
-  function setActivePill(pillId) {
-    document.querySelectorAll('.preset-pill').forEach(el => el.classList.remove('active'));
-    const p = document.getElementById(pillId);
-    if (p) p.classList.add('active');
-  }
-
-  function applyCustomMode() {
+function onSpeciesDropdownChanged() {
+  const sp = document.getElementById("species").value;
+  if (sp === "custom") {
     setActivePill('pill-custom');
-    document.getElementById("char-name").value = "custom_creature";
-    document.getElementById("species").value = "custom";
-    document.getElementById("target-scene").value = `res://scenes/custom_creature_character.tscn`;
     toggleCustomStudio(true);
-    syncCustomPrompt(true);
-    log(`[CUSTOM] Activated Custom Creature Studio. Customize anatomy, wings, and colors!`, "info");
-    refreshGallery();
+  } else {
+    // Don't auto-open studio for non-custom selections
+    toggleCustomStudio(false);
+  }
+}
+
+function syncCustomPrompt(force = false) {
+  const sp = document.getElementById("species").value;
+  if (!force && sp !== "custom") return;
+  const head  = document.getElementById("custom-head").value;
+  const torso = document.getElementById("custom-torso").value;
+  const wings = document.getElementById("custom-wings").checked;
+  const tail  = document.getElementById("custom-tail").checked;
+  const pCol  = document.getElementById("col-primary").value;
+  const gCol  = document.getElementById("col-glow").value;
+  let desc = `custom hybrid creature with ${head} head silhouette, ${torso} body`;
+  if (wings) desc += ", large spreading wings";
+  if (tail)  desc += ", articulated tail";
+  desc += `, primary color ${pCol} and glowing core ${gCol}`;
+  document.getElementById("concept").value = desc;
+}
+
+function applyPreset(name, concept, arch, rig, species = "auto") {
+  setActivePill(`pill-${name}`);
+  document.getElementById("char-name").value = name;
+  document.getElementById("concept").value = concept;
+  document.getElementById("archetype").value = arch;
+  document.getElementById("rig-type").value = rig;
+  document.getElementById("species").value = species;
+  document.getElementById("target-scene").value = `res://scenes/${name}_character.tscn`;
+  currentCharacter = name;
+
+  // Collapse custom studio (not for custom presets)
+  toggleCustomStudio(false);
+
+  // Update color pickers to match species
+  const colorMap = {
+    alien:    { p: "#2b4764", g: "#00f0ff" },
+    demon:    { p: "#5f1c2a", g: "#ff2d1e" },
+    undead:   { p: "#a09b91", g: "#00eeff" },
+    reptilian:{ p: "#1e4a20", g: "#8eff52" },
+    beast:    { p: "#3b2a1e", g: "#00cc44" },
+    humanoid: { p: "#e8c9a0", g: "#a071f7" },
+    insectoid:{ p: "#2a3e1a", g: "#aaff00" },
+    mech:     { p: "#3c4454", g: "#ff9900" },
+  };
+  if (colorMap[species]) {
+    document.getElementById("col-primary").value = colorMap[species].p;
+    document.getElementById("col-glow").value = colorMap[species].g;
   }
 
-  function onSpeciesDropdownChanged() {
-    const sp = document.getElementById("species").value;
-    if (sp === "custom") {
-      setActivePill('pill-custom');
-      toggleCustomStudio(true);
+  log(`[PRESET] Loaded '${name}' (${species.toUpperCase()}, ${rig.toUpperCase()})`, "ci");
+  refreshGallery();
+}
+
+// ---- Status check ----
+async function checkStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+
+    const gBadge = document.getElementById("badge-godot");
+    if (d.godot_available) {
+      gBadge.className = "badge badge-online";
+      gBadge.innerHTML = '<span class="badge-dot"></span> Godot 4: Ready';
     } else {
-      const matchingPill = document.querySelector(`.preset-pill[id*='${sp}']`);
-      if (matchingPill) {
-        setActivePill(matchingPill.id);
+      gBadge.className = "badge badge-offline";
+      gBadge.innerHTML = '<span class="badge-dot"></span> Godot 4: Not Found';
+    }
+
+    const cBadge = document.getElementById("badge-comfy");
+    if (d.comfyui && d.comfyui.online) {
+      if (d.comfyui.has_checkpoint) {
+        cBadge.className = "badge badge-online";
+        cBadge.innerHTML = `<span class="badge-dot"></span> ComfyUI: Ready (${d.comfyui.node_count} nodes)`;
       } else {
-        document.querySelectorAll('.preset-pill').forEach(el => el.classList.remove('active'));
+        cBadge.className = "badge badge-notice";
+        cBadge.innerHTML = '<span class="badge-dot"></span> ComfyUI: Online (No Checkpoint)';
       }
-      const b = document.getElementById("custom-studio-body");
-      const arr = document.getElementById("custom-studio-arrow");
-      if (b && b.classList.contains("open")) {
-        b.classList.remove("open");
-        if (arr) arr.textContent = "▼";
-      }
-    }
-  }
-
-  function syncCustomPrompt(force = false) {
-    const sp = document.getElementById("species").value;
-    if (!force && sp !== "custom") return;
-
-    const head = document.getElementById("custom-head").value;
-    const torso = document.getElementById("custom-torso").value;
-    const wings = document.getElementById("custom-wings").checked;
-    const tail = document.getElementById("custom-tail").checked;
-    const pCol = document.getElementById("col-primary").value;
-    const gCol = document.getElementById("col-glow").value;
-
-    let desc = `custom hybrid creature with ${head} head silhouette, ${torso} body`;
-    if (wings) desc += ", large spreading wings";
-    if (tail) desc += ", articulated tail";
-    desc += `, primary color ${pCol} and glowing core ${gCol}`;
-
-    document.getElementById("concept").value = desc;
-  }
-
-  function applyPreset(name, concept, arch, rig, species = "auto") {
-    setActivePill(`pill-${name}`);
-    document.getElementById("char-name").value = name;
-    document.getElementById("concept").value = concept;
-    document.getElementById("archetype").value = arch;
-    document.getElementById("rig-type").value = rig;
-    document.getElementById("species").value = species;
-    document.getElementById("target-scene").value = `res://scenes/${name}_character.tscn`;
-    currentCharacter = name;
-
-    // Reset custom wings/tail flags when loading standard preset
-    const hasWingsPreset = (name === "winged_demon");
-    const hasTailPreset = (name === "celestial_wolf");
-    document.getElementById("custom-wings").checked = hasWingsPreset;
-    document.getElementById("custom-tail").checked = hasTailPreset;
-
-    // Collapse custom studio when picking a standard preset
-    const b = document.getElementById("custom-studio-body");
-    const arr = document.getElementById("custom-studio-arrow");
-    if (b && b.classList.contains("open")) {
-      b.classList.remove("open");
-      if (arr) arr.textContent = "▼";
+    } else {
+      cBadge.className = "badge badge-offline";
+      cBadge.innerHTML = '<span class="badge-dot"></span> ComfyUI: Offline';
     }
 
-    // Adjust studio defaults for visual convenience
-    if (species === "alien") {
-      document.getElementById("custom-head").value = "alien";
-      document.getElementById("custom-torso").value = "alien";
-      document.getElementById("col-primary").value = "#2b4764";
-      document.getElementById("col-glow").value = "#00f0ff";
-    } else if (species === "demon") {
-      document.getElementById("custom-head").value = "demon";
-      document.getElementById("custom-torso").value = "demon";
-      document.getElementById("col-primary").value = "#5f1c2a";
-      document.getElementById("col-glow").value = "#ff2d1e";
-    } else if (species === "undead") {
-      document.getElementById("custom-head").value = "undead";
-      document.getElementById("custom-torso").value = "undead";
-      document.getElementById("col-primary").value = "#a09b91";
-      document.getElementById("col-glow").value = "#00f0ff";
-    }
-
-    log(`[PRESET] Loaded '${name}' (${species.toUpperCase()}, ${rig.toUpperCase()})`, "info");
-    refreshGallery();
-  }
-
-  async function checkStatus() {
-    try {
-      const r = await fetch('/api/status');
-      const d = await r.json();
-      
-      const gBadge = document.getElementById("badge-godot");
-      if (d.godot_available) {
-        gBadge.className = "badge badge-online";
-        gBadge.innerHTML = '<span class="badge-dot"></span> Godot 4: Ready';
-      } else {
-        gBadge.className = "badge badge-offline";
-        gBadge.innerHTML = '<span class="badge-dot"></span> Godot 4: Not Found';
-      }
-
-      const cBadge = document.getElementById("badge-comfy");
-      if (d.comfyui && d.comfyui.online) {
-        if (d.comfyui.has_checkpoint) {
-          cBadge.className = "badge badge-online";
-          cBadge.innerHTML = `<span class="badge-dot"></span> ComfyUI: Ready (${d.comfyui.node_count} nodes)`;
-        } else {
-          cBadge.className = "badge badge-notice";
-          cBadge.innerHTML = `<span class="badge-dot"></span> ComfyUI: Online (Using Smart Spriter)`;
-        }
-      } else {
-        cBadge.className = "badge badge-offline";
-        cBadge.innerHTML = '<span class="badge-dot"></span> ComfyUI: Offline (Using Smart Spriter)';
-      }
-
-      if (d.comfyui && d.comfyui.checkpoints && d.comfyui.checkpoints.length > 0) {
-        const sel = document.getElementById("model-checkpoint");
-        if (sel) {
-          const currentVal = sel.value;
-          const knownCkpts = [
-            {val: "animagineXL_v31.safetensors", label: "Animagine XL 3.1 (SDXL Premier Anime)"},
-            {val: "counterfeit_v3.safetensors", label: "Counterfeit V3.0 (SD 1.5 Lightweight Anime)"},
-            {val: "dreamshaper_8.safetensors", label: "DreamShaper 8 (SD 1.5 Game Concept Art)"}
-          ];
-          d.comfyui.checkpoints.forEach(c => {
-            if (!knownCkpts.some(k => k.val === c)) {
-              knownCkpts.push({val: c, label: c});
-            }
-          });
-          sel.innerHTML = "";
-          knownCkpts.forEach(k => {
-            const opt = document.createElement("option");
-            opt.value = k.val;
-            const isInst = d.comfyui.checkpoints.includes(k.val);
-            opt.textContent = isInst ? `${k.label} [INSTALLED]` : `${k.label}`;
-            if (k.val === currentVal || (!currentVal && k.val === "animagineXL_v31.safetensors")) {
-              opt.selected = true;
-            }
-            sel.appendChild(opt);
-          });
-        }
-      }
-    } catch (e) {
-      console.warn("Status check failed:", e);
-    }
-  }
-
-  async function refreshGallery() {
-    const name = document.getElementById("char-name").value.trim().toLowerCase().replace(/\\s+/g, '_');
-    currentCharacter = name;
-    try {
-      const r = await fetch(`/api/sprites?char=${name}`);
-      const d = await r.json();
-      const g = document.getElementById("sprite-gallery");
-      g.innerHTML = "";
-      if (d.sprites && d.sprites.length > 0) {
-        d.sprites.forEach(s => {
-          const card = document.createElement("div");
-          card.className = "sprite-card";
-          card.innerHTML = `
-            <img class="sprite-thumb" src="${s.url}?t=${Date.now()}" alt="${s.bone}">
-            <div class="sprite-name">${s.bone}</div>
-          `;
-          g.appendChild(card);
+    // Populate model checkpoint selector
+    if (d.comfyui && d.comfyui.checkpoints && d.comfyui.checkpoints.length > 0) {
+      const sel = document.getElementById("model-checkpoint");
+      if (sel) {
+        const currentVal = sel.value;
+        const knownCkpts = [
+          {val: "animagineXL_v31.safetensors", label: "Animagine XL 3.1 (SDXL Premier Anime)"},
+          {val: "counterfeit_v3.safetensors",  label: "Counterfeit V3.0 (SD 1.5 Lightweight Anime)"},
+          {val: "dreamshaper_8.safetensors",   label: "DreamShaper 8 (SD 1.5 Game Concept Art)"}
+        ];
+        d.comfyui.checkpoints.forEach(c => {
+          if (!knownCkpts.some(k => k.val === c)) knownCkpts.push({val: c, label: c});
         });
-      } else {
-        g.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 45px 0; font-size: 12px;">No limb cutouts extracted for this character yet. Click Generate above!</div>';
+        sel.innerHTML = "";
+        knownCkpts.forEach(k => {
+          const opt = document.createElement("option");
+          opt.value = k.val;
+          const isInst = d.comfyui.checkpoints.includes(k.val);
+          opt.textContent = isInst ? `${k.label} [INSTALLED]` : k.label;
+          if (k.val === currentVal || (!currentVal && k.val === "animagineXL_v31.safetensors")) opt.selected = true;
+          sel.appendChild(opt);
+        });
       }
-    } catch (e) {}
-  }
+    }
+  } catch(e) {}
+}
 
-  async function runPipeline(actionType) {
-    const btn = document.getElementById("btn-generate");
-    const name = document.getElementById("char-name").value.trim().toLowerCase().replace(/\\s+/g, '_');
-    const concept = document.getElementById("concept").value.trim();
-    const archetype = document.getElementById("archetype").value;
-    const rig = document.getElementById("rig-type").value;
-    const species = document.getElementById("species").value;
-    const mode = document.getElementById("engine-mode").value;
-    const checkpoint = document.getElementById("model-checkpoint") ? document.getElementById("model-checkpoint").value : "animagineXL_v31.safetensors";
-    const seed = document.getElementById("seed").value;
+// ---- Gallery ----
+async function refreshGallery() {
+  const name = document.getElementById("char-name").value.trim().toLowerCase().replace(/\\s+/g, '_');
+  currentCharacter = name;
+  try {
+    const r = await fetch(`/api/sprites?char=${encodeURIComponent(name)}`);
+    const d = await r.json();
+    const g = document.getElementById("sprite-gallery");
+    g.innerHTML = "";
+    if (d.sprites && d.sprites.length > 0) {
+      d.sprites.forEach(s => {
+        const card = document.createElement("div");
+        card.className = "sprite-card";
+        card.onclick = () => openLightbox(s.url, s.bone, `${s.width}×${s.height}px — ${(s.size_bytes/1024).toFixed(1)} KB`);
+        card.innerHTML = `
+          <img class="sprite-thumb" src="${s.url}?t=${Date.now()}" alt="${s.bone}" loading="lazy">
+          <div class="sprite-name">${s.bone}</div>
+        `;
+        g.appendChild(card);
+      });
+    } else {
+      g.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px 0;font-size:12px;">No limb cutouts found for this character. Click Generate above!</div>';
+    }
+  } catch(e) {}
+}
 
-    const customColors = {
-      primary: document.getElementById("col-primary").value,
-      accent: document.getElementById("col-accent").value,
-      glow: document.getElementById("col-glow").value,
-      outline: document.getElementById("col-outline").value
-    };
+// ---- Pipeline runner ----
+async function runPipeline(actionType) {
+  const btn = document.getElementById("btn-generate");
+  const name = document.getElementById("char-name").value.trim().toLowerCase().replace(/\\s+/g, '_');
+  const concept   = document.getElementById("concept").value.trim();
+  const archetype = document.getElementById("archetype").value;
+  const rig       = document.getElementById("rig-type").value;
+  const species   = document.getElementById("species").value;
+  const mode      = document.getElementById("engine-mode").value;
+  const ckpt      = document.getElementById("model-checkpoint") ? document.getElementById("model-checkpoint").value : "";
+  const seed      = document.getElementById("seed").value;
 
-    const customFeatures = {
-      head_style: document.getElementById("custom-head").value,
-      torso_style: document.getElementById("custom-torso").value,
-      hand_style: document.getElementById("custom-hands").value,
-      foot_style: document.getElementById("custom-feet").value,
-      has_wings: document.getElementById("custom-wings").checked,
-      has_tail: document.getElementById("custom-tail").checked
-    };
+  if (!name) { log("[ERROR] Character Identifier is required.", "err"); return; }
 
-    btn.disabled = true;
-    document.getElementById("status-pill").textContent = "Processing...";
-    log(`\\n========================================================`, "info");
-    log(`[PIPELINE] Starting generation sequence for '${name}'...`, "info");
+  const customColors = {
+    primary: document.getElementById("col-primary").value,
+    accent:  document.getElementById("col-accent").value,
+    glow:    document.getElementById("col-glow").value,
+    outline: document.getElementById("col-outline").value
+  };
+  const customFeatures = {
+    head_style:  document.getElementById("custom-head").value,
+    torso_style: document.getElementById("custom-torso").value,
+    hand_style:  document.getElementById("custom-hands").value,
+    foot_style:  document.getElementById("custom-feet").value,
+    has_wings:   document.getElementById("custom-wings").checked,
+    has_tail:    document.getElementById("custom-tail").checked
+  };
 
+  btn.disabled = true;
+  const origBtnHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Generating...';
+  const startPill = document.getElementById("status-pill");
+  startPill.textContent = "⏳ Processing...";
+  startPill.style.color = "#d29922";
+
+  const t0 = Date.now();
+
+  // For rig_only, just call assemble endpoint
+  if (actionType === 'rig_only') {
+    log("\\n---", "warn");
+    log(`[RIG] Re-rigging skeleton for '${name}' (${rig})...`, "gi");
     try {
-      const r = await fetch('/api/generate', {
+      const r = await fetch('/api/assemble', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          character_name: name,
-          concept: concept,
-          archetype: archetype,
-          rig_type: rig,
-          species: species,
-          custom_colors: (species === "custom" ? customColors : null),
-          custom_features: (species === "custom" ? customFeatures : null),
-          mode: mode,
-          checkpoint: checkpoint,
-          seed: seed,
-          auto_rig: (actionType !== 'sprites_only')
-        })
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({character_name: name, rig_type: rig})
       });
       const res = await r.json();
-      if (res.logs) {
-        res.logs.forEach(l => {
-          if (l.includes("ERROR") || l.includes("Failed")) log(l, "err");
-          else if (l.includes("WARN") || l.includes("NOTICE")) log(l, "warn");
-          else log(l, "info");
-        });
+      if (res.status === 'success') {
+        log(`[GODOT] ✓ Scene assembled -> res://scenes/${name}_character.tscn`, "ok");
+      } else {
+        log(`[GODOT-ERROR] ${res.message || 'Rig build failed.'}`, "err");
+        if (res.stderr) log(`  stderr: ${res.stderr}`, "err");
       }
-      document.getElementById("status-pill").textContent = res.status === "success" ? "Done" : "Error";
-      refreshGallery();
-    } catch (e) {
-      log(`[ERROR] Pipeline exception: ${e}`, "err");
-      document.getElementById("status-pill").textContent = "Failed";
-    } finally {
+    } catch(e) { log(`[ERROR] ${e}`, "err"); }
+    const elapsed = ((Date.now() - t0)/1000).toFixed(1);
+    startPill.textContent = `Done (${elapsed}s)`;
+    startPill.style.color = "#3fb950";
+    btn.innerHTML = origBtnHtml;
+    btn.disabled = false;
+    return;
+  }
+
+  log("\\n========================================================", "ci");
+  log(`[PIPELINE] Starting generation for '${name}'...`, "ci");
+  log(`[ENGINE] Mode: ${mode.toUpperCase()}${actionType === 'sprites_only' ? ' | Sprites Only (No Auto-Rig)' : ''}`, "ci");
+
+  try {
+    const r = await fetch('/api/generate', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        character_name: name, concept, archetype,
+        rig_type: rig, species, mode,
+        checkpoint: ckpt, seed,
+        auto_rig: (actionType !== 'sprites_only'),
+        custom_colors:   (species === "custom" ? customColors   : null),
+        custom_features: (species === "custom" ? customFeatures : null),
+      })
+    });
+    const res = await r.json();
+
+    if (res.logs) {
+      res.logs.forEach(l => {
+        if (l.includes("[COMFYUI]") || l.includes("[DOWNLOAD]"))      log(l, "ci");
+        else if (l.includes("[GODOT]"))                                log(l, "gi");
+        else if (l.includes("ERROR") || l.includes("Failed"))         log(l, "err");
+        else if (l.includes("WARN") || l.includes("NOTICE") || l.includes("FALLBACK")) log(l, "warn");
+        else if (l.includes("[GENERATOR]"))                            log(l, "gen");
+        else if (l.includes("assembled") || l.includes("success"))    log(l, "ok");
+        else                                                           log(l);
+      });
+    }
+
+    const elapsed = ((Date.now() - t0)/1000).toFixed(1);
+    if (res.status === "success") {
+      startPill.textContent = `✓ Done (${elapsed}s)`;
+      startPill.style.color = "#3fb950";
+    } else {
+      startPill.textContent = `✗ Error (${elapsed}s)`;
+      startPill.style.color = "#f85149";
+    }
+
+    refreshGallery();
+  } catch(e) {
+    log(`[ERROR] Pipeline exception: ${e}`, "err");
+    startPill.textContent = "✗ Failed";
+    startPill.style.color = "#f85149";
+  } finally {
+    btn.innerHTML = origBtnHtml;
+    btn.disabled = false;
+  }
+}
+
+// ---- Folder & Godot actions ----
+async function openExplorer() {
+  const name = document.getElementById("char-name").value.trim();
+  await _openFolderFor(name);
+}
+async function openExplorerFor(name) { await _openFolderFor(name); }
+async function _openFolderFor(name) {
+  try {
+    const resp = await fetch('/api/open_folder', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({character: name})
+    });
+    const d = await resp.json();
+    if (resp.ok) log(`[SYSTEM] Opened Explorer: ${d.path}`, "ci");
+    else log(`[WARN] Sprite folder not found for '${name}'.`, "warn");
+  } catch(e) { log(`[ERROR] ${e}`, "err"); }
+}
+
+async function openInGodot() {
+  const scene = document.getElementById("target-scene").value.trim();
+  const name  = document.getElementById("char-name").value.trim();
+  await _openGodotFor(name, scene);
+}
+async function openGodotFor(name) { await _openGodotFor(name, ""); }
+async function _openGodotFor(name, scene) {
+  log(`[GODOT] Launching Godot 4 Editor for '${name}'...`, "gi");
+  try {
+    const resp = await fetch('/api/open_godot', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({scene, character: name})
+    });
+    const d = await resp.json();
+    if (resp.ok) log(`[GODOT] ${d.message || 'Godot 4 launched!'}`, "ok");
+    else         log(`[GODOT-ERROR] ${d.message || 'Failed to launch.'}`, "err");
+  } catch(e) { log(`[GODOT-ERROR] ${e}`, "err"); }
+}
+
+async function rerigChar(name) {
+  const rig = document.getElementById("rig-type")?.value || "biped";
+  log(`[RIG] Re-rigging '${name}'...`, "gi");
+  try {
+    const r = await fetch('/api/assemble', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({character_name: name, rig_type: rig})
+    });
+    const res = await r.json();
+    if (res.status === 'success') {
+      log(`[GODOT] ✓ Re-rig complete -> res://scenes/${name}_character.tscn`, "ok");
+      refreshLibrary();
+    } else {
+      log(`[GODOT-ERROR] ${res.message || 'Re-rig failed.'}`, "err");
+    }
+  } catch(e) { log(`[ERROR] ${e}`, "err"); }
+}
+
+// ---- Model download ----
+async function checkModelStatus() {
+  try {
+    const r = await fetch('/api/models/status');
+    const d = await r.json();
+    const pill = document.getElementById("model-status-pill");
+    const cat = d.catalog || {};
+    const installed = Object.values(cat).filter(m => m.installed && m.subfolder === "checkpoints");
+    pill.style.color = installed.length > 0 ? "#3fb950" : "#d29922";
+    pill.textContent = installed.length > 0 ? `${installed.length} Checkpoint(s) Ready` : "No Checkpoint Installed";
+
+    // Update model catalog list
+    const listEl = document.getElementById("model-catalog-list");
+    if (listEl) {
+      const items = Object.entries(cat);
+      if (items.length === 0) {
+        listEl.innerHTML = '<div style="color:var(--text-muted);font-size:12px;">No models found.</div>';
+      } else {
+        listEl.innerHTML = items.map(([key, m]) => `
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#10131b;border:1px solid ${m.installed ? 'rgba(46,160,67,0.3)' : 'var(--border)'};border-radius:8px;">
+            <span style="font-size:18px;">${m.installed ? '✅' : '⭕'}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:13px;font-weight:600;color:var(--text);">${m.desc || key}</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">
+                ${m.installed ? `${m.size_mb} MB installed` : `~${m.expected_mb} MB required`} • ${m.subfolder || 'models'}
+              </div>
+            </div>
+            ${m.installed ? '<span style="font-size:11px;color:#3fb950;font-weight:600;">INSTALLED</span>' : `<span style="font-size:11px;color:var(--text-muted);">Not installed</span>`}
+          </div>
+        `).join('');
+      }
+    }
+
+    if (d.download_state && d.download_state.active) {
+      showDownloadProgress(d.download_state);
+      if (!dlPollInterval) dlPollInterval = setInterval(pollDownloadProgress, 1000);
+    }
+  } catch(e) {}
+}
+
+let dlPollInterval = null;
+async function startModelDownload() {
+  const sel = document.getElementById("model-select").value;
+  const btn = document.getElementById("btn-download-model");
+  btn.disabled = true;
+  log(`[DOWNLOAD] Requesting download for '${sel}'...`, "ci");
+  try {
+    const r = await fetch('/api/models/download', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({model: sel})
+    });
+    const d = await r.json();
+    if (d.status === "started" || d.status === "in_progress") {
+      document.getElementById("model-progress-wrap").style.display = "block";
+      if (!dlPollInterval) dlPollInterval = setInterval(pollDownloadProgress, 1000);
+    } else {
+      log(`[DOWNLOAD] ${d.message || d.status}`, "warn");
       btn.disabled = false;
     }
+  } catch(e) {
+    log(`[DOWNLOAD-ERROR] ${e}`, "err");
+    btn.disabled = false;
   }
+}
 
-  async function openExplorer() {
-    const name = document.getElementById("char-name").value.trim();
-    try {
-      const resp = await fetch('/api/open_folder', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({character: name})
-      });
-      const data = await resp.json();
-      if (resp.ok) {
-        log(`[SYSTEM] Opened Explorer to sprites directory: ${data.path}`, "info");
-      } else {
-        log(`[WARN] Sprite folder not found for '${name}'. Generate sprites first!`, "warn");
-      }
-    } catch (e) {
-      log(`[ERROR] Could not open folder: ${e}`, "err");
+async function pollDownloadProgress() {
+  try {
+    const r = await fetch('/api/models/progress');
+    const st = await r.json();
+    showDownloadProgress(st);
+    if (!st.active) {
+      clearInterval(dlPollInterval);
+      dlPollInterval = null;
+      document.getElementById("btn-download-model").disabled = false;
+      checkModelStatus();
+      checkStatus();
+      if (st.status === "complete") log(`[DOWNLOAD] ✓ ${st.message || 'Model download complete!'}`, "ok");
+      else if (st.status === "error") log(`[DOWNLOAD-ERROR] ${st.message || 'Download failed.'}`, "err");
     }
+  } catch(e) {}
+}
+
+function showDownloadProgress(st) {
+  document.getElementById("model-progress-wrap").style.display = "block";
+  document.getElementById("model-progress-bar").style.width = `${st.pct}%`;
+  document.getElementById("model-progress-text").textContent = `${st.pct}%`;
+  document.getElementById("model-dl-info").textContent = `${st.model}: ${st.downloaded_mb || 0} / ${st.total_mb || 0} MB`;
+  document.getElementById("model-dl-speed").textContent = `${st.speed_mbps || 0} MB/s`;
+}
+
+// ---- Lightbox ----
+function openLightbox(url, title, meta) {
+  const lb = document.getElementById("lightbox");
+  document.getElementById("lightbox-img").src = url + "?t=" + Date.now();
+  document.getElementById("lightbox-title").textContent = title;
+  document.getElementById("lightbox-meta").textContent = meta || "";
+  lb.classList.add("open");
+}
+function closeLightbox(e) {
+  if (e.target === document.getElementById("lightbox")) closeLightboxDirect();
+}
+function closeLightboxDirect() {
+  document.getElementById("lightbox").classList.remove("open");
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightboxDirect(); });
+
+// ---- Asset Library ----
+async function refreshLibrary() {
+  const roster = document.getElementById("char-roster");
+  roster.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:30px 0;font-size:12px;">🔄 Loading...</div>';
+  try {
+    const r = await fetch('/api/characters');
+    const d = await r.json();
+    allLibraryChars = d.characters || [];
+    document.getElementById("lib-char-count").textContent = `${allLibraryChars.length} character(s)`;
+    renderRoster(allLibraryChars);
+  } catch(e) {
+    roster.innerHTML = '<div style="text-align:center;color:var(--danger);padding:30px 0;font-size:12px;">Failed to load characters.</div>';
   }
+}
 
-  async function checkModelStatus() {
-    try {
-      const r = await fetch('/api/models/status');
-      const d = await r.json();
-      const pill = document.getElementById("model-status-pill");
-      const cat = d.catalog || {};
-      const installed = Object.values(cat).filter(m => m.installed && m.subfolder === "checkpoints");
-      if (installed.length > 0) {
-        pill.style.color = "#3fb950";
-        pill.textContent = `${installed.length} Checkpoint(s) Ready`;
-      } else {
-        pill.style.color = "#d29922";
-        pill.textContent = "No Checkpoint Installed";
-      }
+function filterRoster() {
+  const q = document.getElementById("lib-search").value.toLowerCase();
+  const filtered = allLibraryChars.filter(c => c.name.includes(q));
+  renderRoster(filtered);
+}
 
-      if (d.download_state && d.download_state.active) {
-        showDownloadProgress(d.download_state);
-        if (!dlPollInterval) dlPollInterval = setInterval(pollDownloadProgress, 1000);
-      }
-    } catch (e) {}
+function renderRoster(chars) {
+  const roster = document.getElementById("char-roster");
+  if (!chars || chars.length === 0) {
+    roster.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px 0;font-size:13px;">No characters found.<br>Generate one in the Generator tab!</div>';
+    return;
   }
+  roster.innerHTML = "";
+  chars.forEach(c => {
+    const item = document.createElement("div");
+    item.className = "char-roster-item" + (c.name === viewingChar ? " selected" : "");
+    item.onclick = () => viewCharacter(c.name);
 
-  let dlPollInterval = null;
-  async function startModelDownload() {
-    const sel = document.getElementById("model-select").value;
-    const btn = document.getElementById("btn-download-model");
-    btn.disabled = true;
-    log(`[DOWNLOAD] Requesting download for model '${sel}'...`, "info");
-    try {
-      const r = await fetch('/api/models/download', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({model: sel})
-      });
-      const d = await r.json();
-      if (d.status === "started" || d.status === "in_progress") {
-        document.getElementById("model-progress-wrap").style.display = "block";
-        if (!dlPollInterval) dlPollInterval = setInterval(pollDownloadProgress, 1000);
-      } else {
-        log(`[DOWNLOAD] ${d.message || d.status}`, "warn");
-        btn.disabled = false;
-      }
-    } catch (e) {
-      log(`[DOWNLOAD-ERROR] ${e}`, "err");
-      btn.disabled = false;
+    // Thumb: use first limb png if available (not exploded)
+    const limbNames = (c.limbs || []).filter(l => !l.includes("_exploded"));
+    let thumbHtml = `<div class="char-roster-thumb-placeholder">🎮</div>`;
+    if (limbNames.length > 0) {
+      // prefer head or torso for thumbnail
+      const preferred = limbNames.find(l => l.includes("_head")) || limbNames.find(l => l.includes("_torso")) || limbNames[0];
+      thumbHtml = `<img class="char-roster-thumb" src="/sprites/${c.name}/${preferred}?t=${Date.now()}" alt="${c.name}" loading="lazy">`;
     }
-  }
 
-  async function pollDownloadProgress() {
-    try {
-      const r = await fetch('/api/models/progress');
-      const st = await r.json();
-      showDownloadProgress(st);
-      if (!st.active) {
-        clearInterval(dlPollInterval);
-        dlPollInterval = null;
-        document.getElementById("btn-download-model").disabled = false;
-        checkModelStatus();
-        checkStatus();
-        if (st.status === "complete") {
-          log(`[DOWNLOAD] ${st.message || 'Model download complete!'}`, "info");
-        } else if (st.status === "error") {
-          log(`[DOWNLOAD-ERROR] ${st.message || 'Download failed'}`, "err");
-        }
-      }
-    } catch (e) {}
-  }
+    const sceneBadge = c.has_godot_scene
+      ? '<span class="lib-badge lib-badge-scene">🎮 Scene</span>'
+      : '<span class="lib-badge lib-badge-no-scene">No Scene</span>';
 
-  function showDownloadProgress(st) {
-    document.getElementById("model-progress-wrap").style.display = "block";
-    const bar = document.getElementById("model-progress-bar");
-    const txt = document.getElementById("model-progress-text");
-    const info = document.getElementById("model-dl-info");
-    const spd = document.getElementById("model-dl-speed");
+    item.innerHTML = `
+      ${thumbHtml}
+      <div class="char-roster-info">
+        <div class="char-roster-name">${c.name.replace(/_/g, ' ')}</div>
+        <div class="char-roster-meta">
+          <span>${c.limb_count} limbs</span>
+          ${sceneBadge}
+        </div>
+      </div>
+    `;
+    roster.appendChild(item);
+  });
+}
 
-    bar.style.width = `${st.pct}%`;
-    txt.textContent = `${st.pct}%`;
-    info.textContent = `${st.model}: ${st.downloaded_mb || 0} / ${st.total_mb || 0} MB`;
-    spd.textContent = `${st.speed_mbps || 0} MB/s`;
-  }
+async function viewCharacter(name) {
+  viewingChar = name;
 
-  async function openInGodot() {
-    const scene = document.getElementById("target-scene").value.trim();
-    const name = document.getElementById("char-name").value.trim();
-    log(`[GODOT] Requesting Godot 4 Editor for '${scene}'...`, "info");
-    try {
-      const resp = await fetch('/api/open_godot', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({scene: scene, character: name})
-      });
-      const data = await resp.json();
-      if (resp.ok) {
-        log(`[GODOT] ${data.message || 'Godot 4 Editor launched successfully!'}`, "info");
-      } else {
-        log(`[GODOT-ERROR] ${data.message || 'Failed to launch Godot'}`, "err");
-      }
-    } catch (e) {
-      log(`[GODOT-ERROR] Failed to connect to server: ${e}`, "err");
+  // Update roster selection
+  document.querySelectorAll('.char-roster-item').forEach(el => el.classList.remove('selected'));
+  const clickedItems = document.querySelectorAll('.char-roster-item');
+  clickedItems.forEach(el => {
+    if (el.querySelector('.char-roster-name')?.textContent === name.replace(/_/g, ' ')) {
+      el.classList.add('selected');
     }
-  }
+  });
 
-  // Initial load
-  setActivePill('pill-cyber_alien');
-  checkStatus();
-  checkModelStatus();
-  refreshGallery();
-  setInterval(checkStatus, 6000);
-  setInterval(checkModelStatus, 8000);
+  document.getElementById("viewer-empty").style.display = "none";
+  document.getElementById("viewer-content").style.display = "block";
+
+  const charInfo = allLibraryChars.find(c => c.name === name);
+  document.getElementById("viewer-char-name").textContent = name.replace(/_/g, ' ');
+  document.getElementById("viewer-char-meta").textContent = charInfo
+    ? `${charInfo.limb_count} limb cutouts • ${charInfo.has_godot_scene ? 'Godot scene available' : 'No scene yet'}`
+    : '';
+
+  // Load sprites
+  try {
+    const r = await fetch(`/api/sprites?char=${encodeURIComponent(name)}`);
+    const d = await r.json();
+    const grid = document.getElementById("viewer-grid");
+    grid.innerHTML = "";
+    if (d.sprites && d.sprites.length > 0) {
+      d.sprites.forEach(s => {
+        const card = document.createElement("div");
+        card.className = "viewer-sprite-card";
+        card.onclick = () => openLightbox(s.url, s.bone, `${s.width}×${s.height}px — ${(s.size_bytes/1024).toFixed(1)} KB`);
+        card.innerHTML = `
+          <img class="viewer-sprite-img" src="${s.url}?t=${Date.now()}" alt="${s.bone}" loading="lazy">
+          <div class="viewer-sprite-name">${s.bone}</div>
+          <div class="viewer-sprite-size">${s.width}×${s.height}px</div>
+        `;
+        grid.appendChild(card);
+      });
+    } else {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;font-size:12px;">No sprites found for this character.</div>';
+    }
+  } catch(e) {}
+}
+
+async function deleteChar(name) {
+  if (!name) return;
+  if (!confirm(`Delete character "${name}" and all its sprites/scene? This cannot be undone.`)) return;
+  log(`[SYSTEM] Deleting character '${name}'...`, "warn");
+  try {
+    const r = await fetch('/api/character/delete', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({character_name: name})
+    });
+    const d = await r.json();
+    if (d.status === 'success') {
+      log(`[SYSTEM] ✓ Deleted: ${d.deleted.join(', ')}`, "ok");
+      viewingChar = "";
+      document.getElementById("viewer-empty").style.display = "flex";
+      document.getElementById("viewer-content").style.display = "none";
+      refreshLibrary();
+    } else {
+      log(`[WARN] Character '${name}' not found on disk.`, "warn");
+    }
+  } catch(e) { log(`[ERROR] Delete failed: ${e}`, "err"); }
+}
+
+// ---- Init ----
+setActivePill('pill-cyber_alien');  // cyber_alien is default, not custom_creature
+checkStatus();
+checkModelStatus();
+refreshGallery();
+setInterval(checkStatus, 7000);
+setInterval(checkModelStatus, 12000);
 </script>
 </body>
 </html>
@@ -1327,5 +1754,4 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=PORT, help="Port to listen on")
     parser.add_argument("--no-browser", action="store_true", help="Don't open browser automatically")
     args = parser.parse_args()
-
     run_server(port=args.port, open_browser=not args.no_browser)
