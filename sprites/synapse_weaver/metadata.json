@@ -1,0 +1,47 @@
+{
+  "character_name": "synapse_weaver",
+  "display_name": "Synapse Weaver",
+  "faction_id": "apex_transhumans",
+  "faction_name": "Apex Transhumans (Psionic)",
+  "role": "Mind Controller",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Synapse Weaver specializing as Mind Controller.",
+  "weapon_id": "covenant_psi_emitter",
+  "equipped_weapon": "covenant_psi_emitter",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_psi_overload",
+    "special_deploy_turret",
+    "special_mortar_barrage",
+    "special_railgun_snipe"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    }
+  ]
+}

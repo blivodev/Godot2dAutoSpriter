@@ -1,0 +1,2352 @@
+[
+  {
+    "character_name": "ghost_operative",
+    "display_name": "Ghost Operative",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Special Agent",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Ghost Operative specializing as Special Agent.",
+    "weapon_id": "directorate_submachine_gun",
+    "equipped_weapon": "directorate_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_power_charge",
+      "special_railgun_snipe",
+      "special_ground_slam",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "shadow_netrunner",
+    "display_name": "Shadow Netrunner",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Mind Controller",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Shadow Netrunner specializing as Mind Controller.",
+    "weapon_id": "covenant_psi_emitter",
+    "equipped_weapon": "covenant_psi_emitter",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_napalm_toss",
+      "special_psi_overload",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "phase_infiltrator",
+    "display_name": "Phase Infiltrator",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Spy / Saboteur",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Phase Infiltrator specializing as Spy / Saboteur.",
+    "weapon_id": "directorate_submachine_gun",
+    "equipped_weapon": "directorate_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_mortar_barrage",
+      "special_cyber_hack",
+      "special_defib_revive"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "cybersamurai_kage",
+    "display_name": "Cyber-Samurai Kage",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Cyber-Samurai Kage specializing as Soldier.",
+    "weapon_id": "covenant_assault_rifle",
+    "equipped_weapon": "covenant_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_mortar_barrage",
+      "special_flak_barrage",
+      "special_victory_flourish",
+      "special_deploy_turret"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "dataspike_assassin",
+    "display_name": "Dataspike Assassin",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Special Agent",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Dataspike Assassin specializing as Special Agent.",
+    "weapon_id": "silicon_submachine_gun",
+    "equipped_weapon": "silicon_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_cyber_dash",
+      "special_sonic_screech",
+      "special_victory_flourish"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "void_stalker",
+    "display_name": "Void Stalker",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Sniper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Void Stalker specializing as Sniper.",
+    "weapon_id": "covenant_sniper_rifle",
+    "equipped_weapon": "covenant_sniper_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_victory_flourish",
+      "special_power_charge",
+      "special_drone_swarm",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "optical_wraith",
+    "display_name": "Optical Wraith",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Spy / Saboteur",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Optical Wraith specializing as Spy / Saboteur.",
+    "weapon_id": "directorate_submachine_gun",
+    "equipped_weapon": "directorate_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_emp_blast",
+      "special_drone_swarm",
+      "special_cyber_hack",
+      "special_sonic_screech"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "monoblade_ronin",
+    "display_name": "Monoblade Ronin",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Monoblade Ronin specializing as Soldier.",
+    "weapon_id": "syndicate_assault_rifle",
+    "equipped_weapon": "syndicate_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_flak_barrage",
+      "special_drone_swarm",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "nanowire_trapper",
+    "display_name": "Nanowire Trapper",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Engineer",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Nanowire Trapper specializing as Engineer.",
+    "weapon_id": "directorate_shotgun",
+    "equipped_weapon": "directorate_shotgun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_cyber_dash",
+      "special_psi_overload",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "phantom_courier",
+    "display_name": "Phantom Courier",
+    "faction_id": "ghost_protocol",
+    "faction_name": "Ghost Protocol (Black-Ops)",
+    "role": "Special Agent",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Phantom Courier specializing as Special Agent.",
+    "weapon_id": "directorate_submachine_gun",
+    "equipped_weapon": "directorate_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_ground_slam",
+      "special_power_charge",
+      "special_orbital_strike",
+      "special_railgun_snipe"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "titan_juggernaut",
+    "display_name": "Titan Juggernaut",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Rocket Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Titan Juggernaut specializing as Rocket Trooper.",
+    "weapon_id": "directorate_rocket_launcher",
+    "equipped_weapon": "directorate_rocket_launcher",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_deploy_turret",
+      "special_orbital_strike",
+      "special_ground_slam"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "valkyrie_breacher",
+    "display_name": "Valkyrie Breacher",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Valkyrie Breacher specializing as Soldier.",
+    "weapon_id": "directorate_assault_rifle",
+    "equipped_weapon": "directorate_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_stim_inject",
+      "special_psi_overload",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "rail_artillerist",
+    "display_name": "Rail Artillerist",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Sniper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Rail Artillerist specializing as Sniper.",
+    "weapon_id": "directorate_sniper_rifle",
+    "equipped_weapon": "directorate_sniper_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_orbital_strike",
+      "special_mortar_barrage",
+      "special_railgun_snipe"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "siege_sentinel",
+    "display_name": "Siege Sentinel",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Flak Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Siege Sentinel specializing as Flak Trooper.",
+    "weapon_id": "directorate_flak_cannon",
+    "equipped_weapon": "directorate_flak_cannon",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_cyber_hack",
+      "special_orbital_strike",
+      "special_napalm_toss",
+      "special_victory_flourish"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "colossus_gunner",
+    "display_name": "Colossus Gunner",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Colossus Gunner specializing as Soldier.",
+    "weapon_id": "directorate_assault_rifle",
+    "equipped_weapon": "directorate_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_napalm_toss",
+      "special_mortar_barrage",
+      "special_whirlwind",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "demolition_vanguard",
+    "display_name": "Demolition Vanguard",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Grenadier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Demolition Vanguard specializing as Grenadier.",
+    "weapon_id": "directorate_grenade_launcher",
+    "equipped_weapon": "directorate_grenade_launcher",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_nanite_barrier",
+      "special_ground_slam",
+      "special_flame_inferno",
+      "special_emp_blast"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "vulcan_dreadnought",
+    "display_name": "Vulcan Dreadnought",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Flame Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Vulcan Dreadnought specializing as Flame Trooper.",
+    "weapon_id": "directorate_flamethrower",
+    "equipped_weapon": "directorate_flamethrower",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_emp_blast",
+      "special_flak_barrage",
+      "special_victory_flourish",
+      "special_cyber_dash"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "mortar_bastion",
+    "display_name": "Mortar Bastion",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Rocket Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Mortar Bastion specializing as Rocket Trooper.",
+    "weapon_id": "directorate_rocket_launcher",
+    "equipped_weapon": "directorate_rocket_launcher",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_active_camo",
+      "special_mortar_barrage",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "ironclad_shock",
+    "display_name": "Ironclad Shock",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Ironclad Shock specializing as Soldier.",
+    "weapon_id": "directorate_shotgun",
+    "equipped_weapon": "directorate_shotgun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_stim_inject",
+      "special_victory_flourish",
+      "special_flak_barrage",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "thunder_centurion",
+    "display_name": "Thunder Centurion",
+    "faction_id": "iron_valkyrie",
+    "faction_name": "Iron Valkyrie (Heavy Armor)",
+    "role": "Drone Operator",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Thunder Centurion specializing as Drone Operator.",
+    "weapon_id": "directorate_drone_pad",
+    "equipped_weapon": "directorate_drone_pad",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_cyber_hack",
+      "special_cyber_dash",
+      "special_orbital_strike",
+      "special_psi_overload"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "neon_scavenger",
+    "display_name": "Neon Scavenger",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Neon Scavenger specializing as Soldier.",
+    "weapon_id": "syndicate_assault_rifle",
+    "equipped_weapon": "syndicate_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_heavy_gatling",
+      "special_napalm_toss",
+      "special_active_camo",
+      "special_power_charge"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "chem_wastelander",
+    "display_name": "Chem Wastelander",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Flame Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Chem Wastelander specializing as Flame Trooper.",
+    "weapon_id": "syndicate_flamethrower",
+    "equipped_weapon": "syndicate_flamethrower",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_ground_slam",
+      "special_cyber_dash",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "plasma_biker",
+    "display_name": "Plasma Biker",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Plasma Biker specializing as Soldier.",
+    "weapon_id": "syndicate_shotgun",
+    "equipped_weapon": "syndicate_shotgun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_orbital_strike",
+      "special_stim_inject",
+      "special_cyber_dash",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "sandstorm_sniper",
+    "display_name": "Sandstorm Sniper",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Sniper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Sandstorm Sniper specializing as Sniper.",
+    "weapon_id": "syndicate_sniper_rifle",
+    "equipped_weapon": "syndicate_sniper_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_ground_slam",
+      "special_mortar_barrage",
+      "special_active_camo",
+      "special_cyber_hack"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "scrap_sawbones",
+    "display_name": "Scrap Sawbones",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Medic",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Scrap Sawbones specializing as Medic.",
+    "weapon_id": "syndicate_submachine_gun",
+    "equipped_weapon": "syndicate_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_mortar_barrage",
+      "special_psi_overload",
+      "special_whirlwind",
+      "special_railgun_snipe"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "rebar_gladiator",
+    "display_name": "Rebar Gladiator",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Rebar Gladiator specializing as Soldier.",
+    "weapon_id": "syndicate_shotgun",
+    "equipped_weapon": "syndicate_shotgun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_defib_revive",
+      "special_emp_blast",
+      "special_drone_swarm",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "rad_stalker",
+    "display_name": "Rad Stalker",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Spy / Saboteur",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Rad Stalker specializing as Spy / Saboteur.",
+    "weapon_id": "syndicate_submachine_gun",
+    "equipped_weapon": "syndicate_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_psi_overload",
+      "special_deploy_turret",
+      "special_cyber_dash",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "junk_demolitionist",
+    "display_name": "Junk Demolitionist",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Grenadier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Junk Demolitionist specializing as Grenadier.",
+    "weapon_id": "syndicate_grenade_launcher",
+    "equipped_weapon": "syndicate_grenade_launcher",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_defib_revive",
+      "special_cyber_dash",
+      "special_flame_inferno"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "toxic_nomad",
+    "display_name": "Toxic Nomad",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Engineer",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Toxic Nomad specializing as Engineer.",
+    "weapon_id": "syndicate_shotgun",
+    "equipped_weapon": "syndicate_shotgun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_active_camo",
+      "special_stim_inject",
+      "special_heavy_gatling",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "dune_tracker",
+    "display_name": "Dune Tracker",
+    "faction_id": "neon_outcasts",
+    "faction_name": "Neon Outcasts (Wasteland)",
+    "role": "Drone Operator",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Dune Tracker specializing as Drone Operator.",
+    "weapon_id": "syndicate_drone_pad",
+    "equipped_weapon": "syndicate_drone_pad",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_mortar_barrage",
+      "special_cyber_hack",
+      "special_defib_revive",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "apex_overseer",
+    "display_name": "Apex Overseer",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Mind Controller",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Apex Overseer specializing as Mind Controller.",
+    "weapon_id": "covenant_psi_emitter",
+    "equipped_weapon": "covenant_psi_emitter",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_flame_inferno",
+      "special_flak_barrage",
+      "special_railgun_snipe",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "synapse_weaver",
+    "display_name": "Synapse Weaver",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Mind Controller",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Synapse Weaver specializing as Mind Controller.",
+    "weapon_id": "covenant_psi_emitter",
+    "equipped_weapon": "covenant_psi_emitter",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_psi_overload",
+      "special_deploy_turret",
+      "special_mortar_barrage",
+      "special_railgun_snipe"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "chrono_operative",
+    "display_name": "Chrono Operative",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Special Agent",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Chrono Operative specializing as Special Agent.",
+    "weapon_id": "covenant_submachine_gun",
+    "equipped_weapon": "covenant_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_active_camo",
+      "special_flak_barrage",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "cyber_archon",
+    "display_name": "Cyber Archon",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Cyber Archon specializing as Soldier.",
+    "weapon_id": "covenant_assault_rifle",
+    "equipped_weapon": "covenant_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_orbital_strike",
+      "special_defib_revive",
+      "special_flak_barrage",
+      "special_emp_blast"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "psionic_crusader",
+    "display_name": "Psionic Crusader",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Psionic Crusader specializing as Soldier.",
+    "weapon_id": "covenant_assault_rifle",
+    "equipped_weapon": "covenant_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_emp_blast",
+      "special_railgun_snipe",
+      "special_stim_inject",
+      "special_ground_slam"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "neural_phantom",
+    "display_name": "Neural Phantom",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Spy / Saboteur",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Neural Phantom specializing as Spy / Saboteur.",
+    "weapon_id": "covenant_submachine_gun",
+    "equipped_weapon": "covenant_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_flame_inferno",
+      "special_mortar_barrage",
+      "special_emp_blast",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "singularity_vanguard",
+    "display_name": "Singularity Vanguard",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Rocket Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Singularity Vanguard specializing as Rocket Trooper.",
+    "weapon_id": "covenant_rocket_launcher",
+    "equipped_weapon": "covenant_rocket_launcher",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_psi_overload",
+      "special_sonic_screech",
+      "special_flame_inferno",
+      "special_orbital_strike"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "void_oracle",
+    "display_name": "Void Oracle",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Sniper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Void Oracle specializing as Sniper.",
+    "weapon_id": "covenant_sniper_rifle",
+    "equipped_weapon": "covenant_sniper_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_flame_inferno",
+      "special_orbital_strike",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "graviton_marshal",
+    "display_name": "Graviton Marshal",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Flak Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Graviton Marshal specializing as Flak Trooper.",
+    "weapon_id": "covenant_flak_cannon",
+    "equipped_weapon": "covenant_flak_cannon",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_power_charge",
+      "special_mortar_barrage",
+      "special_stim_inject",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "psi_reaper",
+    "display_name": "Psi Reaper",
+    "faction_id": "apex_transhumans",
+    "faction_name": "Apex Transhumans (Psionic)",
+    "role": "Special Agent",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Psi Reaper specializing as Special Agent.",
+    "weapon_id": "covenant_submachine_gun",
+    "equipped_weapon": "covenant_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_victory_flourish",
+      "special_whirlwind",
+      "special_flak_barrage",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "synth_recon",
+    "display_name": "Synth Recon",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Spy / Saboteur",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Synth Recon specializing as Spy / Saboteur.",
+    "weapon_id": "silicon_submachine_gun",
+    "equipped_weapon": "silicon_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_mortar_barrage",
+      "special_active_camo",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "tactical_android",
+    "display_name": "Tactical Android",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Tactical Android specializing as Soldier.",
+    "weapon_id": "silicon_assault_rifle",
+    "equipped_weapon": "silicon_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_power_charge",
+      "special_whirlwind",
+      "special_napalm_toss",
+      "special_ground_slam"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "ballistic_cyborg",
+    "display_name": "Ballistic Cyborg",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Soldier",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Ballistic Cyborg specializing as Soldier.",
+    "weapon_id": "silicon_assault_rifle",
+    "equipped_weapon": "silicon_assault_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_victory_flourish",
+      "special_whirlwind",
+      "special_flame_inferno",
+      "special_cyber_hack"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "field_technomancer",
+    "display_name": "Field Technomancer",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Engineer",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Field Technomancer specializing as Engineer.",
+    "weapon_id": "silicon_shotgun",
+    "equipped_weapon": "silicon_shotgun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_ground_slam",
+      "special_flak_barrage",
+      "special_psi_overload",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "combat_medic_core",
+    "display_name": "Combat Medic Core",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Medic",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Combat Medic Core specializing as Medic.",
+    "weapon_id": "silicon_submachine_gun",
+    "equipped_weapon": "silicon_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_whirlwind",
+      "special_sonic_screech",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "heavy_flak_droid",
+    "display_name": "Heavy Flak Droid",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Flak Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Heavy Flak Droid specializing as Flak Trooper.",
+    "weapon_id": "silicon_flak_cannon",
+    "equipped_weapon": "silicon_flak_cannon",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_emp_blast",
+      "special_sonic_screech",
+      "special_power_charge",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "laser_sharpshooter",
+    "display_name": "Laser Sharpshooter",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Sniper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Laser Sharpshooter specializing as Sniper.",
+    "weapon_id": "silicon_sniper_rifle",
+    "equipped_weapon": "silicon_sniper_rifle",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_power_charge",
+      "special_whirlwind",
+      "special_heavy_gatling",
+      "special_psi_overload"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "specops_automaton",
+    "display_name": "SpecOps Automaton",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Special Agent",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: SpecOps Automaton specializing as Special Agent.",
+    "weapon_id": "silicon_submachine_gun",
+    "equipped_weapon": "silicon_submachine_gun",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_defib_revive",
+      "special_orbital_strike",
+      "special_drone_swarm",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "hazard_incinerator",
+    "display_name": "Hazard Incinerator",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Flame Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Hazard Incinerator specializing as Flame Trooper.",
+    "weapon_id": "silicon_flamethrower",
+    "equipped_weapon": "silicon_flamethrower",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_active_camo",
+      "special_heavy_gatling",
+      "special_sonic_screech",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "assault_frame",
+    "display_name": "Assault Frame",
+    "faction_id": "synth_corp",
+    "faction_name": "Section 9 Synth-Corp (Androids)",
+    "role": "Rocket Trooper",
+    "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Assault Frame specializing as Rocket Trooper.",
+    "weapon_id": "silicon_rocket_launcher",
+    "equipped_weapon": "silicon_rocket_launcher",
+    "art_style": "pixel_anime",
+    "specials": [
+      "special_whirlwind",
+      "special_ground_slam",
+      "special_railgun_snipe",
+      "special_sonic_screech"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      }
+    ]
+  }
+]

@@ -1,0 +1,47 @@
+{
+  "character_name": "dune_tracker",
+  "display_name": "Dune Tracker",
+  "faction_id": "neon_outcasts",
+  "faction_name": "Neon Outcasts (Wasteland)",
+  "role": "Drone Operator",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Dune Tracker specializing as Drone Operator.",
+  "weapon_id": "syndicate_drone_pad",
+  "equipped_weapon": "syndicate_drone_pad",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_mortar_barrage",
+    "special_cyber_hack",
+    "special_defib_revive",
+    "special_active_camo"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    }
+  ]
+}

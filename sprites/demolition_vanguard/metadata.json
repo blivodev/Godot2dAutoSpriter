@@ -1,0 +1,47 @@
+{
+  "character_name": "demolition_vanguard",
+  "display_name": "Demolition Vanguard",
+  "faction_id": "iron_valkyrie",
+  "faction_name": "Iron Valkyrie (Heavy Armor)",
+  "role": "Grenadier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Demolition Vanguard specializing as Grenadier.",
+  "weapon_id": "directorate_grenade_launcher",
+  "equipped_weapon": "directorate_grenade_launcher",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_nanite_barrier",
+    "special_ground_slam",
+    "special_flame_inferno",
+    "special_emp_blast"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    }
+  ]
+}

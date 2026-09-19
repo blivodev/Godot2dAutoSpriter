@@ -1,0 +1,47 @@
+{
+  "character_name": "singularity_vanguard",
+  "display_name": "Singularity Vanguard",
+  "faction_id": "apex_transhumans",
+  "faction_name": "Apex Transhumans (Psionic)",
+  "role": "Rocket Trooper",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Singularity Vanguard specializing as Rocket Trooper.",
+  "weapon_id": "covenant_rocket_launcher",
+  "equipped_weapon": "covenant_rocket_launcher",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_psi_overload",
+    "special_sonic_screech",
+    "special_flame_inferno",
+    "special_orbital_strike"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    }
+  ]
+}

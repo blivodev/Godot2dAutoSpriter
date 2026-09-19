@@ -1,0 +1,47 @@
+{
+  "character_name": "colossus_gunner",
+  "display_name": "Colossus Gunner",
+  "faction_id": "iron_valkyrie",
+  "faction_name": "Iron Valkyrie (Heavy Armor)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Colossus Gunner specializing as Soldier.",
+  "weapon_id": "directorate_assault_rifle",
+  "equipped_weapon": "directorate_assault_rifle",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_napalm_toss",
+    "special_mortar_barrage",
+    "special_whirlwind",
+    "special_active_camo"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    }
+  ]
+}

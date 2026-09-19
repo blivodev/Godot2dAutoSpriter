@@ -1,0 +1,47 @@
+{
+  "character_name": "monoblade_ronin",
+  "display_name": "Monoblade Ronin",
+  "faction_id": "ghost_protocol",
+  "faction_name": "Ghost Protocol (Black-Ops)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Monoblade Ronin specializing as Soldier.",
+  "weapon_id": "syndicate_assault_rifle",
+  "equipped_weapon": "syndicate_assault_rifle",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_sonic_screech",
+    "special_flak_barrage",
+    "special_drone_swarm",
+    "special_nanite_barrier"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    }
+  ]
+}

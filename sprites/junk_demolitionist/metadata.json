@@ -1,0 +1,47 @@
+{
+  "character_name": "junk_demolitionist",
+  "display_name": "Junk Demolitionist",
+  "faction_id": "neon_outcasts",
+  "faction_name": "Neon Outcasts (Wasteland)",
+  "role": "Grenadier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Junk Demolitionist specializing as Grenadier.",
+  "weapon_id": "syndicate_grenade_launcher",
+  "equipped_weapon": "syndicate_grenade_launcher",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_drone_swarm",
+    "special_defib_revive",
+    "special_cyber_dash",
+    "special_flame_inferno"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    }
+  ]
+}

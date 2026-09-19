@@ -1,0 +1,47 @@
+{
+  "character_name": "laser_sharpshooter",
+  "display_name": "Laser Sharpshooter",
+  "faction_id": "synth_corp",
+  "faction_name": "Section 9 Synth-Corp (Androids)",
+  "role": "Sniper",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Laser Sharpshooter specializing as Sniper.",
+  "weapon_id": "silicon_sniper_rifle",
+  "equipped_weapon": "silicon_sniper_rifle",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_power_charge",
+    "special_whirlwind",
+    "special_heavy_gatling",
+    "special_psi_overload"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    }
+  ]
+}

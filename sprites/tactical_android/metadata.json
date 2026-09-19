@@ -1,0 +1,47 @@
+{
+  "character_name": "tactical_android",
+  "display_name": "Tactical Android",
+  "faction_id": "synth_corp",
+  "faction_name": "Section 9 Synth-Corp (Androids)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Tactical Android specializing as Soldier.",
+  "weapon_id": "silicon_assault_rifle",
+  "equipped_weapon": "silicon_assault_rifle",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_power_charge",
+    "special_whirlwind",
+    "special_napalm_toss",
+    "special_ground_slam"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    }
+  ]
+}

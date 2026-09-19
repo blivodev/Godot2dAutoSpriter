@@ -1,0 +1,47 @@
+{
+  "character_name": "titan_juggernaut",
+  "display_name": "Titan Juggernaut",
+  "faction_id": "iron_valkyrie",
+  "faction_name": "Iron Valkyrie (Heavy Armor)",
+  "role": "Rocket Trooper",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Titan Juggernaut specializing as Rocket Trooper.",
+  "weapon_id": "directorate_rocket_launcher",
+  "equipped_weapon": "directorate_rocket_launcher",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_drone_swarm",
+    "special_deploy_turret",
+    "special_orbital_strike",
+    "special_ground_slam"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "character_name": "cyber_archon",
+  "display_name": "Cyber Archon",
+  "faction_id": "apex_transhumans",
+  "faction_name": "Apex Transhumans (Psionic)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Cyber Archon specializing as Soldier.",
+  "weapon_id": "covenant_assault_rifle",
+  "equipped_weapon": "covenant_assault_rifle",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_orbital_strike",
+    "special_defib_revive",
+    "special_flak_barrage",
+    "special_emp_blast"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    }
+  ]
+}

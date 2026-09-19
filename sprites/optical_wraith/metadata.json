@@ -1,0 +1,47 @@
+{
+  "character_name": "optical_wraith",
+  "display_name": "Optical Wraith",
+  "faction_id": "ghost_protocol",
+  "faction_name": "Ghost Protocol (Black-Ops)",
+  "role": "Spy / Saboteur",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Optical Wraith specializing as Spy / Saboteur.",
+  "weapon_id": "directorate_submachine_gun",
+  "equipped_weapon": "directorate_submachine_gun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_emp_blast",
+    "special_drone_swarm",
+    "special_cyber_hack",
+    "special_sonic_screech"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    }
+  ]
+}

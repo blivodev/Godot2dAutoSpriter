@@ -1,0 +1,47 @@
+{
+  "character_name": "assault_frame",
+  "display_name": "Assault Frame",
+  "faction_id": "synth_corp",
+  "faction_name": "Section 9 Synth-Corp (Androids)",
+  "role": "Rocket Trooper",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Assault Frame specializing as Rocket Trooper.",
+  "weapon_id": "silicon_rocket_launcher",
+  "equipped_weapon": "silicon_rocket_launcher",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_whirlwind",
+    "special_ground_slam",
+    "special_railgun_snipe",
+    "special_sonic_screech"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    }
+  ]
+}

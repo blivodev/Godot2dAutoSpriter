@@ -1,0 +1,47 @@
+{
+  "character_name": "toxic_nomad",
+  "display_name": "Toxic Nomad",
+  "faction_id": "neon_outcasts",
+  "faction_name": "Neon Outcasts (Wasteland)",
+  "role": "Engineer",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Toxic Nomad specializing as Engineer.",
+  "weapon_id": "syndicate_shotgun",
+  "equipped_weapon": "syndicate_shotgun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_active_camo",
+    "special_stim_inject",
+    "special_heavy_gatling",
+    "special_drone_swarm"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    }
+  ]
+}

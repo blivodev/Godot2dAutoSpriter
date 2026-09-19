@@ -1,0 +1,47 @@
+{
+  "character_name": "valkyrie_breacher",
+  "display_name": "Valkyrie Breacher",
+  "faction_id": "iron_valkyrie",
+  "faction_name": "Iron Valkyrie (Heavy Armor)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Valkyrie Breacher specializing as Soldier.",
+  "weapon_id": "directorate_assault_rifle",
+  "equipped_weapon": "directorate_assault_rifle",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_flak_barrage",
+    "special_stim_inject",
+    "special_psi_overload",
+    "special_mortar_barrage"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    }
+  ]
+}

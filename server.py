@@ -1323,6 +1323,7 @@ def list_generated_characters() -> str:
                 "faction_id": meta_data.get("faction_id", "custom"),
                 "faction_name": meta_data.get("faction_name", "Independent"),
                 "role": meta_data.get("role", "Warrior"),
+                "art_style": meta_data.get("art_style", "anime"),
                 "description": meta_data.get("description", ""),
                 "weapon_id": meta_data.get("weapon_id", ""),
                 "equipped_weapon": meta_data.get("equipped_weapon", meta_data.get("weapon_id", "")),

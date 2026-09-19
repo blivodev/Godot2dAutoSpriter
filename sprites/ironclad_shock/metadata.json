@@ -1,0 +1,47 @@
+{
+  "character_name": "ironclad_shock",
+  "display_name": "Ironclad Shock",
+  "faction_id": "iron_valkyrie",
+  "faction_name": "Iron Valkyrie (Heavy Armor)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Ironclad Shock specializing as Soldier.",
+  "weapon_id": "directorate_shotgun",
+  "equipped_weapon": "directorate_shotgun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_stim_inject",
+    "special_victory_flourish",
+    "special_flak_barrage",
+    "special_drone_swarm"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    }
+  ]
+}

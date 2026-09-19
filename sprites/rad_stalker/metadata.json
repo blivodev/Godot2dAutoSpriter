@@ -1,0 +1,47 @@
+{
+  "character_name": "rad_stalker",
+  "display_name": "Rad Stalker",
+  "faction_id": "neon_outcasts",
+  "faction_name": "Neon Outcasts (Wasteland)",
+  "role": "Spy / Saboteur",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Rad Stalker specializing as Spy / Saboteur.",
+  "weapon_id": "syndicate_submachine_gun",
+  "equipped_weapon": "syndicate_submachine_gun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_psi_overload",
+    "special_deploy_turret",
+    "special_cyber_dash",
+    "special_nanite_barrier"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "character_name": "dataspike_assassin",
+  "display_name": "Dataspike Assassin",
+  "faction_id": "ghost_protocol",
+  "faction_name": "Ghost Protocol (Black-Ops)",
+  "role": "Special Agent",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Dataspike Assassin specializing as Special Agent.",
+  "weapon_id": "silicon_submachine_gun",
+  "equipped_weapon": "silicon_submachine_gun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_drone_swarm",
+    "special_cyber_dash",
+    "special_sonic_screech",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

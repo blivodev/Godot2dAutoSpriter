@@ -1,0 +1,47 @@
+{
+  "character_name": "scrap_sawbones",
+  "display_name": "Scrap Sawbones",
+  "faction_id": "neon_outcasts",
+  "faction_name": "Neon Outcasts (Wasteland)",
+  "role": "Medic",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Scrap Sawbones specializing as Medic.",
+  "weapon_id": "syndicate_submachine_gun",
+  "equipped_weapon": "syndicate_submachine_gun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_mortar_barrage",
+    "special_psi_overload",
+    "special_whirlwind",
+    "special_railgun_snipe"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    }
+  ]
+}

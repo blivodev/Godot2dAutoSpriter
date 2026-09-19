@@ -1,0 +1,47 @@
+{
+  "character_name": "rebar_gladiator",
+  "display_name": "Rebar Gladiator",
+  "faction_id": "neon_outcasts",
+  "faction_name": "Neon Outcasts (Wasteland)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Rebar Gladiator specializing as Soldier.",
+  "weapon_id": "syndicate_shotgun",
+  "equipped_weapon": "syndicate_shotgun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_defib_revive",
+    "special_emp_blast",
+    "special_drone_swarm",
+    "special_flak_barrage"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    }
+  ]
+}

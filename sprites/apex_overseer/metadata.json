@@ -1,0 +1,47 @@
+{
+  "character_name": "apex_overseer",
+  "display_name": "Apex Overseer",
+  "faction_id": "apex_transhumans",
+  "faction_name": "Apex Transhumans (Psionic)",
+  "role": "Mind Controller",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Apex Overseer specializing as Mind Controller.",
+  "weapon_id": "covenant_psi_emitter",
+  "equipped_weapon": "covenant_psi_emitter",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_flame_inferno",
+    "special_flak_barrage",
+    "special_railgun_snipe",
+    "special_mortar_barrage"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    }
+  ]
+}

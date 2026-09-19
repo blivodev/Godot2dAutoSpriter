@@ -1,0 +1,47 @@
+{
+  "character_name": "nanowire_trapper",
+  "display_name": "Nanowire Trapper",
+  "faction_id": "ghost_protocol",
+  "faction_name": "Ghost Protocol (Black-Ops)",
+  "role": "Engineer",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Nanowire Trapper specializing as Engineer.",
+  "weapon_id": "directorate_shotgun",
+  "equipped_weapon": "directorate_shotgun",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_sonic_screech",
+    "special_cyber_dash",
+    "special_psi_overload",
+    "special_nanite_barrier"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    }
+  ]
+}

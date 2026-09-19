@@ -1,0 +1,47 @@
+{
+  "character_name": "hazard_incinerator",
+  "display_name": "Hazard Incinerator",
+  "faction_id": "synth_corp",
+  "faction_name": "Section 9 Synth-Corp (Androids)",
+  "role": "Flame Trooper",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Hazard Incinerator specializing as Flame Trooper.",
+  "weapon_id": "silicon_flamethrower",
+  "equipped_weapon": "silicon_flamethrower",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_active_camo",
+    "special_heavy_gatling",
+    "special_sonic_screech",
+    "special_flak_barrage"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    }
+  ]
+}

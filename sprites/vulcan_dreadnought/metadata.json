@@ -1,0 +1,47 @@
+{
+  "character_name": "vulcan_dreadnought",
+  "display_name": "Vulcan Dreadnought",
+  "faction_id": "iron_valkyrie",
+  "faction_name": "Iron Valkyrie (Heavy Armor)",
+  "role": "Flame Trooper",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Vulcan Dreadnought specializing as Flame Trooper.",
+  "weapon_id": "directorate_flamethrower",
+  "equipped_weapon": "directorate_flamethrower",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_emp_blast",
+    "special_flak_barrage",
+    "special_victory_flourish",
+    "special_cyber_dash"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    }
+  ]
+}

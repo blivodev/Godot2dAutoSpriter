@@ -1,0 +1,47 @@
+{
+  "character_name": "chem_wastelander",
+  "display_name": "Chem Wastelander",
+  "faction_id": "neon_outcasts",
+  "faction_name": "Neon Outcasts (Wasteland)",
+  "role": "Flame Trooper",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Chem Wastelander specializing as Flame Trooper.",
+  "weapon_id": "syndicate_flamethrower",
+  "equipped_weapon": "syndicate_flamethrower",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_drone_swarm",
+    "special_ground_slam",
+    "special_cyber_dash",
+    "special_napalm_toss"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    }
+  ]
+}

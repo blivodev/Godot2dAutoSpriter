@@ -1469,11 +1469,17 @@ HTML_PAGE = """<!DOCTYPE html>
       <div>
         <div class="roster-filter-bar">
           <button class="filter-chip active" id="chip-filter-all" onclick="setRosterFilter('all')">All (<span id="count-all">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-pixel_anime" onclick="setRosterFilter('pixel_anime')" style="border-color:#ff007f;color:#ff66b2;font-weight:600;">✨ Pixel/Anime (50)</button>
           <button class="filter-chip" id="chip-filter-directorate" onclick="setRosterFilter('directorate')" style="border-color:#58a6ff;">🏛️ Directorate</button>
           <button class="filter-chip" id="chip-filter-syndicate" onclick="setRosterFilter('syndicate')" style="border-color:#e68c14;">⚙️ Syndicate</button>
           <button class="filter-chip" id="chip-filter-covenant" onclick="setRosterFilter('covenant')" style="border-color:#bc8cff;">🧠 Covenant</button>
           <button class="filter-chip" id="chip-filter-bioforge" onclick="setRosterFilter('bioforge')" style="border-color:#2ea043;">🧬 Bio-Forge</button>
           <button class="filter-chip" id="chip-filter-silicon" onclick="setRosterFilter('silicon')" style="border-color:#f85149;">⚡ Silicon</button>
+          <button class="filter-chip" id="chip-filter-ghost_protocol" onclick="setRosterFilter('ghost_protocol')" style="border-color:#39c5bb;">🥷 Ghost Protocol</button>
+          <button class="filter-chip" id="chip-filter-iron_valkyrie" onclick="setRosterFilter('iron_valkyrie')" style="border-color:#d29922;">🛡️ Iron Valkyrie</button>
+          <button class="filter-chip" id="chip-filter-neon_outcasts" onclick="setRosterFilter('neon_outcasts')" style="border-color:#f778ba;">🔥 Neon Outcasts</button>
+          <button class="filter-chip" id="chip-filter-apex_transhumans" onclick="setRosterFilter('apex_transhumans')" style="border-color:#a371f7;">🔮 Apex Transhumans</button>
+          <button class="filter-chip" id="chip-filter-synth_corp" onclick="setRosterFilter('synth_corp')" style="border-color:#ff7b72;">🤖 Synth-Corp</button>
           <button class="filter-chip" id="chip-filter-scenes" onclick="setRosterFilter('scenes')">🎮 Scenes (<span id="count-scenes">0</span>)</button>
           <button class="filter-chip" id="chip-filter-exploded" onclick="setRosterFilter('exploded')">🖼️ Sheets (<span id="count-exploded">0</span>)</button>
         </div>
@@ -2768,7 +2774,9 @@ function filterRoster() {
     filtered = filtered.filter(c => c.has_godot_scene);
   } else if (rosterFilter === "exploded") {
     filtered = filtered.filter(c => c.has_exploded_sheet);
-  } else if (["directorate", "syndicate", "covenant", "bioforge", "silicon"].includes(rosterFilter)) {
+  } else if (rosterFilter === "pixel_anime") {
+    filtered = filtered.filter(c => (c.art_style || "").toLowerCase() === "pixel_anime" || ["ghost_protocol", "iron_valkyrie", "neon_outcasts", "apex_transhumans", "synth_corp"].includes((c.faction_id || "").toLowerCase()));
+  } else if (["directorate", "syndicate", "covenant", "bioforge", "silicon", "ghost_protocol", "iron_valkyrie", "neon_outcasts", "apex_transhumans", "synth_corp"].includes(rosterFilter)) {
     filtered = filtered.filter(c => (c.faction_id || "").toLowerCase() === rosterFilter);
   }
 

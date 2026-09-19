@@ -1,0 +1,47 @@
+{
+  "character_name": "cybersamurai_kage",
+  "display_name": "Cyber-Samurai Kage",
+  "faction_id": "ghost_protocol",
+  "faction_name": "Ghost Protocol (Black-Ops)",
+  "role": "Soldier",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Cyber-Samurai Kage specializing as Soldier.",
+  "weapon_id": "covenant_assault_rifle",
+  "equipped_weapon": "covenant_assault_rifle",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_mortar_barrage",
+    "special_flak_barrage",
+    "special_victory_flourish",
+    "special_deploy_turret"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    }
+  ]
+}

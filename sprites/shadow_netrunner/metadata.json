@@ -1,0 +1,47 @@
+{
+  "character_name": "shadow_netrunner",
+  "display_name": "Shadow Netrunner",
+  "faction_id": "ghost_protocol",
+  "faction_name": "Ghost Protocol (Black-Ops)",
+  "role": "Mind Controller",
+  "description": "Cyberpunk post-apocalyptic pixel/anime warrior: Shadow Netrunner specializing as Mind Controller.",
+  "weapon_id": "covenant_psi_emitter",
+  "equipped_weapon": "covenant_psi_emitter",
+  "art_style": "pixel_anime",
+  "specials": [
+    "special_sonic_screech",
+    "special_napalm_toss",
+    "special_psi_overload",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}
