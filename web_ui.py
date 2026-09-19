@@ -30,7 +30,7 @@ import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+from server import get_project_root, PROJECT_ROOT
 HOST = "127.0.0.1"
 PORT = 8080
 
@@ -66,6 +66,46 @@ def _check_comfyui_status() -> dict:
         return {"online": False, "node_count": 0, "has_layerdiffuse": False, "has_controlnet": False, "checkpoints": [], "has_checkpoint": False}
 
 
+_DOWNLOAD_STATE = {
+    "active": False,
+    "model": "",
+    "pct": 0.0,
+    "downloaded_mb": 0.0,
+    "total_mb": 0.0,
+    "speed_mbps": 0.0,
+    "status": "idle",
+    "message": ""
+}
+
+def _bg_download(model_key: str):
+    global _DOWNLOAD_STATE
+    _DOWNLOAD_STATE["active"] = True
+    _DOWNLOAD_STATE["model"] = model_key
+    _DOWNLOAD_STATE["pct"] = 0.0
+    _DOWNLOAD_STATE["downloaded_mb"] = 0.0
+    _DOWNLOAD_STATE["total_mb"] = 0.0
+    _DOWNLOAD_STATE["speed_mbps"] = 0.0
+    _DOWNLOAD_STATE["status"] = "downloading"
+    _DOWNLOAD_STATE["message"] = f"Downloading {model_key}..."
+
+    def cb(pct, mb_done, mb_tot, speed):
+        _DOWNLOAD_STATE["pct"] = round(pct, 1)
+        _DOWNLOAD_STATE["downloaded_mb"] = round(mb_done, 1)
+        _DOWNLOAD_STATE["total_mb"] = round(mb_tot, 1)
+        _DOWNLOAD_STATE["speed_mbps"] = round(speed, 1)
+
+    try:
+        from scripts.download_models import download_model
+        ok, msg = download_model(model_key, progress_callback=cb)
+        _DOWNLOAD_STATE["active"] = False
+        _DOWNLOAD_STATE["status"] = "complete" if ok else "error"
+        _DOWNLOAD_STATE["message"] = msg
+    except Exception as e:
+        _DOWNLOAD_STATE["active"] = False
+        _DOWNLOAD_STATE["status"] = "error"
+        _DOWNLOAD_STATE["message"] = str(e)
+
+
 class AutoSpriterHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         # Silence default server access spam in console
@@ -92,6 +132,16 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 "project_root": str(PROJECT_ROOT)
             }
             self._send_json(res)
+            return
+
+        elif path == "/api/models/status":
+            from scripts.download_models import get_model_status, find_comfyui_models_directory
+            mdir = find_comfyui_models_directory()
+            self._send_json({"models_dir": str(mdir), "catalog": get_model_status(mdir), "download_state": _DOWNLOAD_STATE})
+            return
+
+        elif path == "/api/models/progress":
+            self._send_json(_DOWNLOAD_STATE)
             return
 
         elif path == "/api/sprites":
@@ -171,6 +221,16 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 "models_dir": str(models_dir) if models_dir else None
             }
             self._send_json(res)
+            return
+
+        elif path == "/api/models/download":
+            model_key = payload.get("model", "counterfeit_v3")
+            if _DOWNLOAD_STATE["active"]:
+                self._send_json({"status": "in_progress", "message": f"Already downloading {_DOWNLOAD_STATE['model']}"})
+                return
+            t = threading.Thread(target=_bg_download, args=(model_key,), daemon=True)
+            t.start()
+            self._send_json({"status": "started", "model": model_key})
             return
 
         elif path == "/api/open_folder":
@@ -460,12 +520,18 @@ HTML_PAGE = """<!DOCTYPE html>
   .quick-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
   .preset-pill { font-size: 11px; padding: 5px 11px; border-radius: 14px; background: #191f2b; border: 1px solid var(--border); cursor: pointer; color: var(--text-muted); transition: all 0.15s; }
   .preset-pill:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
-  .preset-custom { background: rgba(227, 179, 65, 0.15); border-color: rgba(227, 179, 65, 0.4); color: #f0c654; font-weight: 700; }
-  .preset-custom:hover { background: rgba(227, 179, 65, 0.25); border-color: #f0c654; color: #ffd666; }
+  .preset-pill.active { background: rgba(88, 166, 255, 0.2); border-color: var(--primary); color: var(--primary); font-weight: 700; box-shadow: 0 0 8px rgba(88, 166, 255, 0.35); }
+  .preset-custom { background: #191f2b; border-color: rgba(227, 179, 65, 0.35); color: #f0c654; }
+  .preset-custom:hover { background: rgba(227, 179, 65, 0.15); border-color: #f0c654; color: #ffd666; }
+  .preset-custom.active { background: rgba(227, 179, 65, 0.25); border-color: #f0c654; color: #ffd666; font-weight: 700; box-shadow: 0 0 10px rgba(227, 179, 65, 0.4); }
 
   .color-picker-box { display: flex; align-items: center; gap: 8px; background: var(--bg-input); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); }
   .color-picker-box input[type="color"] { border: none; width: 28px; height: 28px; border-radius: 4px; background: transparent; cursor: pointer; }
   .color-picker-box span { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+  .progress-container { width: 100%; background: #07090e; border: 1px solid var(--border); border-radius: 6px; height: 16px; overflow: hidden; margin-top: 8px; position: relative; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), #a371f7); width: 0%; transition: width 0.3s; }
+  .progress-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 </style>
 </head>
 <body>
@@ -494,17 +560,17 @@ HTML_PAGE = """<!DOCTYPE html>
 
       <div class="form-group">
         <label>Archetype & Creature Presets:</label>
-        <div class="quick-presets">
-          <span class="preset-pill preset-custom" onclick="applyCustomMode()">✨ Custom Creature</span>
-          <span class="preset-pill" onclick="applyPreset('cyber_alien', 'cyberpunk warrior alien with neon bioluminescent crest, plasma blade and chitin plates', 'warrior', 'biped', 'alien')">👾 Cyber Alien</span>
-          <span class="preset-pill" onclick="applyPreset('elven_sorceress', 'female elf sorceress with flowing purple hair, arcane glowing robes and crystal staff', 'mage', 'biped', 'humanoid')">🧝 Elf Mage</span>
-          <span class="preset-pill" onclick="applyPreset('winged_demon', 'crimson demon lord with obsidian curved horns, runic chest brand, shadow talons and wings', 'assassin', 'biped', 'demon')">😈 Demon Fiend</span>
-          <span class="preset-pill" onclick="applyPreset('skeleton_lich', 'undead skeleton lich with glowing cyan soul eyes, bone ribcage and tattered shroud', 'mage', 'biped', 'undead')">💀 Skeleton Lich</span>
-          <span class="preset-pill" onclick="applyPreset('dragonkin_brawler', 'emerald dragonkin warrior with horned brow, ridge scales and reptilian claws', 'warrior', 'biped', 'reptilian')">🦎 Dragonkin</span>
-          <span class="preset-pill" onclick="applyPreset('celestial_wolf', 'mythical celestial dire wolf with emerald predator eyes, multi tail and fur ruff', 'beast', 'quadruped', 'beast')">🐺 Dire Beast</span>
-          <span class="preset-pill" onclick="applyPreset('mantis_stalker', 'insectoid mantis assassin with compound phosphor eyes, chitin carapace and scythe claws', 'assassin', 'biped', 'insectoid')">🦗 Mantis</span>
-          <span class="preset-pill" onclick="applyPreset('holy_paladin', 'noble human paladin in regal blue and gold armor with glowing blade', 'warrior', 'biped', 'humanoid')">⚔️ Paladin</span>
-          <span class="preset-pill" onclick="applyPreset('diesel_mech', 'heavy dieselpunk mech juggernaut with caution hazard stripes and furnace core', 'mech', 'biped', 'mech')">🤖 Heavy Mech</span>
+        <div class="quick-presets" id="preset-container">
+          <span class="preset-pill preset-custom" id="pill-custom" onclick="applyCustomMode()">✨ Custom Creature</span>
+          <span class="preset-pill" id="pill-cyber_alien" onclick="applyPreset('cyber_alien', 'cyberpunk warrior alien with neon bioluminescent crest, plasma blade and chitin plates', 'warrior', 'biped', 'alien')">👾 Cyber Alien</span>
+          <span class="preset-pill" id="pill-elven_sorceress" onclick="applyPreset('elven_sorceress', 'female elf sorceress with flowing purple hair, arcane glowing robes and crystal staff', 'mage', 'biped', 'humanoid')">🧝 Elf Mage</span>
+          <span class="preset-pill" id="pill-winged_demon" onclick="applyPreset('winged_demon', 'crimson demon lord with obsidian curved horns, runic chest brand, shadow talons and wings', 'assassin', 'biped', 'demon')">😈 Demon Fiend</span>
+          <span class="preset-pill" id="pill-skeleton_lich" onclick="applyPreset('skeleton_lich', 'undead skeleton lich with glowing cyan soul eyes, bone ribcage and tattered shroud', 'mage', 'biped', 'undead')">💀 Skeleton Lich</span>
+          <span class="preset-pill" id="pill-dragonkin_brawler" onclick="applyPreset('dragonkin_brawler', 'emerald dragonkin warrior with horned brow, ridge scales and reptilian claws', 'warrior', 'biped', 'reptilian')">🦎 Dragonkin</span>
+          <span class="preset-pill" id="pill-celestial_wolf" onclick="applyPreset('celestial_wolf', 'mythical celestial dire wolf with emerald predator eyes, multi tail and fur ruff', 'beast', 'quadruped', 'beast')">🐺 Dire Beast</span>
+          <span class="preset-pill" id="pill-mantis_stalker" onclick="applyPreset('mantis_stalker', 'insectoid mantis assassin with compound phosphor eyes, chitin carapace and scythe claws', 'assassin', 'biped', 'insectoid')">🦗 Mantis</span>
+          <span class="preset-pill" id="pill-holy_paladin" onclick="applyPreset('holy_paladin', 'noble human paladin in regal blue and gold armor with glowing blade', 'warrior', 'biped', 'humanoid')">⚔️ Paladin</span>
+          <span class="preset-pill" id="pill-diesel_mech" onclick="applyPreset('diesel_mech', 'heavy dieselpunk mech juggernaut with caution hazard stripes and furnace core', 'mech', 'biped', 'mech')">🤖 Heavy Mech</span>
         </div>
       </div>
 
@@ -704,6 +770,37 @@ HTML_PAGE = """<!DOCTYPE html>
         <div id="console" class="console">[System Ready] Enter a character concept, choose a preset, or click ✨ Custom Creature!</div>
       </div>
 
+      <!-- AI Model Downloader Card -->
+      <div class="card">
+        <div class="card-title">
+          <span>AI Diffusion Checkpoints</span>
+          <span id="model-status-pill" style="font-size: 11px; color: var(--text-muted);">Checking...</span>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+          Download state-of-the-art anime AI checkpoints into ComfyUI for local generative diffusion.
+        </p>
+        <div class="row-2" style="margin-bottom: 6px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <select id="model-select">
+              <option value="counterfeit_v3" selected>Counterfeit V3.0 (SD 1.5 ~2 GB - Fast Anime)</option>
+              <option value="animagine_xl">Animagine XL 3.1 (SDXL ~6.6 GB - Premier Anime)</option>
+              <option value="dreamshaper_8">DreamShaper 8 (SD 1.5 ~2 GB - Game Concept)</option>
+            </select>
+          </div>
+          <button id="btn-download-model" class="btn btn-secondary" onclick="startModelDownload()">⬇️ Download Model</button>
+        </div>
+        <div id="model-progress-wrap" style="display: none; margin-top: 8px;">
+          <div class="progress-container">
+            <div id="model-progress-bar" class="progress-bar"></div>
+            <div id="model-progress-text" class="progress-text">0%</div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; justify-content: space-between;">
+            <span id="model-dl-info">Starting...</span>
+            <span id="model-dl-speed">0.0 MB/s</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Assets Preview Card -->
       <div class="card" style="flex: 1;">
         <div class="card-title">
@@ -765,12 +862,19 @@ HTML_PAGE = """<!DOCTYPE html>
     }
   }
 
+  function setActivePill(pillId) {
+    document.querySelectorAll('.preset-pill').forEach(el => el.classList.remove('active'));
+    const p = document.getElementById(pillId);
+    if (p) p.classList.add('active');
+  }
+
   function applyCustomMode() {
+    setActivePill('pill-custom');
     document.getElementById("char-name").value = "custom_creature";
     document.getElementById("species").value = "custom";
     document.getElementById("target-scene").value = `res://scenes/custom_creature_character.tscn`;
     toggleCustomStudio(true);
-    syncCustomPrompt();
+    syncCustomPrompt(true);
     log(`[CUSTOM] Activated Custom Creature Studio. Customize anatomy, wings, and colors!`, "info");
     refreshGallery();
   }
@@ -778,11 +882,28 @@ HTML_PAGE = """<!DOCTYPE html>
   function onSpeciesDropdownChanged() {
     const sp = document.getElementById("species").value;
     if (sp === "custom") {
+      setActivePill('pill-custom');
       toggleCustomStudio(true);
+    } else {
+      const matchingPill = document.querySelector(`.preset-pill[id*='${sp}']`);
+      if (matchingPill) {
+        setActivePill(matchingPill.id);
+      } else {
+        document.querySelectorAll('.preset-pill').forEach(el => el.classList.remove('active'));
+      }
+      const b = document.getElementById("custom-studio-body");
+      const arr = document.getElementById("custom-studio-arrow");
+      if (b && b.classList.contains("open")) {
+        b.classList.remove("open");
+        if (arr) arr.textContent = "▼";
+      }
     }
   }
 
-  function syncCustomPrompt() {
+  function syncCustomPrompt(force = false) {
+    const sp = document.getElementById("species").value;
+    if (!force && sp !== "custom") return;
+
     const head = document.getElementById("custom-head").value;
     const torso = document.getElementById("custom-torso").value;
     const wings = document.getElementById("custom-wings").checked;
@@ -799,6 +920,7 @@ HTML_PAGE = """<!DOCTYPE html>
   }
 
   function applyPreset(name, concept, arch, rig, species = "auto") {
+    setActivePill(`pill-${name}`);
     document.getElementById("char-name").value = name;
     document.getElementById("concept").value = concept;
     document.getElementById("archetype").value = arch;
@@ -806,6 +928,20 @@ HTML_PAGE = """<!DOCTYPE html>
     document.getElementById("species").value = species;
     document.getElementById("target-scene").value = `res://scenes/${name}_character.tscn`;
     currentCharacter = name;
+
+    // Reset custom wings/tail flags when loading standard preset
+    const hasWingsPreset = (name === "winged_demon");
+    const hasTailPreset = (name === "celestial_wolf");
+    document.getElementById("custom-wings").checked = hasWingsPreset;
+    document.getElementById("custom-tail").checked = hasTailPreset;
+
+    // Collapse custom studio when picking a standard preset
+    const b = document.getElementById("custom-studio-body");
+    const arr = document.getElementById("custom-studio-arrow");
+    if (b && b.classList.contains("open")) {
+      b.classList.remove("open");
+      if (arr) arr.textContent = "▼";
+    }
 
     // Adjust studio defaults for visual convenience
     if (species === "alien") {
@@ -970,6 +1106,87 @@ HTML_PAGE = """<!DOCTYPE html>
     }
   }
 
+  async function checkModelStatus() {
+    try {
+      const r = await fetch('/api/models/status');
+      const d = await r.json();
+      const pill = document.getElementById("model-status-pill");
+      const cat = d.catalog || {};
+      const installed = Object.values(cat).filter(m => m.installed && m.subfolder === "checkpoints");
+      if (installed.length > 0) {
+        pill.style.color = "#3fb950";
+        pill.textContent = `${installed.length} Checkpoint(s) Ready`;
+      } else {
+        pill.style.color = "#d29922";
+        pill.textContent = "No Checkpoint Installed";
+      }
+
+      if (d.download_state && d.download_state.active) {
+        showDownloadProgress(d.download_state);
+        if (!dlPollInterval) dlPollInterval = setInterval(pollDownloadProgress, 1000);
+      }
+    } catch (e) {}
+  }
+
+  let dlPollInterval = null;
+  async function startModelDownload() {
+    const sel = document.getElementById("model-select").value;
+    const btn = document.getElementById("btn-download-model");
+    btn.disabled = true;
+    log(`[DOWNLOAD] Requesting download for model '${sel}'...`, "info");
+    try {
+      const r = await fetch('/api/models/download', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({model: sel})
+      });
+      const d = await r.json();
+      if (d.status === "started" || d.status === "in_progress") {
+        document.getElementById("model-progress-wrap").style.display = "block";
+        if (!dlPollInterval) dlPollInterval = setInterval(pollDownloadProgress, 1000);
+      } else {
+        log(`[DOWNLOAD] ${d.message || d.status}`, "warn");
+        btn.disabled = false;
+      }
+    } catch (e) {
+      log(`[DOWNLOAD-ERROR] ${e}`, "err");
+      btn.disabled = false;
+    }
+  }
+
+  async function pollDownloadProgress() {
+    try {
+      const r = await fetch('/api/models/progress');
+      const st = await r.json();
+      showDownloadProgress(st);
+      if (!st.active) {
+        clearInterval(dlPollInterval);
+        dlPollInterval = null;
+        document.getElementById("btn-download-model").disabled = false;
+        checkModelStatus();
+        checkStatus();
+        if (st.status === "complete") {
+          log(`[DOWNLOAD] ${st.message || 'Model download complete!'}`, "info");
+        } else if (st.status === "error") {
+          log(`[DOWNLOAD-ERROR] ${st.message || 'Download failed'}`, "err");
+        }
+      }
+    } catch (e) {}
+  }
+
+  function showDownloadProgress(st) {
+    document.getElementById("model-progress-wrap").style.display = "block";
+    const bar = document.getElementById("model-progress-bar");
+    const txt = document.getElementById("model-progress-text");
+    const info = document.getElementById("model-dl-info");
+    const spd = document.getElementById("model-dl-speed");
+
+    bar.style.width = `${st.pct}%`;
+    txt.textContent = `${st.pct}%`;
+    info.textContent = `${st.model}: ${st.downloaded_mb || 0} / ${st.total_mb || 0} MB`;
+    spd.textContent = `${st.speed_mbps || 0} MB/s`;
+  }
+
   async function openInGodot() {
     const scene = document.getElementById("target-scene").value.trim();
     const name = document.getElementById("char-name").value.trim();
@@ -992,9 +1209,12 @@ HTML_PAGE = """<!DOCTYPE html>
   }
 
   // Initial load
+  setActivePill('pill-cyber_alien');
   checkStatus();
+  checkModelStatus();
   refreshGallery();
   setInterval(checkStatus, 6000);
+  setInterval(checkModelStatus, 8000);
 </script>
 </body>
 </html>

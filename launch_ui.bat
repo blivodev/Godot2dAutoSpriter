@@ -5,12 +5,6 @@ echo   Launching Godot 2D Auto Spriter ^& Rigger Dashboard...
 echo ========================================================
 cd /d "%~dp0"
 
-if exist "dist\Godot2dAutoSpriterUI.exe" (
-    echo [INFO] Standalone executable found at dist\Godot2dAutoSpriterUI.exe
-    "dist\Godot2dAutoSpriterUI.exe" %*
-    goto end
-)
-
 where python >nul 2>nul
 if %ERRORLEVEL% equ 0 (
     echo [INFO] Launching with Python...
@@ -22,6 +16,12 @@ where py >nul 2>nul
 if %ERRORLEVEL% equ 0 (
     echo [INFO] Launching with Python Launcher...
     py web_ui.py %*
+    goto end
+)
+
+if exist "dist\Godot2dAutoSpriterUI.exe" (
+    echo [INFO] Standalone executable found at dist\Godot2dAutoSpriterUI.exe
+    "dist\Godot2dAutoSpriterUI.exe" %*
     goto end
 )
 

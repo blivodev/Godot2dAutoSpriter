@@ -105,7 +105,7 @@ func _build_rig(char_name: String, dir_path: String, out_scene_path: String, tem
 
 	skeleton.character_sprites_dir = dir_path
 	skeleton.character_prefix = char_name
-	skeleton.reset_sprite_offsets = true
+	skeleton.reset_sprite_offsets = false
 
 	var rig_res := skeleton.execute_auto_rig(true)
 	if not rig_res.get("success", false):

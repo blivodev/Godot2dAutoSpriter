@@ -8,22 +8,29 @@ This system connects **ComfyUI generative AI workflows** (using ControlNet OpenP
 
 ## 🌟 Key Components
 
-1. **ComfyUI Front-End & Chained Separation**:
+1. **Organic Curved Anime Sprite Engine (`scripts/generate_sample_sprites.py`)**:
+   * **Catmull-Rom Organic Splines**: High-resolution continuous curvature replacing flat polygonal cutouts.
+   * **Expressive Anime Eyes**: Multi-layered sclera, gradient-colored iris, deep pupil, dual specular catchlights, winged eyelashes, and anime blush.
+   * **Convex Joint Articulation Caps**: Rounded pivot caps on shoulders, elbows, hips, and knees ensuring smooth 360° skeletal rotation with zero gaps or sharp corner breaks.
+   * **Multi-Tier Cel-Shading & Hair Halos**: Ambient occlusion, cylindrical limb highlights, and anime hair sheen bands rendered with 4x supersampling and downsampled via `LANCZOS`.
+2. **Enhanced Godot 4 Rigging System (`scenes/character_rig_template.tscn`)**:
+   * **Built-in `AnimationPlayer`**: Auto-looping `idle` animation track with natural breathing and limb bobbing (`autoplay = "idle"`).
+   * **Equipment Marker Sockets**: `Marker2D` nodes ready for immediate attachment: `WeaponSlot_R` (main hand), `WeaponSlot_L` (off-hand/shield), `HatSlot` (headwear), and `BackSlot` (cape, quiver, wings).
+   * **2.5D Visual Z-Ordering**: Layered limb depth (`arm_upper_R` at `-1`, `torso` at `1`, `arm_upper_L` at `2`, `head` at `3`).
+   * **Natural A-Pose Hierarchy**: Arms relaxed downward at ~25° for natural resting posture.
+3. **AI Model Downloader & Management (`scripts/download_models.py` & MCP Tool `download_comfyui_model`)**:
+   * Download Animagine XL 3.1 (SDXL 6.6 GB), Counterfeit V3.0 (SD 1.5 2.0 GB), or DreamShaper 8 directly into ComfyUI's model repository.
+   * Features chunked streaming, live MB/s speed, ETA, and HTTP Range resumption (`.part` files).
+4. **ComfyUI Front-End & Chained Separation**:
    * **Base Generation**: Text-to-Image stage creating 2D anime-style sprites (clean cel-shading, crisp outlines, flat colors).
-   * **Bridge to Exploded Separation**: Chains base generation via **IP-Adapter** + **OpenPose ControlNet** + **LayerDiffuse** to render the exact character with limbs detached across an orthographic canvas with true alpha transparency.
+   * **Bridge to Exploded Separation**: Chains base generation via **IP-Adapter** + **OpenPose ControlNet** + **LayerDiffuse** to render detached limbs with true alpha transparency.
    * **VRAM Management**: Sequential queueing and model offloading to run locally on consumer GPUs (8GB–12GB VRAM).
-2. **Web UI Dashboard & Standalone Executable (`web_ui.py` / `launch_ui.bat` / `dist/Godot2dAutoSpriterUI.exe`)**:
-   * Complete browser dashboard with archetype presets (including "cyberpunk warrior alien"), live generation logs, parameter tuning, transparent limb gallery, and 1-click scene launching.
-3. **Model Context Protocol (MCP) Server (`server.py`)**:
-   * Exposes end-to-end pipeline tools (`generate_character_sprites`, `slice_character_limbs`, `assemble_godot_rig`) to AI agents (Claude Desktop, Cline, Cursor, OpenCode).
-4. **Standalone Character CLI (`scripts/create_character.py`)**:
-   * 1-command generation and rig assembly for any character archetype without requiring an AI agent or GUI.
-5. **Headless Godot 4 Rig Builder (`scripts/headless_rig_builder.gd`)**:
-   * Executes via Godot CLI without GUI to bind sliced transparent PNGs to the master `Skeleton2D` template and pack ready-to-use `.tscn` character scenes.
-6. **Godot 4 Editor Plugin (`addons/godot_2d_auto_spriter/`)**:
-   * Runs inside the Godot Editor with custom dock controls and multi-limb bone generators (wings, secondary arms, multi-segment tails).
+5. **Web UI Dashboard & Standalone Executable (`web_ui.py` / `launch_ui.bat` / `dist/Godot2dAutoSpriterUI.exe`)**:
+   * Complete browser dashboard with archetype presets, custom creature studio, live generation console, interactive model downloader, and 1-click Godot editor launching.
+6. **Model Context Protocol (MCP) Server (`server.py`)**:
+   * Exposes end-to-end pipeline tools (`generate_character_sprites`, `slice_character_limbs`, `assemble_godot_rig`, `setup_comfyui_environment`, `download_comfyui_model`) to AI agents (Claude Desktop, Cline, Cursor, OpenCode).
 7. **Master Rig Templates (`scenes/character_rig_template.tscn` & `scenes/quadruped_rig_template.tscn`)**:
-   * Complete 15-bone humanoid and 20-bone quadruped hierarchies with zero-warning leaf-bone setup.
+   * Complete 15-bone humanoid and 20-bone quadruped hierarchies with zero-warning leaf-bone setup and equipment sockets.
 
 ---
 
@@ -426,10 +433,11 @@ Godot2dAutoSpriter/
 │   └── fenrir_character.tscn                  # Pre-rigged Beast / Quadruped character
 ├── scripts/
 │   ├── create_character.py                    # Standalone 1-command character CLI builder
+│   ├── download_models.py                     # AI diffusion model downloader with resume support
 │   ├── setup_comfyui.py                       # Automated ComfyUI nodes, inputs & models installer
 │   ├── generate_openpose_templates.py         # OpenPose exploded skeleton template generator
 │   ├── headless_rig_builder.gd                # Headless CLI entry point for scene packing
-│   ├── generate_sample_sprites.py             # Multi-archetype stylized sprite generator
+│   ├── generate_sample_sprites.py             # Organic curved anime & multi-species sprite generator
 │   └── save_rigged_warrior.gd                 # Scene packing utility script
 ├── sprites/
 │   ├── warrior/                               # 15 Warrior limb sprites

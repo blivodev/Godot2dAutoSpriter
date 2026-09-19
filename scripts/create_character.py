@@ -109,8 +109,10 @@ def main():
     cmd = [
         godot_exe,
         "--headless",
+        "--path",
+        str(PROJECT_ROOT),
         "--script",
-        "scripts/headless_rig_builder.gd",
+        "res://scripts/headless_rig_builder.gd",
         "--",
         "--character-name", char_name,
         "--assets-dir", res_dir,

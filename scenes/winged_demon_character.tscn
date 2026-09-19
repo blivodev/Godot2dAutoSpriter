@@ -1,0 +1,212 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://auto_rig_importer.gd" id="1_yq83d"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_pelvis.png" id="2_yifs8"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_torso.png" id="3_xjwin"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_head.png" id="4_njy37"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_arm_upper_L.png" id="5_whty5"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_arm_lower_L.png" id="6_8ku0u"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_hand_L.png" id="7_ljdxj"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_arm_upper_R.png" id="8_wcug7"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_arm_lower_R.png" id="9_rx5wk"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_hand_R.png" id="10_h0jx6"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_wing_upper_L.png" id="11_gu83h"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_wing_lower_L.png" id="12_m5ywg"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_wing_upper_R.png" id="13_8ycuq"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_wing_lower_R.png" id="14_pxjyd"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_leg_upper_L.png" id="15_jgenh"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_leg_lower_L.png" id="16_fw41t"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_foot_L.png" id="17_03n54"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_leg_upper_R.png" id="18_aebng"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_leg_lower_R.png" id="19_1iavo"]
+[ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_foot_R.png" id="20_kn460"]
+
+[node name="Winged DemonRoot" type="Node2D" unique_id=1990467707]
+
+[node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=1641832571]
+script = ExtResource("1_yq83d")
+character_sprites_dir = "res://sprites/winged_demon"
+character_prefix = "winged_demon"
+
+[node name="pelvis" type="Bone2D" parent="Skeleton2D" unique_id=1272041790]
+rest = Transform2D(1, 0, 0, 1, 0, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis" unique_id=105237718]
+texture = ExtResource("2_yifs8")
+offset = Vector2(0, 4)
+
+[node name="torso" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=943071340]
+position = Vector2(0, -40)
+rest = Transform2D(1, 0, 0, 1, 0, -40)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso" unique_id=855062187]
+texture = ExtResource("3_xjwin")
+offset = Vector2(0, -4)
+
+[node name="head" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1977376912]
+position = Vector2(0, -50)
+rest = Transform2D(1, 0, 0, 1, 0, -50)
+auto_calculate_length_and_angle = false
+length = 20.0
+bone_angle = -1.5707998
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/head" unique_id=129106696]
+z_index = 1
+texture = ExtResource("4_njy37")
+offset = Vector2(0, -26)
+
+[node name="arm_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=512987042]
+position = Vector2(32, -20)
+rest = Transform2D(1, 0, 0, 1, 32, -20)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=2068749784]
+texture = ExtResource("5_whty5")
+offset = Vector2(2, 18)
+
+[node name="arm_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=1948613872]
+position = Vector2(8, 36)
+rest = Transform2D(1, 0, 0, 1, 8, 36)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=1570593768]
+texture = ExtResource("6_8ku0u")
+offset = Vector2(1, 16)
+
+[node name="hand_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=1875610378]
+position = Vector2(4, 30)
+rest = Transform2D(1, 0, 0, 1, 4, 30)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.45
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=1102930098]
+texture = ExtResource("7_ljdxj")
+offset = Vector2(0, 10)
+
+[node name="arm_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=804927509]
+position = Vector2(-32, -20)
+rest = Transform2D(1, 0, 0, 1, -32, -20)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=337642180]
+texture = ExtResource("8_wcug7")
+offset = Vector2(-2, 18)
+
+[node name="arm_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=1840749682]
+position = Vector2(-8, 36)
+rest = Transform2D(1, 0, 0, 1, -8, 36)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=444846990]
+texture = ExtResource("9_rx5wk")
+offset = Vector2(-1, 16)
+
+[node name="hand_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1037706357]
+position = Vector2(-4, 30)
+rest = Transform2D(1, 0, 0, 1, -4, 30)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.6899999
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=1228920338]
+texture = ExtResource("10_h0jx6")
+offset = Vector2(0, 10)
+
+[node name="wing_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1421592196]
+position = Vector2(28, -20)
+rest = Transform2D(1, 0, 0, 1, 28, -20)
+auto_calculate_length_and_angle = false
+length = 24.0
+bone_angle = -0.49999997
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_L" unique_id=1512240530]
+z_index = -2
+texture = ExtResource("11_gu83h")
+offset = Vector2(16, 20)
+
+[node name="wing_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/wing_upper_L" unique_id=1303944620]
+position = Vector2(24, 28)
+rest = Transform2D(1, 0, 0, 1, 24, 28)
+auto_calculate_length_and_angle = false
+length = 24.0
+bone_angle = 0.49999997
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_L/wing_lower_L" unique_id=1802837710]
+z_index = -2
+texture = ExtResource("12_m5ywg")
+offset = Vector2(20, 22)
+
+[node name="wing_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=35899091]
+position = Vector2(-28, -20)
+rest = Transform2D(1, 0, 0, 1, -28, -20)
+auto_calculate_length_and_angle = false
+length = 24.0
+bone_angle = 3.6399996
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_R" unique_id=1983224600]
+z_index = -2
+texture = ExtResource("13_8ycuq")
+offset = Vector2(-16, 20)
+
+[node name="wing_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/wing_upper_R" unique_id=1332373968]
+position = Vector2(-24, 28)
+rest = Transform2D(1, 0, 0, 1, -24, 28)
+auto_calculate_length_and_angle = false
+length = 24.0
+bone_angle = 2.6399999
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_R/wing_lower_R" unique_id=198676637]
+z_index = -2
+texture = ExtResource("14_pxjyd")
+offset = Vector2(-20, 22)
+
+[node name="leg_upper_L" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=750518080]
+position = Vector2(20, 20)
+rest = Transform2D(1, 0, 0, 1, 20, 20)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=1848183050]
+texture = ExtResource("15_jgenh")
+offset = Vector2(0, 18)
+
+[node name="leg_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=776565539]
+position = Vector2(0, 40)
+rest = Transform2D(1, 0, 0, 1, 0, 40)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=1633610849]
+texture = ExtResource("16_fw41t")
+offset = Vector2(0, 16)
+
+[node name="foot_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=737044899]
+position = Vector2(10, 30)
+rest = Transform2D(1, 0, 0, 1, 10, 30)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.5707998
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L/foot_L" unique_id=740077561]
+texture = ExtResource("17_03n54")
+offset = Vector2(8, 8)
+
+[node name="leg_upper_R" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=1472904830]
+position = Vector2(-20, 20)
+rest = Transform2D(1, 0, 0, 1, -20, 20)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=1972475109]
+texture = ExtResource("18_aebng")
+offset = Vector2(0, 18)
+
+[node name="leg_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=679862946]
+position = Vector2(0, 40)
+rest = Transform2D(1, 0, 0, 1, 0, 40)
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=419223898]
+texture = ExtResource("19_1iavo")
+offset = Vector2(0, 16)
+
+[node name="foot_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=1957165356]
+position = Vector2(-10, 30)
+rest = Transform2D(1, 0, 0, 1, -10, 30)
+auto_calculate_length_and_angle = false
+length = 16.0
+bone_angle = 1.5707998
+
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R/foot_R" unique_id=2125906899]
+texture = ExtResource("20_kn460")
+offset = Vector2(-8, 8)

@@ -13,3 +13,8 @@ build/
 # System files
 .DS_Store
 Thumbs.db
+
+# Runtime IPC & Scratch
+open_scene_request.txt
+scratch/
+*.part

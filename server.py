@@ -23,9 +23,43 @@ from mcp.server.fastmcp import FastMCP
 # Initialize FastMCP Server
 mcp = FastMCP("Godot2dAutoSpriter")
 
+def get_project_root() -> Path:
+    """Finds the actual repository root where project.godot resides."""
+    if os.environ.get("GODOT_PROJECT_ROOT"):
+        p = Path(os.environ["GODOT_PROJECT_ROOT"]).resolve()
+        if (p / "project.godot").is_file():
+            return p
+    cwd = Path.cwd().resolve()
+    if (cwd / "project.godot").is_file():
+        return cwd
+    if getattr(sys, "frozen", False):
+        exe_path = Path(sys.executable).resolve()
+        if (exe_path.parent / "project.godot").is_file():
+            return exe_path.parent
+        if (exe_path.parent.parent / "project.godot").is_file():
+            return exe_path.parent.parent
+    if len(sys.argv) > 0 and sys.argv[0]:
+        try:
+            argv0 = Path(sys.argv[0]).resolve()
+            if (argv0.parent / "project.godot").is_file():
+                return argv0.parent
+            if (argv0.parent.parent / "project.godot").is_file():
+                return argv0.parent.parent
+        except Exception:
+            pass
+    file_path = Path(__file__).resolve()
+    if (file_path.parent / "project.godot").is_file():
+        return file_path.parent
+    if (file_path.parent.parent / "project.godot").is_file():
+        return file_path.parent.parent
+    known_repo = Path(r"D:\Projects\Godot2dAutoSpriter")
+    if (known_repo / "project.godot").is_file():
+        return known_repo
+    return file_path.parent
+
+PROJECT_ROOT = get_project_root()
 COMFYUI_HOST = os.environ.get("COMFYUI_HOST", "127.0.0.1:8188")
 GODOT_BIN = os.environ.get("GODOT_BIN", "")
-PROJECT_ROOT = Path(__file__).resolve().parent
 
 BONE_PARTS_BIPED = [
     "pelvis",
@@ -162,7 +196,9 @@ def generate_character_sprites(
     character_name: str,
     archetype_prompt: str,
     seed: int = -1,
-    rig_type: str = "biped"
+    rig_type: str = "biped",
+    checkpoint: str = "",
+    art_style: str = "anime"
 ) -> str:
     """
     Connects to the local ComfyUI API to trigger the base anime character generation
@@ -173,6 +209,8 @@ def generate_character_sprites(
         archetype_prompt: Visual prompt (e.g. 'cyberpunk cyber-blade assassin, neon visor').
         seed: Random seed for generation (-1 for randomized).
         rig_type: Rig hierarchy type ('biped' or 'quadruped').
+        checkpoint: Optional custom ComfyUI checkpoint filename (e.g. 'animagineXL_v31.safetensors').
+        art_style: Graphic art style ('anime', 'dark_fantasy', 'pixel_arcade', 'cyberpunk', 'moba_chibi', 'comic_ink').
 
     Returns:
         JSON string containing status, output image path, and parameters.
@@ -188,14 +226,26 @@ def generate_character_sprites(
 
     client_id = uuid.uuid4().hex
 
+    ckpt_name = checkpoint.strip() if checkpoint else os.environ.get("COMFYUI_CHECKPOINT", "animagineXL_v31.safetensors")
+
+    style_prompts = {
+        "anime": "masterpiece, anime 2d game sprite, clean flat cel shading, crisp bold outlines, vibrant colors",
+        "dark_fantasy": "dark fantasy, gothic grimdark game sprite, weathered steel armor, runic markings, eerie soul glow, etched shadows",
+        "pixel_arcade": "16-bit retro pixel art game sprite, arcade colors, dithered shading, crisp pixel borders, nostalgic palette",
+        "cyberpunk": "neon cyberpunk synth game sprite, high-tech carbon plates, glowing bioluminescent circuit lines, plasma highlights",
+        "moba_chibi": "chibi stylized MOBA hero sprite, exaggerated proportions, clean friendly contours, luminous highlights",
+        "comic_ink": "comic graphic novel game sprite, heavy black inking, bold halftone crosshatching, dramatic shading"
+    }
+    style_prefix = style_prompts.get(art_style, style_prompts["anime"])
+
     # ComfyUI API Workflow definition:
-    # 1. Base Generation (Anime Checkpoint + Flat Color LoRA + KSampler)
+    # 1. Base Generation (Chosen Checkpoint + Flat Color LoRA + KSampler)
     # 2. Bridge via IP-Adapter + Exploded OpenPose ControlNet + LayerDiffuse
     # 3. LayeredDiffusionDecodeRGBA -> SaveImage
     workflow = {
         "1": {
             "class_type": "CheckpointLoaderSimple",
-            "inputs": {"ckpt_name": "animagineXL_v31.safetensors"}
+            "inputs": {"ckpt_name": ckpt_name}
         },
         "2": {
             "class_type": "LoraLoader",
@@ -210,7 +260,7 @@ def generate_character_sprites(
         "3": {
             "class_type": "CLIPTextEncode",
             "inputs": {
-                "text": f"masterpiece, anime 2d game sprite, {archetype_prompt}, orthographic front view, flat cel shading, crisp outlines, modular character cut-out",
+                "text": f"{style_prefix}, {archetype_prompt}, orthographic front view, modular character cut-out, transparent background",
                 "clip": ["2", 1]
             }
         },
@@ -476,6 +526,12 @@ def assemble_godot_rig(
     """
     clean_name = character_name.strip().lower().replace(" ", "_")
     godot_exe = _find_godot_executable()
+    if not godot_exe:
+        return json.dumps({
+            "status": "error",
+            "character_name": clean_name,
+            "message": "Godot 4 executable not found. Please set GODOT_BIN environment variable or install Godot 4."
+        }, indent=2)
 
     if not target_scene_path:
         target_scene_path = f"res://scenes/{clean_name}_character.tscn"
@@ -484,11 +540,13 @@ def assemble_godot_rig(
     if not assets_dir.startswith("res://"):
         assets_dir = f"res://sprites/{clean_name}"
 
-    script_path = "scripts/headless_rig_builder.gd"
+    script_path = "res://scripts/headless_rig_builder.gd"
 
     cmd = [
         godot_exe,
         "--headless",
+        "--path",
+        str(PROJECT_ROOT),
         "--script",
         script_path,
         "--",
@@ -567,6 +625,9 @@ def setup_comfyui_environment(
         install_inputs(comfy_root)
     elif action == "install_models" and models_dir:
         install_models(models_dir, include_checkpoint=False)
+    elif action == "install_checkpoint" or action == "download_checkpoint":
+        from scripts.download_models import download_model
+        download_model("animagine_xl", models_dir=models_dir)
     elif action == "install_all":
         if custom_nodes:
             install_custom_nodes(custom_nodes, py_bin)
@@ -607,6 +668,50 @@ def setup_comfyui_environment(
     }, indent=2)
 
 
+# ==============================================================================
+# MCP TOOL 5: download_comfyui_model
+# ==============================================================================
+@mcp.tool()
+def download_comfyui_model(
+    model_name: str = "animagine_xl"
+) -> str:
+    """
+    Downloads an AI diffusion model checkpoint or neural weight file
+    (e.g., Animagine XL 3.1, Counterfeit V3.0, DreamShaper 8) for local ComfyUI generation.
+    Supports HTTP Range resumption so interrupted downloads automatically continue.
+
+    Args:
+        model_name: One of 'animagine_xl', 'counterfeit_v3', 'dreamshaper_8', 'layer_conv', 'vae_decoder', 'controlnet_openpose', 'flat_anime_lora', or 'status'.
+
+    Returns:
+        JSON string reporting download result or status table.
+    """
+    from scripts.download_models import download_model, get_model_status, find_comfyui_models_directory, MODELS_CATALOG
+
+    mdir = find_comfyui_models_directory()
+    if model_name == "status":
+        return json.dumps({
+            "status": "success",
+            "models_dir": str(mdir),
+            "catalog": get_model_status(mdir)
+        }, indent=2)
+
+    if model_name not in MODELS_CATALOG:
+        return json.dumps({
+            "status": "error",
+            "message": f"Unknown model '{model_name}'. Available models: {list(MODELS_CATALOG.keys())} or 'status'"
+        }, indent=2)
+
+    ok, msg = download_model(model_name, models_dir=mdir)
+    return json.dumps({
+        "status": "success" if ok else "error",
+        "model": model_name,
+        "models_dir": str(mdir),
+        "message": msg
+    }, indent=2)
+
+
 if __name__ == "__main__":
     # Start FastMCP server via standard I/O for MCP clients
     mcp.run()
+

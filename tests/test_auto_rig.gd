@@ -69,7 +69,7 @@ func _run_tests() -> bool:
 	# Configure importer
 	importer.character_sprites_dir = SPRITE_DIR
 	importer.character_prefix = "warrior"
-	importer.reset_sprite_offsets = true
+	importer.reset_sprite_offsets = false
 
 	# Execute Auto-Rigging with force_run=true (headless mode)
 	var res = importer.execute_auto_rig(true)

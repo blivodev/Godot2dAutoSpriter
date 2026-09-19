@@ -16,32 +16,137 @@ def create_sprite(size, draw_func):
 
 
 # ==============================================================================
+# Organic Curved Anime Silhouette & Shading Engine
+# ==============================================================================
+
+def catmull_rom_spline(pts, num_subdivs=6, closed=True):
+    """Generates smooth, continuous organic curves through control points using Catmull-Rom interpolation."""
+    if len(pts) < 3:
+        return [(round(x), round(y)) for x, y in pts]
+    result = []
+    n = len(pts)
+    for i in range(n):
+        if not closed and (i == 0 or i >= n - 2):
+            result.append((round(pts[i][0]), round(pts[i][1])))
+            continue
+        p0 = pts[(i - 1 + n) % n]
+        p1 = pts[i]
+        p2 = pts[(i + 1) % n]
+        p3 = pts[(i + 2) % n]
+        for t_step in range(num_subdivs):
+            t = t_step / float(num_subdivs)
+            t2 = t * t
+            t3 = t2 * t
+            x = 0.5 * ((2*p1[0]) + (-p0[0] + p2[0])*t + (2*p0[0] - 5*p1[0] + 4*p2[0] - p3[0])*t2 + (-p0[0] + 3*p1[0] - 3*p2[0] + p3[0])*t3)
+            y = 0.5 * ((2*p1[1]) + (-p0[1] + p2[1])*t + (2*p0[1] - 5*p1[1] + 4*p2[1] - p3[1])*t2 + (-p0[1] + 3*p1[1] - 3*p2[1] + p3[1])*t3)
+            result.append((round(x), round(y)))
+    return result
+
+
+def draw_curved_polygon(draw, pts, fill=None, outline=None, width=1, num_subdivs=6):
+    """Draws an organically curved polygon without hard polygonal corners."""
+    curved = catmull_rom_spline(pts, num_subdivs=num_subdivs, closed=True)
+    draw.polygon(curved, fill=fill, outline=outline, width=width)
+
+
+def draw_curved_line(draw, pts, fill=None, width=1, num_subdivs=6):
+    """Draws a smooth flowing curved line (e.g. hair strands, clothing folds, eyelash curves)."""
+    curved = catmull_rom_spline(pts, num_subdivs=num_subdivs, closed=False)
+    if len(curved) >= 2:
+        draw.line(curved, fill=fill, width=width)
+
+
+def draw_expressive_anime_eye(draw, ex, ey, s, theme, is_left=True):
+    """Renders a sparkling, multi-layered expressive anime eye with gradient iris, double catchlights, and blush."""
+    dir_mul = 1 if is_left else -1
+    
+    # Sclera (eye white)
+    sclera_pts = [
+        (ex - 7*s*dir_mul, ey + 1*s),
+        (ex - 4*s*dir_mul, ey - 3*s),
+        (ex + 4*s*dir_mul, ey - 3*s),
+        (ex + 7*s*dir_mul, ey + 2*s),
+        (ex + 3*s*dir_mul, ey + 7*s),
+        (ex - 4*s*dir_mul, ey + 7*s)
+    ]
+    draw_curved_polygon(draw, sclera_pts, fill=(255, 255, 255, 255), outline=theme["outline"], width=s)
+
+    # Large Gradient Iris
+    iris_glow = theme.get("glow", (120, 200, 255, 255))
+    iris_dark = theme.get("primary_dark", (40, 50, 70, 255))
+    draw.ellipse([ex - 4*s, ey - 2*s, ex + 4*s, ey + 6*s], fill=iris_glow)
+    # Upper iris shadow (cast by upper eyelid)
+    draw.chord([ex - 4*s, ey - 2*s, ex + 4*s, ey + 6*s], start=180, end=360, fill=iris_dark)
+
+    # Deep Pupil
+    draw.ellipse([ex - 2*s, ey, ex + 2*s, ey + 5*s], fill=theme["outline"])
+    draw.ellipse([ex - 1*s, ey + 1*s, ex + 1*s, ey + 4*s], fill=(0, 0, 0, 255))
+
+    # Dual Specular Catchlights (The unmistakable anime gleam!)
+    # Primary star/circle highlight (top-left)
+    draw.ellipse([ex - 3*s, ey - 1*s, ex - 1*s, ey + 2*s], fill=(255, 255, 255, 255))
+    # Secondary soft reflection highlight (bottom-right)
+    draw.ellipse([ex + 1*s, ey + 3*s, ex + 2*s, ey + 5*s], fill=(240, 245, 255, 220))
+
+    # Bold winged upper eyelash curve
+    lash_pts = [
+        (ex - 8*s*dir_mul, ey + 2*s),
+        (ex - 4*s*dir_mul, ey - 4*s),
+        (ex + 2*s*dir_mul, ey - 4*s),
+        (ex + 8*s*dir_mul, ey - 1*s),
+        (ex + 10*s*dir_mul, ey - 3*s) # Wing flick
+    ]
+    draw_curved_line(draw, lash_pts, fill=theme["outline"], width=2*s)
+
+    # Delicate lower eyelash accent
+    lower_lash_pts = [
+        (ex - 4*s*dir_mul, ey + 7*s),
+        (ex + 3*s*dir_mul, ey + 7*s),
+        (ex + 6*s*dir_mul, ey + 6*s)
+    ]
+    draw_curved_line(draw, lower_lash_pts, fill=theme["outline"], width=s)
+
+    # Eyelid crease line above the eye
+    draw_curved_line(draw, [(ex - 5*s*dir_mul, ey - 7*s), (ex, ey - 7*s), (ex + 4*s*dir_mul, ey - 6*s)], fill=theme["outline"], width=s)
+
+    # Anime blush lines on cheek below eye
+    blush_col = (255, 140, 160, 180)
+    for bx in [-3, 0, 3]:
+        draw.line([(ex + (bx-1)*s, ey + 10*s), (ex + (bx+1)*s, ey + 13*s)], fill=blush_col, width=s)
+
+
+
+# ==============================================================================
 # Dynamic Prompt & Species Analyzer
 # ==============================================================================
 def detect_species(prompt: str, archetype: str = "") -> str:
-    """Extracts the biological / thematic species from the user's prompt text."""
+    """Extracts the biological / thematic species from the user's prompt text using word-boundary matching."""
     p = (prompt + " " + archetype).lower()
-    if any(k in p for k in ["alien", "xenomorph", "extraterrestrial", "martian", "biomechanic"]):
-        return "alien"
-    if any(k in p for k in ["demon", "fiend", "devil", "tiefling", "succubus", "oni", "hell"]):
-        return "demon"
-    if any(k in p for k in ["undead", "skeleton", "lich", "ghoul", "zombie", "skull", "bone", "necromancer"]):
-        return "undead"
-    if any(k in p for k in ["reptil", "lizard", "dragon", "drake", "serpent", "snake", "scale", "croc"]):
-        return "reptilian"
-    if any(k in p for k in ["insect", "mantis", "bug", "arachnid", "spider", "beetle", "chitin", "wasp", "ant"]):
-        return "insectoid"
-    if any(k in p for k in ["aquatic", "merfolk", "merman", "mermaid", "fish", "siren", "shark", "coral"]):
-        return "aquatic"
-    if any(k in p for k in ["plant", "dryad", "treant", "tree", "wood", "floral", "vine", "bark", "moss"]):
-        return "plant"
-    if any(k in p for k in ["slime", "ooze", "gelatin", "elemental", "blob"]):
-        return "slime"
-    if any(k in p for k in ["mech", "robot", "cyborg", "automaton", "android", "dieselpunk", "steampunk", "golem"]):
-        return "mech"
-    if any(k in p for k in ["beast", "wolf", "chimera", "hound", "tiger", "lion", "bear", "cat", "fox", "werewolf", "fenrir", "mount"]):
+    def has_any(*words):
+        pattern = r'\b(' + '|'.join(re.escape(w) for w in words) + r')\b'
+        return bool(re.search(pattern, p))
+
+    if has_any("wolfman", "wolf man", "werewolf", "lycan", "beastman", "beast", "wolf", "chimera", "hound", "tiger", "lion", "bear", "cat", "fox", "fenrir", "mount"):
         return "beast"
-    # Default to organic humanoid (human, elf, anime, caster, rogue, warrior)
+    if has_any("alien", "xenomorph", "extraterrestrial", "martian", "biomechanic"):
+        return "alien"
+    if has_any("demon", "fiend", "devil", "tiefling", "succubus", "oni", "hell", "infernal"):
+        return "demon"
+    if has_any("undead", "skeleton", "lich", "ghoul", "zombie", "skull", "bone", "necromancer"):
+        return "undead"
+    if has_any("reptile", "reptilian", "lizard", "dragon", "drake", "serpent", "snake", "scale", "scales", "croc", "crocodile", "dragonkin"):
+        return "reptilian"
+    if has_any("insect", "insectoid", "mantis", "bug", "arachnid", "spider", "beetle", "chitin", "wasp", "ant", "ants"):
+        return "insectoid"
+    if has_any("mech", "robot", "cyborg", "automaton", "android", "dieselpunk", "steampunk", "golem", "titan", "juggernaut"):
+        return "mech"
+    if has_any("aquatic", "merfolk", "merman", "mermaid", "fish", "siren", "shark", "coral"):
+        return "aquatic"
+    if has_any("plant", "dryad", "treant", "tree", "wood", "floral", "vine", "vines", "bark", "moss"):
+        return "plant"
+    if has_any("slime", "ooze", "gelatin", "elemental", "blob"):
+        return "slime"
+    # Default to organic humanoid (human, elf, anime, caster, rogue, warrior, paladin, sorceress)
     return "humanoid"
 
 
@@ -57,10 +162,10 @@ def hex_to_rgba(h_str: str, default=(128, 128, 128, 255)):
     return default
 
 
-def build_palette(prompt: str, archetype: str = "", seed: int = 42, custom_colors: dict = None) -> dict:
+def build_palette(prompt: str, archetype: str = "", seed: int = 42, custom_colors: dict = None, art_style: str = "anime") -> dict:
     """
     Extracts explicit colors from prompt or deterministically synthesizes
-    a rich, harmonious 8-color palette tailored to the creature/humanoid type.
+    a rich, harmonious 8-color palette tailored to the creature/humanoid type and selected art_style.
     Accepts optional custom_colors dict with 'primary', 'accent', 'glow', 'outline' hex values.
     """
     p = (prompt + " " + archetype).lower()
@@ -87,6 +192,7 @@ def build_palette(prompt: str, archetype: str = "", seed: int = 42, custom_color
 
         return {
             "species": species,
+            "art_style": art_style,
             "primary_dark": skin_dark,
             "primary_mid": skin_mid,
             "primary_light": skin_light,
@@ -236,8 +342,32 @@ def build_palette(prompt: str, archetype: str = "", seed: int = 42, custom_color
         255
     )
 
+    # Art style color adjustments
+    if art_style == "dark_fantasy":
+        skin_dark = (max(0, skin_dark[0]-25), max(0, skin_dark[1]-25), max(0, skin_dark[2]-25), 255)
+        skin_mid = (max(0, skin_mid[0]-20), max(0, skin_mid[1]-20), max(0, skin_mid[2]-20), 255)
+        accent_mid = (max(0, accent_mid[0]-20), max(0, accent_mid[1]-20), max(0, accent_mid[2]-20), 255)
+        outline = (8, 9, 12, 255)
+    elif art_style == "cyberpunk":
+        skin_dark = (16, 20, 26, 255)
+        skin_mid = (32, 40, 52, 255)
+        skin_light = (64, 82, 106, 255)
+        outline = (10, 12, 18, 255)
+    elif art_style == "pixel_arcade":
+        def q(c): return ((c[0]//32)*32, (c[1]//32)*32, (c[2]//32)*32, 255)
+        skin_dark = q(skin_dark)
+        skin_mid = q(skin_mid)
+        skin_light = q(skin_light)
+        accent_mid = q(accent_mid)
+        outline = (12, 14, 20, 255)
+    elif art_style == "comic_ink":
+        outline = (0, 0, 0, 255)
+    elif art_style == "moba_chibi":
+        skin_light = (min(255, skin_light[0]+25), min(255, skin_light[1]+25), min(255, skin_light[2]+25), 255)
+
     return {
         "species": species,
+        "art_style": art_style,
         "primary_dark": skin_dark,
         "primary_mid": skin_mid,
         "primary_light": skin_light,
@@ -261,7 +391,7 @@ def draw_head(draw, w, h, s, theme, seed=42):
 
     if sp == "alien":
         # 👾 Elongated bulbous cranium sloping back
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 14*s, cy + 18*s), # Chin
             (cx - 18*s, cy + 4*s),  # Cheek
             (cx - 22*s, cy - 8*s),  # Temple
@@ -275,7 +405,7 @@ def draw_head(draw, w, h, s, theme, seed=42):
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
 
         # Cranium biomechanical highlight
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 12*s, cy - 10*s),
             (cx - 8*s, cy - 24*s),
             (cx, cy - 27*s),
@@ -305,27 +435,27 @@ def draw_head(draw, w, h, s, theme, seed=42):
         # 😈 Menacing horned demon
         # Sweeping curved demonic horns
         # Left Horn
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 12*s, cy - 12*s),
             (cx - 24*s, cy - 22*s),
             (cx - 28*s, cy - 36*s), # Horn tip
             (cx - 18*s, cy - 28*s),
             (cx - 6*s, cy - 14*s)
         ], fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
-        draw.polygon([(cx - 26*s, cy - 34*s), (cx - 21*s, cy - 28*s), (cx - 16*s, cy - 24*s)], fill=theme["accent_light"])
+        draw_curved_polygon(draw, [(cx - 26*s, cy - 34*s), (cx - 21*s, cy - 28*s), (cx - 16*s, cy - 24*s)], fill=theme["accent_light"])
 
         # Right Horn
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx + 12*s, cy - 12*s),
             (cx + 24*s, cy - 22*s),
             (cx + 28*s, cy - 36*s), # Horn tip
             (cx + 18*s, cy - 28*s),
             (cx + 6*s, cy - 14*s)
         ], fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
-        draw.polygon([(cx + 26*s, cy - 34*s), (cx + 21*s, cy - 28*s), (cx + 16*s, cy - 24*s)], fill=theme["accent_light"])
+        draw_curved_polygon(draw, [(cx + 26*s, cy - 34*s), (cx + 21*s, cy - 28*s), (cx + 16*s, cy - 24*s)], fill=theme["accent_light"])
 
         # Demon face
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 16*s, cy - 12*s),
             (cx + 16*s, cy - 12*s),
             (cx + 14*s, cy + 6*s),
@@ -336,7 +466,7 @@ def draw_head(draw, w, h, s, theme, seed=42):
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
 
         # Forehead demonic runic mark
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx, cy - 10*s),
             (cx + 4*s, cy - 4*s),
             (cx, cy + 1*s),
@@ -356,7 +486,7 @@ def draw_head(draw, w, h, s, theme, seed=42):
 
     elif sp == "undead":
         # 💀 Bony skull with glowing soul sockets
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 14*s, cy - 18*s),
             (cx + 14*s, cy - 18*s),
             (cx + 16*s, cy - 4*s),
@@ -368,8 +498,8 @@ def draw_head(draw, w, h, s, theme, seed=42):
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
 
         # Temple hollows
-        draw.polygon([(cx - 14*s, cy), (cx - 10*s, cy), (cx - 12*s, cy + 6*s)], fill=theme["primary_dark"])
-        draw.polygon([(cx + 14*s, cy), (cx + 10*s, cy), (cx + 12*s, cy + 6*s)], fill=theme["primary_dark"])
+        draw_curved_polygon(draw, [(cx - 14*s, cy), (cx - 10*s, cy), (cx - 12*s, cy + 6*s)], fill=theme["primary_dark"])
+        draw_curved_polygon(draw, [(cx + 14*s, cy), (cx + 10*s, cy), (cx + 12*s, cy + 6*s)], fill=theme["primary_dark"])
 
         # Hollow eye sockets with floating soul fire
         draw.ellipse([cx - 10*s, cy - 4*s, cx - 3*s, cy + 4*s], fill=theme["outline"])
@@ -388,12 +518,11 @@ def draw_head(draw, w, h, s, theme, seed=42):
 
     elif sp == "reptilian":
         # 🦎 Dragon / Reptilian snout with horns and scales
-        # Dragon brow horns
-        draw.polygon([(cx - 10*s, cy - 10*s), (cx - 24*s, cy - 24*s), (cx - 14*s, cy - 18*s)], fill=theme["accent_mid"], outline=theme["outline"], width=s)
-        draw.polygon([(cx + 10*s, cy - 10*s), (cx + 24*s, cy - 24*s), (cx + 14*s, cy - 18*s)], fill=theme["accent_mid"], outline=theme["outline"], width=s)
+        draw_curved_polygon(draw, [(cx - 10*s, cy - 10*s), (cx - 24*s, cy - 24*s), (cx - 14*s, cy - 18*s)], fill=theme["accent_mid"], outline=theme["outline"], width=s)
+        draw_curved_polygon(draw, [(cx + 10*s, cy - 10*s), (cx + 24*s, cy - 24*s), (cx + 14*s, cy - 18*s)], fill=theme["accent_mid"], outline=theme["outline"], width=s)
 
         # Scaled head
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 16*s, cy - 12*s),
             (cx + 16*s, cy - 12*s),
             (cx + 18*s, cy + 2*s),
@@ -417,12 +546,11 @@ def draw_head(draw, w, h, s, theme, seed=42):
 
     elif sp == "insectoid":
         # 🦗 Insectoid triangular carapace head with antennae & compound eyes
-        # Long curved antennae
         draw.line([(cx - 6*s, cy - 12*s), (cx - 22*s, cy - 32*s)], fill=theme["accent_light"], width=2*s)
         draw.line([(cx + 6*s, cy - 12*s), (cx + 22*s, cy - 32*s)], fill=theme["accent_light"], width=2*s)
 
         # Carapace head
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 16*s, cy - 16*s),
             (cx + 16*s, cy - 16*s),
             (cx + 20*s, cy),
@@ -436,12 +564,12 @@ def draw_head(draw, w, h, s, theme, seed=42):
         draw.ellipse([cx + 7*s, cy - 8*s, cx + 18*s, cy + 8*s], fill=theme["glow"], outline=theme["outline"], width=s)
 
         # Clicking mandibles
-        draw.polygon([(cx - 8*s, cy + 14*s), (cx - 3*s, cy + 26*s), (cx - 1*s, cy + 18*s)], fill=theme["accent_mid"], outline=theme["outline"])
-        draw.polygon([(cx + 8*s, cy + 14*s), (cx + 3*s, cy + 26*s), (cx + 1*s, cy + 18*s)], fill=theme["accent_mid"], outline=theme["outline"])
+        draw_curved_polygon(draw, [(cx - 8*s, cy + 14*s), (cx - 3*s, cy + 26*s), (cx - 1*s, cy + 18*s)], fill=theme["accent_mid"], outline=theme["outline"])
+        draw_curved_polygon(draw, [(cx + 8*s, cy + 14*s), (cx + 3*s, cy + 26*s), (cx + 1*s, cy + 18*s)], fill=theme["accent_mid"], outline=theme["outline"])
 
     elif sp == "mech":
         # 🤖 Robotic helmet with visor
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 18*s, cy - 20*s),
             (cx + 18*s, cy - 20*s),
             (cx + 20*s, cy + 4*s),
@@ -457,58 +585,146 @@ def draw_head(draw, w, h, s, theme, seed=42):
         draw.rectangle([cx - 14*s, cy - 2*s, cx + 14*s, cy + 4*s], fill=theme["glow"], outline=theme["outline"], width=s)
         draw.rectangle([cx - 10*s, cy - 1*s, cx + 10*s, cy + 3*s], fill=theme["glow_core"])
 
-    else:
-        # 🧝 Humanoid / Elf with organic skin, expressive anime eyes, and styled hair
-        # Base skin face
-        draw.polygon([
-            (cx - 13*s, cy - 10*s),
-            (cx + 13*s, cy - 10*s),
-            (cx + 14*s, cy + 4*s),
-            (cx + 8*s, cy + 16*s),
-            (cx, cy + 21*s), # Chin
-            (cx - 8*s, cy + 16*s),
-            (cx - 14*s, cy + 4*s)
+    elif sp == "beast":
+        # 🐺 Werewolf / Beast Head with alert ears, furry cheeks, predatory muzzle and sharp fangs
+        draw_curved_polygon(draw, [(cx - 16*s, cy - 8*s), (cx - 22*s, cy - 30*s), (cx - 8*s, cy - 16*s)], fill=theme["primary_dark"], outline=theme["outline"], width=2*s)
+        draw_curved_polygon(draw, [(cx - 17*s, cy - 12*s), (cx - 20*s, cy - 26*s), (cx - 10*s, cy - 16*s)], fill=theme["accent_light"])
+
+        draw_curved_polygon(draw, [(cx + 16*s, cy - 8*s), (cx + 22*s, cy - 30*s), (cx + 8*s, cy - 16*s)], fill=theme["primary_dark"], outline=theme["outline"], width=2*s)
+        draw_curved_polygon(draw, [(cx + 17*s, cy - 12*s), (cx + 20*s, cy - 26*s), (cx + 10*s, cy - 16*s)], fill=theme["accent_light"])
+
+        # Skull and furry cheek tufts
+        draw_curved_polygon(draw, [
+            (cx - 15*s, cy - 16*s),
+            (cx + 15*s, cy - 16*s),
+            (cx + 22*s, cy - 4*s),
+            (cx + 16*s, cy + 8*s),
+            (cx + 9*s, cy + 22*s),
+            (cx - 9*s, cy + 22*s),
+            (cx - 16*s, cy + 8*s),
+            (cx - 22*s, cy - 4*s)
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
 
-        # Elven pointed ears or earrings
-        draw.polygon([(cx - 14*s, cy - 4*s), (cx - 22*s, cy - 10*s), (cx - 13*s, cy + 4*s)], fill=theme["primary_mid"], outline=theme["outline"], width=s)
-        draw.polygon([(cx + 14*s, cy - 4*s), (cx + 22*s, cy - 10*s), (cx + 13*s, cy + 4*s)], fill=theme["primary_mid"], outline=theme["outline"], width=s)
+        # Muzzle bridge
+        draw.polygon([(cx - 6*s, cy - 4*s), (cx + 6*s, cy - 4*s), (cx + 7*s, cy + 16*s), (cx - 7*s, cy + 16*s)], fill=theme["primary_light"], outline=theme["outline"], width=s)
+        # Dark nose
+        draw.polygon([(cx - 4*s, cy + 8*s), (cx + 4*s, cy + 8*s), (cx, cy + 13*s)], fill=theme["outline"])
+        # Sharp bared white fangs
+        draw.polygon([(cx - 6*s, cy + 15*s), (cx - 3*s, cy + 22*s), (cx - 1*s, cy + 15*s)], fill=(250, 250, 245, 255), outline=theme["outline"])
+        draw.polygon([(cx + 1*s, cy + 15*s), (cx + 3*s, cy + 22*s), (cx + 6*s, cy + 15*s)], fill=(250, 250, 245, 255), outline=theme["outline"])
 
-        # Expressive anime eyes (colored iris, pupil, highlight sparkle)
-        # Left eye
-        draw.ellipse([cx - 11*s, cy - 1*s, cx - 4*s, cy + 7*s], fill=(255, 255, 255, 255), outline=theme["outline"], width=s)
-        draw.ellipse([cx - 9*s, cy, cx - 5*s, cy + 6*s], fill=theme["glow"])
-        draw.ellipse([cx - 8*s, cy + 1*s, cx - 6*s, cy + 4*s], fill=theme["outline"])
-        draw.ellipse([cx - 8*s, cy, cx - 7*s, cy + 2*s], fill=(255, 255, 255, 255)) # Sparkle
+        # Predatory beast eyes
+        draw.polygon([(cx - 13*s, cy - 4*s), (cx - 5*s, cy - 2*s), (cx - 6*s, cy + 3*s), (cx - 12*s, cy + 1*s)], fill=theme["glow"], outline=theme["outline"], width=s)
+        draw.polygon([(cx + 13*s, cy - 4*s), (cx + 5*s, cy - 2*s), (cx + 6*s, cy + 3*s), (cx + 12*s, cy + 1*s)], fill=theme["glow"], outline=theme["outline"], width=s)
+        draw.ellipse([cx - 9*s, cy - 2*s, cx - 7*s, cy + 1*s], fill=theme["glow_core"])
+        draw.ellipse([cx + 7*s, cy - 2*s, cx + 9*s, cy + 1*s], fill=theme["glow_core"])
 
-        # Right eye
-        draw.ellipse([cx + 4*s, cy - 1*s, cx + 11*s, cy + 7*s], fill=(255, 255, 255, 255), outline=theme["outline"], width=s)
-        draw.ellipse([cx + 5*s, cy, cx + 9*s, cy + 6*s], fill=theme["glow"])
-        draw.ellipse([cx + 6*s, cy + 1*s, cx + 8*s, cy + 4*s], fill=theme["outline"])
-        draw.ellipse([cx + 6*s, cy, cx + 7*s, cy + 2*s], fill=(255, 255, 255, 255)) # Sparkle
-
-        # Delicate mouth & eyebrows
-        draw.line([(cx - 10*s, cy - 4*s), (cx - 4*s, cy - 5*s)], fill=theme["accent_mid"], width=s)
-        draw.line([(cx + 4*s, cy - 5*s), (cx + 10*s, cy - 4*s)], fill=theme["accent_mid"], width=s)
-        draw.line([(cx - 3*s, cy + 13*s), (cx + 3*s, cy + 13*s)], fill=theme["primary_dark"], width=s)
-
-        # Stylized anime hair / bangs / crown
-        draw.polygon([
-            (cx - 17*s, cy + 6*s),
+    else:
+        # 🧝 Humanoid / Anime Character (e.g. Elf Sorceress, Paladin, Cyber Ninja, Rogue)
+        # 1. Back Hair Layer (flowing silhouette behind head & neck)
+        back_hair_pts = [
             (cx - 16*s, cy - 14*s),
-            (cx - 8*s, cy - 26*s),
-            (cx, cy - 28*s),
-            (cx + 8*s, cy - 26*s),
+            (cx - 24*s, cy + 2*s),
+            (cx - 22*s, cy + 26*s),
+            (cx - 15*s, cy + 24*s),
+            (cx - 12*s, cy + 16*s),
+            (cx + 12*s, cy + 16*s),
+            (cx + 15*s, cy + 24*s),
+            (cx + 22*s, cy + 26*s),
+            (cx + 24*s, cy + 2*s),
             (cx + 16*s, cy - 14*s),
-            (cx + 17*s, cy + 6*s),
-            (cx + 13*s, cy - 2*s),
-            (cx + 7*s, cy - 6*s),
-            (cx + 2*s, cy - 2*s),  # Center bang tuft
-            (cx - 3*s, cy - 5*s),
-            (cx - 8*s, cy - 1*s),
-            (cx - 13*s, cy - 2*s)
-        ], fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
-        draw.polygon([(cx - 12*s, cy - 20*s), (cx, cy - 24*s), (cx + 6*s, cy - 18*s)], fill=theme["accent_light"])
+            (cx, cy - 28*s)
+        ]
+        draw_curved_polygon(draw, back_hair_pts, fill=theme["accent_dark"], outline=theme["outline"], width=2*s)
+
+        # 2. Smooth, organic anime jaw and cranium
+        face_pts = [
+            (cx - 14*s, cy - 12*s), # Temple L
+            (cx - 15*s, cy + 2*s),  # Cheek L
+            (cx - 9*s, cy + 14*s),  # Jaw L
+            (cx, cy + 20*s),        # Cute anime chin
+            (cx + 9*s, cy + 14*s),  # Jaw R
+            (cx + 15*s, cy + 2*s),  # Cheek R
+            (cx + 14*s, cy - 12*s), # Temple R
+            (cx, cy - 22*s)         # Forehead
+        ]
+        draw_curved_polygon(draw, face_pts, fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+
+        # 3. Delicate anime ears (pointed for elf, or delicate curve for human)
+        is_elf = "elf" in theme.get("archetype", "") or "sorceress" in theme.get("species", "") or "mage" in theme.get("archetype", "")
+        if is_elf:
+            # Swept back elven ears
+            ear_l = [(cx - 14*s, cy - 2*s), (cx - 26*s, cy - 8*s), (cx - 13*s, cy + 6*s)]
+            ear_r = [(cx + 14*s, cy - 2*s), (cx + 26*s, cy - 8*s), (cx + 13*s, cy + 6*s)]
+            draw_curved_polygon(draw, ear_l, fill=theme["primary_mid"], outline=theme["outline"], width=s)
+            draw_curved_polygon(draw, ear_r, fill=theme["primary_mid"], outline=theme["outline"], width=s)
+            draw_curved_line(draw, [(cx - 14*s, cy), (cx - 22*s, cy - 5*s)], fill=theme["primary_dark"], width=s)
+            draw_curved_line(draw, [(cx + 14*s, cy), (cx + 22*s, cy - 5*s)], fill=theme["primary_dark"], width=s)
+        else:
+            ear_l = [(cx - 14*s, cy - 3*s), (cx - 18*s, cy + 2*s), (cx - 13*s, cy + 7*s)]
+            ear_r = [(cx + 14*s, cy - 3*s), (cx + 18*s, cy + 2*s), (cx + 13*s, cy + 7*s)]
+            draw_curved_polygon(draw, ear_l, fill=theme["primary_mid"], outline=theme["outline"], width=s)
+            draw_curved_polygon(draw, ear_r, fill=theme["primary_mid"], outline=theme["outline"], width=s)
+
+        # 4. Soft cel-shading under chin & neck shadow
+        chin_shadow = [(cx - 7*s, cy + 16*s), (cx, cy + 14*s), (cx + 7*s, cy + 16*s), (cx, cy + 20*s)]
+        draw_curved_polygon(draw, chin_shadow, fill=theme["primary_dark"])
+
+        # 5. Expressive, sparkling anime eyes (with gradient iris, dual catchlights, winged lashes, blush)
+        draw_expressive_anime_eye(draw, cx - 8*s, cy + 2*s, s, theme, is_left=True)
+        draw_expressive_anime_eye(draw, cx + 8*s, cy + 2*s, s, theme, is_left=False)
+
+        # 6. Stylized anime eyebrows
+        brow_l = [(cx - 12*s, cy - 6*s), (cx - 8*s, cy - 8*s), (cx - 4*s, cy - 7*s)]
+        brow_r = [(cx + 4*s, cy - 7*s), (cx + 8*s, cy - 8*s), (cx + 12*s, cy - 6*s)]
+        draw_curved_line(draw, brow_l, fill=theme["accent_dark"], width=s)
+        draw_curved_line(draw, brow_r, fill=theme["accent_dark"], width=s)
+
+        # 7. Subtle anime nose and mouth
+        draw.polygon([(cx, cy + 8*s), (cx + 1*s, cy + 9*s), (cx, cy + 10*s)], fill=theme["primary_dark"])
+        mouth_pts = [(cx - 4*s, cy + 13*s), (cx - 1*s, cy + 14*s), (cx + 1*s, cy + 14*s), (cx + 4*s, cy + 13*s)]
+        draw_curved_line(draw, mouth_pts, fill=theme["outline"], width=s)
+        draw.line([(cx - 1*s, cy + 15*s), (cx + 1*s, cy + 15*s)], fill=theme["primary_light"], width=s)
+
+        # 8. Multi-layered front hair crown, stylish bangs, and sidelocks
+        front_hair_pts = [
+            (cx - 18*s, cy + 6*s),   # Sidelock left tip
+            (cx - 17*s, cy - 14*s),
+            (cx - 10*s, cy - 26*s),
+            (cx, cy - 29*s),         # Crown top
+            (cx + 10*s, cy - 26*s),
+            (cx + 17*s, cy - 14*s),
+            (cx + 18*s, cy + 6*s),   # Sidelock right tip
+            (cx + 14*s, cy - 4*s),
+            (cx + 9*s, cy - 2*s),    # Right fringe
+            (cx + 5*s, cy - 6*s),
+            (cx + 2*s, cy - 1*s),    # Center bang
+            (cx - 3*s, cy - 6*s),
+            (cx - 7*s, cy - 2*s),    # Left fringe
+            (cx - 13*s, cy - 4*s)
+        ]
+        draw_curved_polygon(draw, front_hair_pts, fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
+
+        # 9. Luminous Anime Hair Sheen / Halo Highlight Band
+        sheen_pts = [
+            (cx - 12*s, cy - 18*s),
+            (cx - 5*s, cy - 23*s),
+            (cx + 5*s, cy - 23*s),
+            (cx + 12*s, cy - 18*s)
+        ]
+        draw_curved_line(draw, sheen_pts, fill=theme["accent_light"], width=3*s)
+        for hx in [-6, 0, 6]:
+            draw.polygon([(cx + (hx-1)*s, cy - 22*s), (cx + hx*s, cy - 25*s), (cx + (hx+1)*s, cy - 22*s)], fill=(255, 255, 255, 200))
+
+        # 10. Playful Ahoge / Cowlick strand flick at crown
+        ahoge_pts = [(cx - 2*s, cy - 28*s), (cx + 3*s, cy - 35*s), (cx + 8*s, cy - 32*s), (cx + 2*s, cy - 27*s)]
+        draw_curved_line(draw, ahoge_pts, fill=theme["accent_mid"], width=2*s)
+
+        # 11. Head accessory: Jeweled circlet / diadem
+        circlet_pts = [(cx - 15*s, cy - 10*s), (cx, cy - 13*s), (cx + 15*s, cy - 10*s)]
+        draw_curved_line(draw, circlet_pts, fill=theme["accent_light"], width=2*s)
+        draw.ellipse([cx - 3*s, cy - 15*s, cx + 3*s, cy - 9*s], fill=theme["glow"], outline=theme["outline"], width=s)
+        draw.ellipse([cx - 1*s, cy - 14*s, cx + 1*s, cy - 11*s], fill=theme["glow_core"])
 
 
 def draw_torso(draw, w, h, s, theme, seed=42):
@@ -517,7 +733,7 @@ def draw_torso(draw, w, h, s, theme, seed=42):
 
     if sp == "alien":
         # 👾 Biomechanical carapace with glowing bio-core
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 24*s, cy - 22*s),
             (cx + 24*s, cy - 22*s),
             (cx + 20*s, cy + 6*s),
@@ -527,19 +743,17 @@ def draw_torso(draw, w, h, s, theme, seed=42):
             (cx - 20*s, cy + 6*s)
         ], fill=theme["primary_dark"], outline=theme["outline"], width=2*s)
 
-        # Side biomechanical ribs
         for ry in [-12, -2, 8]:
             draw.line([(cx - 20*s, cy + ry*s), (cx - 8*s, cy + ry*s)], fill=theme["primary_light"], width=2*s)
             draw.line([(cx + 8*s, cy + ry*s), (cx + 20*s, cy + ry*s)], fill=theme["primary_light"], width=2*s)
 
-        # Central glowing pulsating alien core
         draw.ellipse([cx - 8*s, cy - 8*s, cx + 8*s, cy + 8*s], fill=theme["primary_dark"], outline=theme["glow"], width=2*s)
         draw.ellipse([cx - 5*s, cy - 5*s, cx + 5*s, cy + 5*s], fill=theme["glow"])
         draw.ellipse([cx - 2*s, cy - 2*s, cx + 2*s, cy + 2*s], fill=theme["glow_core"])
 
     elif sp == "demon":
-        # 😈 Muscular demonic torso with fiery runic scar/brand
-        draw.polygon([
+        # 😈 Muscular demonic torso with fiery runic brand
+        draw_curved_polygon(draw, [
             (cx - 26*s, cy - 22*s),
             (cx + 26*s, cy - 22*s),
             (cx + 22*s, cy + 4*s),
@@ -549,13 +763,11 @@ def draw_torso(draw, w, h, s, theme, seed=42):
             (cx - 22*s, cy + 4*s)
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
 
-        # Pectoral & ab shading
         draw.line([(cx, cy - 18*s), (cx, cy + 18*s)], fill=theme["primary_dark"], width=2*s)
         draw.arc([cx - 18*s, cy - 14*s, cx - 2*s, cy - 2*s], 0, 180, fill=theme["primary_dark"], width=2*s)
         draw.arc([cx + 2*s, cy - 14*s, cx + 18*s, cy - 2*s], 0, 180, fill=theme["primary_dark"], width=2*s)
 
-        # Glowing fiery runic scar
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx, cy - 6*s),
             (cx + 7*s, cy),
             (cx, cy + 6*s),
@@ -566,43 +778,121 @@ def draw_torso(draw, w, h, s, theme, seed=42):
     elif sp == "undead":
         # 💀 Exposed skeletal ribcage with floating soul orb
         draw.rectangle([cx - 20*s, cy - 20*s, cx + 20*s, cy + 24*s], fill=theme["outline"])
-        # Central spine column
         draw.rectangle([cx - 4*s, cy - 22*s, cx + 4*s, cy + 26*s], fill=theme["primary_mid"], outline=theme["primary_dark"], width=s)
 
-        # Rib pairs curving around
         for ry in [-14, -6, 2, 10]:
             draw.arc([cx - 20*s, cy + (ry-4)*s, cx - 2*s, cy + (ry+6)*s], 180, 360, fill=theme["primary_light"], width=3*s)
             draw.arc([cx + 2*s, cy + (ry-4)*s, cx + 20*s, cy + (ry+6)*s], 180, 360, fill=theme["primary_light"], width=3*s)
 
-        # Floating soul orb inside chest
         draw.ellipse([cx - 6*s, cy - 4*s, cx + 6*s, cy + 8*s], fill=theme["glow"])
         draw.ellipse([cx - 2*s, cy - 1*s, cx + 2*s, cy + 4*s], fill=theme["glow_core"])
 
-    else:
-        # 🧝 Humanoid / Adventurer cloth tunic / robe / leather doublet
-        draw.polygon([
+    elif sp == "beast":
+        # 🐺 Muscular Beast Torso with Thick Fur Ruff
+        draw_curved_polygon(draw, [
+            (cx - 26*s, cy - 22*s),
+            (cx + 26*s, cy - 22*s),
+            (cx + 22*s, cy + 6*s),
+            (cx + 14*s, cy + 24*s),
+            (cx, cy + 28*s),
+            (cx - 14*s, cy + 24*s),
+            (cx - 22*s, cy + 6*s)
+        ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+
+        draw_curved_polygon(draw, [
             (cx - 24*s, cy - 22*s),
-            (cx + 24*s, cy - 22*s),
-            (cx + 20*s, cy + 6*s),
+            (cx - 18*s, cy - 14*s),
+            (cx - 26*s, cy - 8*s),
+            (cx - 12*s, cy - 2*s),
+            (cx, cy - 6*s),
+            (cx + 12*s, cy - 2*s),
+            (cx + 26*s, cy - 8*s),
+            (cx + 18*s, cy - 14*s),
+            (cx + 24*s, cy - 22*s)
+        ], fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
+
+        draw.line([(cx - 16*s, cy - 12*s), (cx + 14*s, cy + 16*s)], fill=theme["accent_dark"], width=3*s)
+        draw.line([(cx + 16*s, cy - 12*s), (cx - 14*s, cy + 16*s)], fill=theme["accent_dark"], width=3*s)
+
+        draw.ellipse([cx - 6*s, cy - 2*s, cx + 6*s, cy + 10*s], fill=theme["glow"], outline=theme["outline"], width=s)
+        draw.ellipse([cx - 2*s, cy + 1*s, cx + 2*s, cy + 6*s], fill=theme["glow_core"])
+
+    elif sp == "mech":
+        # 🤖 Heavy industrial mech torso with furnace core and hazard stripes
+        draw_curved_polygon(draw, [
+            (cx - 26*s, cy - 22*s),
+            (cx + 26*s, cy - 22*s),
+            (cx + 22*s, cy + 8*s),
             (cx + 14*s, cy + 24*s),
             (cx, cy + 26*s),
             (cx - 14*s, cy + 24*s),
-            (cx - 20*s, cy + 6*s)
-        ], fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
+            (cx - 22*s, cy + 8*s)
+        ], fill=theme["primary_dark"], outline=theme["outline"], width=2*s)
+        draw.rectangle([cx - 20*s, cy - 18*s, cx + 20*s, cy - 4*s], fill=theme["primary_mid"], outline=theme["outline"], width=s)
+        for hx in range(-16, 16, 8):
+            draw.line([(cx + hx*s, cy - 16*s), (cx + (hx+5)*s, cy - 6*s)], fill=theme["accent_mid"], width=2*s)
+        draw.rectangle([cx - 8*s, cy, cx + 8*s, cy + 14*s], fill=theme["glow"], outline=theme["outline"], width=s)
+        draw.rectangle([cx - 4*s, cy + 3*s, cx + 4*s, cy + 11*s], fill=theme["glow_core"])
 
-        # V-neck / collar / open vest showing skin or shirt
-        draw.polygon([
-            (cx - 10*s, cy - 22*s),
-            (cx + 10*s, cy - 22*s),
-            (cx, cy - 4*s)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=s)
+    else:
+        # 🧝 Humanoid / Anime Torso with organic contouring, tailored doublet/corset, and convex joint sockets
+        torso_contour = [
+            (cx - 8*s, cy - 24*s),   # Neck socket left
+            (cx - 18*s, cy - 22*s),  # Clavicle left
+            (cx - 24*s, cy - 14*s),  # Shoulder left
+            (cx - 21*s, cy - 2*s),   # Chest / armpit left
+            (cx - 14*s, cy + 12*s),  # Tapered anime waist left
+            (cx - 17*s, cy + 24*s),  # Flare to pelvis left
+            (cx, cy + 26*s),         # Center bottom convex cap (attaches to pelvis)
+            (cx + 17*s, cy + 24*s),  # Flare to pelvis right
+            (cx + 14*s, cy + 12*s),  # Tapered anime waist right
+            (cx + 21*s, cy - 2*s),   # Chest / armpit right
+            (cx + 24*s, cy - 14*s),  # Shoulder right
+            (cx + 18*s, cy - 22*s),  # Clavicle right
+            (cx + 8*s, cy - 24*s)    # Neck socket right
+        ]
+        draw_curved_polygon(draw, torso_contour, fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
 
-        # Trim lapels and center buttons / buckle
-        draw.line([(cx - 10*s, cy - 22*s), (cx, cy + 20*s)], fill=theme["accent_light"], width=2*s)
-        draw.line([(cx + 10*s, cy - 22*s), (cx, cy + 20*s)], fill=theme["accent_light"], width=2*s)
-        # Gem / Brooch / Core
-        draw.ellipse([cx - 4*s, cy - 6*s, cx + 4*s, cy + 2*s], fill=theme["glow"], outline=theme["outline"], width=s)
-        draw.ellipse([cx - 1*s, cy - 4*s, cx + 1*s, cy - 1*s], fill=theme["glow_core"])
+        # Ambient cel-shading along the flanks
+        left_shade = [
+            (cx - 18*s, cy - 20*s),
+            (cx - 23*s, cy - 12*s),
+            (cx - 20*s, cy),
+            (cx - 14*s, cy + 12*s),
+            (cx - 16*s, cy + 22*s),
+            (cx - 10*s, cy + 20*s),
+            (cx - 14*s, cy + 6*s),
+            (cx - 16*s, cy - 10*s)
+        ]
+        draw_curved_polygon(draw, left_shade, fill=theme["accent_dark"])
+
+        # Elegant V-neck / collar showing inner shirt or skin
+        vneck_pts = [
+            (cx - 9*s, cy - 24*s),
+            (cx + 9*s, cy - 24*s),
+            (cx + 7*s, cy - 14*s),
+            (cx, cy - 4*s),
+            (cx - 7*s, cy - 14*s)
+        ]
+        draw_curved_polygon(draw, vneck_pts, fill=theme["primary_mid"], outline=theme["outline"], width=s)
+        draw_curved_polygon(draw, [(cx - 6*s, cy - 24*s), (cx + 6*s, cy - 24*s), (cx, cy - 18*s)], fill=theme["primary_dark"])
+
+        # Decorative gold/accent piping / vest lapel curves
+        lapel_l = [(cx - 9*s, cy - 24*s), (cx - 7*s, cy - 10*s), (cx - 2*s, cy + 18*s)]
+        lapel_r = [(cx + 9*s, cy - 24*s), (cx + 7*s, cy - 10*s), (cx + 2*s, cy + 18*s)]
+        draw_curved_line(draw, lapel_l, fill=theme["accent_light"], width=2*s)
+        draw_curved_line(draw, lapel_r, fill=theme["accent_light"], width=2*s)
+
+        # Center corset laces
+        for by in range(-2, 16, 5):
+            draw.line([(cx - 3*s, cy + by*s), (cx + 3*s, cy + (by+2)*s)], fill=theme["accent_light"], width=s)
+            draw.line([(cx + 3*s, cy + by*s), (cx - 3*s, cy + (by+2)*s)], fill=theme["accent_light"], width=s)
+
+        # Ornate Chest Brooch / Soul Gem (with glow, core gleam, and setting)
+        draw.ellipse([cx - 5*s, cy - 7*s, cx + 5*s, cy + 3*s], fill=theme["accent_light"], outline=theme["outline"], width=s)
+        draw.ellipse([cx - 4*s, cy - 6*s, cx + 4*s, cy + 2*s], fill=theme["glow"])
+        draw.ellipse([cx - 2*s, cy - 4*s, cx + 1*s, cy - 1*s], fill=theme["glow_core"])
+        draw.ellipse([cx - 1*s, cy - 3*s, cx, cy - 2*s], fill=(255, 255, 255, 255))
 
 
 def draw_pelvis(draw, w, h, s, theme, seed=42):
@@ -610,8 +900,7 @@ def draw_pelvis(draw, w, h, s, theme, seed=42):
     sp = theme["species"]
 
     if sp in ["alien", "insectoid"]:
-        # Chitinous abdominal girdle
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 20*s, cy - 12*s),
             (cx + 20*s, cy - 12*s),
             (cx + 16*s, cy + 14*s),
@@ -620,8 +909,7 @@ def draw_pelvis(draw, w, h, s, theme, seed=42):
         ], fill=theme["primary_dark"], outline=theme["outline"], width=2*s)
         draw.line([(cx - 12*s, cy), (cx + 12*s, cy)], fill=theme["glow"], width=s)
     elif sp == "undead":
-        # Skeletal pelvic bone
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 22*s, cy - 10*s),
             (cx + 22*s, cy - 10*s),
             (cx + 18*s, cy + 6*s),
@@ -631,18 +919,32 @@ def draw_pelvis(draw, w, h, s, theme, seed=42):
         draw.ellipse([cx - 14*s, cy - 4*s, cx - 6*s, cy + 4*s], fill=theme["outline"])
         draw.ellipse([cx + 6*s, cy - 4*s, cx + 14*s, cy + 4*s], fill=theme["outline"])
     else:
-        # Adventurer belt / sash / waist
-        draw.rectangle([cx - 22*s, cy - 12*s, cx + 22*s, cy - 2*s], fill=theme["accent_dark"], outline=theme["outline"], width=s)
-        # Folded sash / loincloth
-        draw.polygon([
-            (cx - 18*s, cy - 2*s),
-            (cx + 18*s, cy - 2*s),
-            (cx + 12*s, cy + 16*s),
-            (cx, cy + 18*s),
-            (cx - 12*s, cy + 16*s)
-        ], fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
-        # Ornate buckle
-        draw.rectangle([cx - 6*s, cy - 10*s, cx + 6*s, cy - 4*s], fill=theme["accent_light"], outline=theme["outline"], width=s)
+        # 🧝 Humanoid / Anime Pelvis with curved waist sash, flowing tunic pleats, and convex hip joints
+        belt_pts = [
+            (cx - 21*s, cy - 14*s),
+            (cx + 21*s, cy - 14*s),
+            (cx + 19*s, cy - 2*s),
+            (cx - 19*s, cy - 2*s)
+        ]
+        draw_curved_polygon(draw, belt_pts, fill=theme["accent_dark"], outline=theme["outline"], width=2*s)
+
+        skirt_pts = [
+            (cx - 19*s, cy - 2*s),
+            (cx - 16*s, cy + 18*s),
+            (cx - 7*s, cy + 16*s),
+            (cx, cy + 20*s),         # Center front dip
+            (cx + 7*s, cy + 16*s),
+            (cx + 16*s, cy + 18*s),
+            (cx + 19*s, cy - 2*s)
+        ]
+        draw_curved_polygon(draw, skirt_pts, fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
+
+        draw_curved_line(draw, [(cx - 12*s, cy - 2*s), (cx - 10*s, cy + 16*s)], fill=theme["accent_dark"], width=s)
+        draw_curved_line(draw, [(cx + 12*s, cy - 2*s), (cx + 10*s, cy + 16*s)], fill=theme["accent_dark"], width=s)
+        draw_curved_line(draw, [(cx, cy - 2*s), (cx, cy + 18*s)], fill=theme["accent_light"], width=s)
+
+        draw.rectangle([cx - 7*s, cy - 12*s, cx + 7*s, cy - 4*s], fill=theme["accent_light"], outline=theme["outline"], width=s)
+        draw.ellipse([cx - 3*s, cy - 10*s, cx + 3*s, cy - 6*s], fill=theme["glow"], outline=theme["outline"], width=s)
 
 
 def draw_arm_upper(draw, w, h, s, theme, is_left=True):
@@ -650,8 +952,7 @@ def draw_arm_upper(draw, w, h, s, theme, is_left=True):
     sp = theme["species"]
 
     if sp == "alien":
-        # Slender organic limb with glowing elbow node
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 10*s, cy - 18*s),
             (cx + 10*s, cy - 18*s),
             (cx + 12*s, cy),
@@ -661,22 +962,45 @@ def draw_arm_upper(draw, w, h, s, theme, is_left=True):
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
         draw.ellipse([cx - 4*s, cy + 12*s, cx + 4*s, cy + 20*s], fill=theme["glow"])
     elif sp == "undead":
-        # Bone shaft (humerus)
         draw.ellipse([cx - 8*s, cy - 18*s, cx + 8*s, cy - 10*s], fill=theme["primary_mid"], outline=theme["outline"], width=s)
         draw.rectangle([cx - 4*s, cy - 12*s, cx + 4*s, cy + 14*s], fill=theme["primary_light"], outline=theme["outline"], width=s)
         draw.ellipse([cx - 7*s, cy + 12*s, cx + 7*s, cy + 20*s], fill=theme["primary_mid"], outline=theme["outline"], width=s)
     else:
-        # Organic muscular arm / cloth sleeve
-        draw.polygon([
-            (cx - 12*s, cy - 18*s),
-            (cx + 12*s, cy - 18*s),
-            (cx + 14*s, cy - 2*s),
-            (cx + 9*s, cy + 18*s),
-            (cx - 9*s, cy + 18*s),
-            (cx - 14*s, cy - 2*s)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
-        # Cuff / bracelet
-        draw.rectangle([cx - 11*s, cy + 12*s, cx + 11*s, cy + 18*s], fill=theme["accent_mid"], outline=theme["outline"], width=s)
+        # 🧝 Humanoid / Anime Upper Arm with Convex Shoulder Cap & Elbow Joint
+        dir_mul = 1 if is_left else -1
+        arm_pts = [
+            (cx - 10*s, cy - 16*s),  # Inner shoulder
+            (cx, cy - 22*s),         # Top convex shoulder cap (prevents rotation gaps!)
+            (cx + 10*s, cy - 16*s),  # Outer shoulder
+            (cx + 12*s, cy - 2*s),   # Outer bicep curve
+            (cx + 8*s, cy + 14*s),   # Outer elbow
+            (cx, cy + 20*s),         # Bottom convex elbow cap (perfect pivot overlap!)
+            (cx - 7*s, cy + 14*s),   # Inner elbow
+            (cx - 9*s, cy - 2*s)     # Inner arm curve
+        ]
+        draw_curved_polygon(draw, arm_pts, fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+
+        hl_pts = [
+            (cx - 3*s * dir_mul, cy - 14*s),
+            (cx - 2*s * dir_mul, cy),
+            (cx - 1*s * dir_mul, cy + 12*s)
+        ]
+        draw_curved_line(draw, hl_pts, fill=theme["primary_light"], width=2*s)
+
+        sh_pts = [
+            (cx + 8*s * dir_mul, cy - 12*s),
+            (cx + 9*s * dir_mul, cy),
+            (cx + 6*s * dir_mul, cy + 12*s)
+        ]
+        draw_curved_line(draw, sh_pts, fill=theme["primary_dark"], width=2*s)
+
+        draw_curved_polygon(draw, [
+            (cx - 11*s, cy - 18*s),
+            (cx + 11*s, cy - 18*s),
+            (cx + 12*s, cy - 11*s),
+            (cx - 12*s, cy - 11*s)
+        ], fill=theme["accent_mid"], outline=theme["outline"], width=s)
+        draw_curved_line(draw, [(cx - 11*s, cy - 15*s), (cx + 11*s, cy - 15*s)], fill=theme["accent_light"], width=s)
 
 
 def draw_arm_lower(draw, w, h, s, theme, is_left=True):
@@ -684,7 +1008,7 @@ def draw_arm_lower(draw, w, h, s, theme, is_left=True):
     sp = theme["species"]
 
     if sp == "alien":
-        draw.polygon([
+        draw_curved_polygon(draw, [
             (cx - 8*s, cy - 16*s),
             (cx + 8*s, cy - 16*s),
             (cx + 10*s, cy + 4*s),
@@ -694,65 +1018,95 @@ def draw_arm_lower(draw, w, h, s, theme, is_left=True):
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
         draw.line([(cx, cy - 12*s), (cx, cy + 14*s)], fill=theme["glow"], width=s)
     elif sp == "undead":
-        # Dual forearm bones (radius & ulna)
         draw.line([(cx - 3*s, cy - 14*s), (cx - 3*s, cy + 16*s)], fill=theme["primary_light"], width=2*s)
         draw.line([(cx + 3*s, cy - 14*s), (cx + 3*s, cy + 16*s)], fill=theme["primary_light"], width=2*s)
     else:
-        draw.polygon([
-            (cx - 10*s, cy - 16*s),
-            (cx + 10*s, cy - 16*s),
-            (cx + 11*s, cy + 4*s),
-            (cx + 7*s, cy + 18*s),
-            (cx - 7*s, cy + 18*s),
-            (cx - 11*s, cy + 4*s)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
-        # Vambrace / glove cuff
-        draw.rectangle([cx - 9*s, cy + 8*s, cx + 9*s, cy + 16*s], fill=theme["accent_mid"], outline=theme["outline"], width=s)
+        # 🧝 Humanoid / Anime Forearm with Convex Elbow Pivot Cap & Sleek Vambrace
+        dir_mul = 1 if is_left else -1
+        forearm_pts = [
+            (cx - 8*s, cy - 14*s),   # Inner elbow
+            (cx, cy - 20*s),         # Top convex elbow socket (nests inside upper arm!)
+            (cx + 8*s, cy - 14*s),   # Outer elbow
+            (cx + 10*s, cy),         # Outer forearm muscle
+            (cx + 7*s, cy + 16*s),   # Wrist outer
+            (cx, cy + 19*s),         # Wrist bottom cap
+            (cx - 7*s, cy + 16*s),   # Wrist inner
+            (cx - 9*s, cy)           # Inner forearm
+        ]
+        draw_curved_polygon(draw, forearm_pts, fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+
+        vambrace_pts = [
+            (cx - 9*s, cy - 4*s),
+            (cx + 9*s, cy - 4*s),
+            (cx + 8*s, cy + 16*s),
+            (cx - 8*s, cy + 16*s)
+        ]
+        draw_curved_polygon(draw, vambrace_pts, fill=theme["accent_mid"], outline=theme["outline"], width=s)
+
+        draw_curved_line(draw, [(cx - 8*s, cy + 2*s), (cx + 8*s, cy + 2*s)], fill=theme["accent_dark"], width=s)
+        draw_curved_line(draw, [(cx - 7*s, cy + 10*s), (cx + 7*s, cy + 10*s)], fill=theme["accent_dark"], width=s)
+        draw_curved_line(draw, [(cx - 2*s * dir_mul, cy - 3*s), (cx - 2*s * dir_mul, cy + 15*s)], fill=theme["accent_light"], width=2*s)
 
 
 def draw_hand(draw, w, h, s, theme, is_left=True):
     cx, cy = w // 2, h // 2
     sp = theme["species"]
 
-    if sp in ["alien", "demon", "reptilian"]:
-        # 👾 Sharp clawed hand with distinct talons
-        draw.polygon([
+    if sp in ["alien", "demon", "reptilian", "beast", "insectoid"]:
+        draw_curved_polygon(draw, [
             (cx - 8*s, cy - 8*s),
             (cx + 8*s, cy - 8*s),
             (cx + 9*s, cy + 2*s),
             (cx - 9*s, cy + 2*s)
         ], fill=theme["primary_mid"], outline=theme["outline"], width=s)
-        # 4 elongated claw talons
+        if sp == "beast":
+            draw.polygon([(cx - 10*s, cy - 10*s), (cx - 5*s, cy - 6*s), (cx, cy - 10*s), (cx + 5*s, cy - 6*s), (cx + 10*s, cy - 10*s)], fill=theme["accent_mid"])
         for ox in [-6, -2, 2, 6]:
             draw.polygon([
                 (cx + (ox-1)*s, cy + 2*s),
-                (cx + ox*s, cy + 12*s), # Claw tip
+                (cx + ox*s, cy + 12*s),
                 (cx + (ox+1)*s, cy + 2*s)
-            ], fill=theme["accent_light"], outline=theme["outline"], width=s)
+            ], fill=theme["outline"] if sp == "beast" else theme["accent_light"], outline=theme["outline"], width=s)
+    elif sp == "mech":
+        draw.rectangle([cx - 9*s, cy - 8*s, cx + 9*s, cy + 4*s], fill=theme["primary_dark"], outline=theme["outline"], width=s)
+        draw.rectangle([cx - 7*s, cy + 4*s, cx + 7*s, cy + 12*s], fill=theme["primary_light"], outline=theme["outline"], width=s)
+        draw.line([(cx - 5*s, cy + 4*s), (cx - 5*s, cy + 12*s)], fill=theme["outline"], width=s)
+        draw.line([(cx, cy + 4*s), (cx, cy + 12*s)], fill=theme["outline"], width=s)
+        draw.line([(cx + 5*s, cy + 4*s), (cx + 5*s, cy + 12*s)], fill=theme["outline"], width=s)
     elif sp == "undead":
-        # Bony fingers
         for ox in [-6, -2, 2, 6]:
             draw.line([(cx + ox*s, cy - 4*s), (cx + ox*s, cy + 10*s)], fill=theme["primary_light"], width=2*s)
             draw.ellipse([cx + (ox-1)*s, cy + 8*s, cx + (ox+1)*s, cy + 11*s], fill=theme["outline"])
     else:
-        # 🧝 Organic humanoid hand with fingers and thumb
+        # 🧝 Organic Humanoid / Anime Hand with curved palm, opposable thumb, and slender fingers
         thumb_mul = -1 if is_left else 1
-        # Palm
-        draw.polygon([
-            (cx - 8*s, cy - 8*s),
-            (cx + 8*s, cy - 8*s),
-            (cx + 8*s, cy + 4*s),
-            (cx - 8*s, cy + 4*s)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=s)
-        # Thumb
-        draw.polygon([
-            (cx + 6*s * thumb_mul, cy - 4*s),
-            (cx + 12*s * thumb_mul, cy + 2*s),
-            (cx + 6*s * thumb_mul, cy + 4*s)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=s)
-        # Fingers
-        for fx in [-6, -2, 2]:
-            draw.rectangle([cx + fx*s, cy + 4*s, cx + (fx+3)*s, cy + 10*s], fill=theme["primary_light"], outline=theme["outline"], width=s)
+        palm_pts = [
+            (cx - 7*s, cy - 10*s),
+            (cx + 7*s, cy - 10*s),
+            (cx + 8*s, cy + 2*s),
+            (cx - 8*s, cy + 2*s)
+        ]
+        draw_curved_polygon(draw, palm_pts, fill=theme["primary_mid"], outline=theme["outline"], width=s)
+
+        thumb_pts = [
+            (cx + 5*s * thumb_mul, cy - 6*s),
+            (cx + 12*s * thumb_mul, cy - 1*s),
+            (cx + 14*s * thumb_mul, cy + 5*s),
+            (cx + 9*s * thumb_mul, cy + 6*s),
+            (cx + 5*s * thumb_mul, cy + 1*s)
+        ]
+        draw_curved_polygon(draw, thumb_pts, fill=theme["primary_light"], outline=theme["outline"], width=s)
+
+        finger_widths = [(-6, -3, 9), (-3, 0, 11), (0, 3, 10), (3, 6, 8)]
+        for f_left, f_right, f_len in finger_widths:
+            f_pts = [
+                (cx + f_left*s, cy + 2*s),
+                (cx + (f_left+0.5)*s, cy + f_len*s),
+                (cx + (f_right-0.5)*s, cy + f_len*s),
+                (cx + f_right*s, cy + 2*s)
+            ]
+            draw_curved_polygon(draw, f_pts, fill=theme["primary_light"], outline=theme["outline"], width=s)
+            draw.line([(cx + (f_left+1)*s, cy + (f_len//2)*s), (cx + (f_right-1)*s, cy + (f_len//2)*s)], fill=theme["primary_mid"], width=s)
 
 
 def draw_leg_upper(draw, w, h, s, theme, is_left=True):
@@ -760,22 +1114,37 @@ def draw_leg_upper(draw, w, h, s, theme, is_left=True):
     sp = theme["species"]
 
     if sp == "undead":
-        # Femur bone
         draw.ellipse([cx - 8*s, cy - 20*s, cx + 8*s, cy - 12*s], fill=theme["primary_mid"], outline=theme["outline"], width=s)
         draw.rectangle([cx - 5*s, cy - 14*s, cx + 5*s, cy + 14*s], fill=theme["primary_light"], outline=theme["outline"], width=s)
         draw.ellipse([cx - 8*s, cy + 12*s, cx + 8*s, cy + 20*s], fill=theme["primary_mid"], outline=theme["outline"], width=s)
     else:
-        # Muscular thigh
-        draw.polygon([
-            (cx - 13*s, cy - 20*s),
-            (cx + 13*s, cy - 20*s),
-            (cx + 14*s, cy),
-            (cx + 9*s, cy + 20*s),
-            (cx - 9*s, cy + 20*s),
-            (cx - 14*s, cy)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
-        # Thigh guard / pants crease
-        draw.line([(cx, cy - 14*s), (cx, cy + 12*s)], fill=theme["primary_light"], width=s)
+        # 🧝 Humanoid / Anime Thigh with Convex Hip Ball & Convex Knee Cap
+        dir_mul = 1 if is_left else -1
+        thigh_pts = [
+            (cx - 10*s, cy - 16*s),  # Hip inner
+            (cx, cy - 22*s),         # Top convex hip ball cap (rotates seamlessly under pelvis!)
+            (cx + 12*s, cy - 16*s),  # Hip outer
+            (cx + 14*s, cy),         # Thigh lateral curve
+            (cx + 9*s, cy + 16*s),   # Knee outer
+            (cx, cy + 21*s),         # Bottom convex knee cap (pivot overlap!)
+            (cx - 8*s, cy + 16*s),   # Knee inner
+            (cx - 9*s, cy)           # Thigh medial curve
+        ]
+        draw_curved_polygon(draw, thigh_pts, fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+
+        draw_curved_line(draw, [
+            (cx - 2*s * dir_mul, cy - 14*s),
+            (cx - 1*s * dir_mul, cy),
+            (cx, cy + 14*s)
+        ], fill=theme["primary_light"], width=2*s)
+
+        draw_curved_line(draw, [
+            (cx + 10*s * dir_mul, cy - 12*s),
+            (cx + 11*s * dir_mul, cy),
+            (cx + 7*s * dir_mul, cy + 14*s)
+        ], fill=theme["primary_dark"], width=2*s)
+
+        draw_curved_line(draw, [(cx - 11*s, cy - 12*s), (cx + 13*s, cy - 12*s)], fill=theme["accent_dark"], width=2*s)
 
 
 def draw_leg_lower(draw, w, h, s, theme, is_left=True):
@@ -783,25 +1152,37 @@ def draw_leg_lower(draw, w, h, s, theme, is_left=True):
     sp = theme["species"]
 
     if sp == "undead":
-        # Tibia & fibula
         draw.line([(cx - 3*s, cy - 16*s), (cx - 3*s, cy + 16*s)], fill=theme["primary_light"], width=2*s)
         draw.line([(cx + 3*s, cy - 16*s), (cx + 3*s, cy + 16*s)], fill=theme["primary_light"], width=2*s)
     else:
-        draw.polygon([
-            (cx - 11*s, cy - 18*s),
-            (cx + 11*s, cy - 18*s),
-            (cx + 12*s, cy),
-            (cx + 8*s, cy + 20*s),
-            (cx - 8*s, cy + 20*s),
-            (cx - 12*s, cy)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
-        # Greave / boot fold
-        draw.polygon([
-            (cx - 8*s, cy - 8*s),
-            (cx + 8*s, cy - 8*s),
-            (cx + 6*s, cy + 16*s),
-            (cx - 6*s, cy + 16*s)
-        ], fill=theme["accent_mid"], outline=theme["outline"], width=s)
+        # 🧝 Humanoid / Anime Shin/Calf with Convex Knee Cap & Detailed Boot
+        dir_mul = 1 if is_left else -1
+        shin_pts = [
+            (cx - 9*s, cy - 15*s),   # Knee inner
+            (cx, cy - 21*s),         # Top convex knee cap (nests into thigh knee!)
+            (cx + 9*s, cy - 15*s),   # Knee outer
+            (cx + 12*s, cy - 2*s),   # Calf bulge outer
+            (cx + 8*s, cy + 16*s),   # Ankle outer
+            (cx, cy + 20*s),         # Ankle bottom cap
+            (cx - 7*s, cy + 16*s),   # Ankle inner
+            (cx - 8*s, cy - 2*s)     # Calf inner
+        ]
+        draw_curved_polygon(draw, shin_pts, fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+
+        boot_pts = [
+            (cx - 10*s, cy - 6*s),   # Boot cuff top inner
+            (cx + 10*s, cy - 6*s),   # Boot cuff top outer
+            (cx + 11*s, cy + 4*s),
+            (cx + 8*s, cy + 18*s),   # Ankle
+            (cx - 8*s, cy + 18*s),
+            (cx - 10*s, cy + 4*s)
+        ]
+        draw_curved_polygon(draw, boot_pts, fill=theme["accent_mid"], outline=theme["outline"], width=s)
+
+        cuff_pts = [(cx - 11*s, cy - 8*s), (cx, cy - 6*s), (cx + 11*s, cy - 8*s), (cx + 10*s, cy - 2*s), (cx - 10*s, cy - 2*s)]
+        draw_curved_polygon(draw, cuff_pts, fill=theme["accent_light"], outline=theme["outline"], width=s)
+
+        draw_curved_line(draw, [(cx, cy - 2*s), (cx, cy + 16*s)], fill=theme["accent_dark"], width=s)
 
 
 def draw_foot(draw, w, h, s, theme, is_left=True):
@@ -809,41 +1190,63 @@ def draw_foot(draw, w, h, s, theme, is_left=True):
     sp = theme["species"]
     dir_mul = 1 if is_left else -1
 
-    if sp in ["alien", "demon", "reptilian"]:
-        # Digitigrade clawed foot with 3 sharp talons
-        draw.polygon([
+    if sp in ["alien", "demon", "reptilian", "beast", "insectoid"]:
+        draw_curved_polygon(draw, [
             (cx - 12*s * dir_mul, cy - 8*s),
             (cx + 10*s * dir_mul, cy - 8*s),
             (cx + 16*s * dir_mul, cy + 2*s),
-            (cx + 20*s * dir_mul, cy + 8*s), # Front claw
-            (cx - 14*s * dir_mul, cy + 8*s)  # Heel claw
+            (cx + 20*s * dir_mul, cy + 8*s),
+            (cx - 14*s * dir_mul, cy + 8*s)
         ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
-        # Talons
         for tox in [6, 12, 18]:
             draw.polygon([
                 (cx + tox*s * dir_mul, cy + 4*s),
                 (cx + (tox+4)*s * dir_mul, cy + 10*s),
                 (cx + tox*s * dir_mul, cy + 9*s)
-            ], fill=theme["accent_light"], outline=theme["outline"], width=s)
+            ], fill=theme["outline"] if sp == "beast" else theme["accent_light"], outline=theme["outline"], width=s)
+    elif sp == "mech":
+        rx0 = min(cx - 14*s * dir_mul, cx + 22*s * dir_mul)
+        rx1 = max(cx - 14*s * dir_mul, cx + 22*s * dir_mul)
+        draw.rectangle([rx0, cy - 8*s, rx1, cy + 9*s], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+        draw.line([(rx0, cy + 3*s), (rx1, cy + 3*s)], fill=theme["accent_mid"], width=2*s)
     elif sp == "undead":
-        # Skeletal foot bones
         draw.line([(cx - 10*s * dir_mul, cy - 4*s), (cx + 16*s * dir_mul, cy + 4*s)], fill=theme["primary_light"], width=3*s)
         for tx in [4, 10, 16]:
             draw.line([(cx + tx*s * dir_mul, cy + 2*s), (cx + (tx+3)*s * dir_mul, cy + 8*s)], fill=theme["primary_light"], width=2*s)
     else:
-        # 🧝 Adventurer boot / sandal
-        draw.polygon([
-            (cx - 14*s * dir_mul, cy - 8*s),
-            (cx + 8*s * dir_mul, cy - 8*s),
-            (cx + 18*s * dir_mul, cy + 4*s),
-            (cx + 22*s * dir_mul, cy + 8*s), # Toe
-            (cx - 14*s * dir_mul, cy + 8*s)  # Heel
-        ], fill=theme["accent_dark"], outline=theme["outline"], width=2*s)
-        # Sole & cuff
-        rx0 = min(cx - 14*s * dir_mul, cx + 22*s * dir_mul)
-        rx1 = max(cx - 14*s * dir_mul, cx + 22*s * dir_mul)
-        draw.rectangle([rx0, cy + 6*s, rx1, cy + 9*s], fill=theme["outline"])
-        draw.line([(cx - 12*s * dir_mul, cy - 4*s), (cx + 6*s * dir_mul, cy - 4*s)], fill=theme["accent_light"], width=2*s)
+        # 🧝 Stylized Anime Boot / Shoe with curved instep, elevated heel, sole tread, and highlight
+        boot_pts = [
+            (cx - 11*s * dir_mul, cy - 10*s),  # Ankle collar back
+            (cx + 7*s * dir_mul, cy - 10*s),   # Ankle collar front
+            (cx + 14*s * dir_mul, cy - 2*s),   # Instep curve
+            (cx + 22*s * dir_mul, cy + 5*s),   # Toe box top
+            (cx + 24*s * dir_mul, cy + 10*s),  # Toe tip
+            (cx + 12*s * dir_mul, cy + 11*s),  # Sole front
+            (cx + 4*s * dir_mul, cy + 8*s),    # Foot arch indentation
+            (cx - 10*s * dir_mul, cy + 11*s),  # Heel bottom
+            (cx - 14*s * dir_mul, cy + 5*s),   # Heel back curve
+            (cx - 13*s * dir_mul, cy - 2*s)    # Achilles curve
+        ]
+        draw_curved_polygon(draw, boot_pts, fill=theme["accent_mid"], outline=theme["outline"], width=2*s)
+
+        sole_pts = [
+            (cx - 14*s * dir_mul, cy + 8*s),
+            (cx + 24*s * dir_mul, cy + 8*s),
+            (cx + 24*s * dir_mul, cy + 11*s),
+            (cx - 14*s * dir_mul, cy + 11*s)
+        ]
+        draw.polygon(sole_pts, fill=theme["outline"])
+
+        toe_hl = [
+            (cx + 16*s * dir_mul, cy + 3*s),
+            (cx + 22*s * dir_mul, cy + 5*s),
+            (cx + 20*s * dir_mul, cy + 7*s)
+        ]
+        draw_curved_polygon(draw, toe_hl, fill=theme["accent_light"])
+
+        draw_curved_line(draw, [(cx - 10*s * dir_mul, cy - 4*s), (cx + 10*s * dir_mul, cy - 4*s)], fill=theme["accent_dark"], width=2*s)
+        draw.rectangle([cx + 3*s * dir_mul - 2*s, cy - 6*s, cx + 3*s * dir_mul + 2*s, cy - 2*s], fill=theme["accent_light"], outline=theme["outline"], width=s)
+
 
 
 # ==============================================================================
@@ -924,14 +1327,14 @@ def draw_wing_lower(draw, w, h, s, theme, is_left=True):
 # Public Generation APIs
 # ==============================================================================
 
-def generate_all(out_dir, prefix="warrior", archetype="warrior", prompt="", seed=-1, custom_colors=None, custom_features=None):
+def generate_all(out_dir, prefix="warrior", archetype="warrior", prompt="", seed=-1, custom_colors=None, custom_features=None, art_style="anime"):
     """
     Generates all limb sprites for any creature or humanoid.
-    Dynamically responds to prompt concepts, seeds, custom colors, and custom anatomical features.
+    Dynamically responds to prompt concepts, seeds, custom colors, custom features, and art styles.
     """
     os.makedirs(out_dir, exist_ok=True)
-    theme = build_palette(prompt, archetype, seed, custom_colors)
-    s_int = seed if seed >= 0 else 42
+    theme = build_palette(prompt, archetype, seed, custom_colors, art_style)
+    s_int = seed if seed >= 0 else random.randint(1, 999999999)
     feat = custom_features or {}
 
     head_sp = feat.get("head_style") or theme["species"]
@@ -962,16 +1365,20 @@ def generate_all(out_dir, prefix="warrior", archetype="warrior", prompt="", seed
         "foot_R": ((48, 32), lambda d, w, h, s: draw_foot(d, w, h, s, theme_foot, False)),
     }
 
-    # Optional wings (if prompt mentions wings or requested in custom features)
-    has_wings = feat.get("has_wings", False) or any(k in prompt.lower() for k in ["wing", "winged", "angel", "fairy", "bat"])
+    # Optional wings (if prompt explicitly mentions wings or requested in custom features)
+    has_wings = bool(feat.get("has_wings", False)) or bool(
+        re.search(r'\b(wings?|winged|angel wings?|fairy wings?|bat wings?)\b', prompt.lower())
+    )
     if has_wings:
         parts["wing_upper_L"] = ((48, 64), lambda d, w, h, s: draw_wing_upper(d, w, h, s, theme, True))
         parts["wing_upper_R"] = ((48, 64), lambda d, w, h, s: draw_wing_upper(d, w, h, s, theme, False))
         parts["wing_lower_L"] = ((48, 64), lambda d, w, h, s: draw_wing_lower(d, w, h, s, theme, True))
         parts["wing_lower_R"] = ((48, 64), lambda d, w, h, s: draw_wing_lower(d, w, h, s, theme, False))
 
-    # Optional tail
-    has_tail = feat.get("has_tail", False) or any(k in prompt.lower() for k in ["tail", "devil tail", "dragon tail", "lizard tail"])
+    # Optional tail (if prompt explicitly mentions tail or requested in custom features)
+    has_tail = bool(feat.get("has_tail", False)) or bool(
+        re.search(r'\b(tails?|tailed)\b', prompt.lower())
+    )
     if has_tail:
         parts["tail_01"] = ((36, 36), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 1))
         parts["tail_02"] = ((32, 32), lambda d, w, h, s: draw_beast_tail(d, w, h, s, theme, 2))
@@ -988,11 +1395,11 @@ def generate_all(out_dir, prefix="warrior", archetype="warrior", prompt="", seed
     return generated_paths
 
 
-def generate_quadruped(out_dir, prefix="fenrir", archetype="beast", prompt="", seed=-1):
+def generate_quadruped(out_dir, prefix="fenrir", archetype="beast", prompt="", seed=-1, art_style="anime"):
     """Generates all 20 quadruped body part sprites."""
     os.makedirs(out_dir, exist_ok=True)
-    theme = build_palette(prompt, archetype, seed)
-    s_int = seed if seed >= 0 else 42
+    theme = build_palette(prompt, archetype, seed, art_style=art_style)
+    s_int = seed if seed >= 0 else random.randint(1, 999999999)
 
     parts = {
         "head": ((64, 64), lambda d, w, h, s: draw_beast_head(d, w, h, s, theme, s_int)),
