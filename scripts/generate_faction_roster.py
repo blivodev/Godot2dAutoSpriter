@@ -31,6 +31,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from scripts.generate_sample_sprites import generate_all, create_character_assembled_preview
+from scripts.generate_cyberpunk_sprites import generate_cyberpunk_character_sprites
 from scripts.generate_rig_animations import (
     SPECIAL_MOVES_CATALOG,
     build_character_animations,
@@ -559,20 +560,14 @@ def generate_single_character(char_id: str, faction_key: str, role_key: str, uni
     char_dir = PROJECT_ROOT / "sprites" / char_id
     char_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Generate Sliced Limbs & Exploded Sheet
-    prompt_desc = f"{faction_data['name']} {unit_data['display']} {unit_data['role']}, {unit_data['desc']}, sci-fi cyberpunk post-apocalyptic"
-    generate_all(
+    # 1. Generate Custom Cyberpunk Sliced Limbs, Exploded Sheet & Assembled Preview
+    generate_cyberpunk_character_sprites(
         out_dir=str(char_dir),
         prefix=char_id,
-        archetype="mech" if faction_key == "silicon" else ("beast" if faction_key == "bioforge" else "warrior"),
-        prompt=prompt_desc,
-        seed=abs(hash(char_id)) % 2147483647,
-        custom_colors=colors,
-        art_style=art_style
+        faction=faction_key,
+        role=role_key,
+        seed=abs(hash(char_id)) % 2147483647
     )
-
-    # 2. Generate Assembled Full Model Preview
-    create_character_assembled_preview(char_dir, prefix=char_id, rig_type="biped")
 
     # 3. Create Custom Template with Character's 4 Signature Specials
     specials = unit_data.get("specials", ["special_ground_slam", "special_whirlwind", "special_power_charge", "special_victory_flourish"])
