@@ -271,7 +271,9 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             if file_path.is_file() and str(file_path.resolve()).startswith(str((PROJECT_ROOT / "sprites").resolve())):
                 self.send_response(200)
                 self.send_header("Content-Type", "image/png")
-                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+                self.send_header("Pragma", "no-cache")
+                self.send_header("Expires", "0")
                 self.end_headers()
                 with open(file_path, "rb") as f:
                     self.wfile.write(f.read())
@@ -1553,8 +1555,8 @@ HTML_PAGE = """<!DOCTYPE html>
                 </div>
                 <!-- Render Mode Selector -->
                 <div style="display:flex;align-items:center;gap:3px;background:rgba(0,0,0,0.3);padding:2px 4px;border-radius:6px;border:1px solid var(--border);">
-                  <button class="btn btn-sm btn-primary" id="btn-mode-limbs" style="font-size:10.5px;padding:3px 7px;" onclick="setRenderMode('limbs')">🧩 Sliced Rig</button>
-                  <button class="btn btn-sm btn-secondary" id="btn-mode-full" style="font-size:10.5px;padding:3px 7px;" onclick="setRenderMode('full')">🧍 Full Model</button>
+                  <button class="btn btn-sm btn-secondary" id="btn-mode-limbs" style="font-size:10.5px;padding:3px 7px;" onclick="setRenderMode('limbs')">🧩 Sliced Rig</button>
+                  <button class="btn btn-sm btn-primary" id="btn-mode-full" style="font-size:10.5px;padding:3px 7px;" onclick="setRenderMode('full')">🧍 Full Model</button>
                 </div>
                 <!-- Auto-Loop Toggle -->
                 <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);cursor:pointer;margin-bottom:0;">
@@ -3047,7 +3049,7 @@ function populateAnimTable() {
 // ---- 2D Animation Player Canvas Engine ----
 const BONE_LIMBS = ["head", "torso", "arm_upper_L", "arm_lower_L", "hand_L", "arm_upper_R", "arm_lower_R", "hand_R", "leg_upper_L", "leg_lower_L", "foot_L", "leg_upper_R", "leg_lower_R", "foot_R", "pelvis"];
 
-let renderMode = "limbs"; // "limbs" | "full"
+let renderMode = "full"; // "limbs" | "full"
 let autoLoop = true;
 
 function setRenderMode(m) {
