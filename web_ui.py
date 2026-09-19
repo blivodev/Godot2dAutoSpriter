@@ -204,6 +204,23 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             self._send_json(json.loads(result_str))
             return
 
+        elif path == "/api/animations":
+            try:
+                from scripts.generate_rig_animations import ANIMATION_DEFS
+                self._send_json({"status": "ok", "count": len(ANIMATION_DEFS), "animations": ANIMATION_DEFS})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)})
+            return
+
+        elif path == "/api/rerig_all":
+            try:
+                from scripts.generate_rig_animations import rerig_all_existing_scenes
+                updated = rerig_all_existing_scenes()
+                self._send_json({"status": "success", "count": len(updated), "characters": updated})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)})
+            return
+
         elif path.startswith("/sprites/"):
             rel = urllib.parse.unquote(path[len("/sprites/"):])
             file_path = PROJECT_ROOT / "sprites" / rel
@@ -278,6 +295,15 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         elif path == "/api/assemble":
             result = self._handle_assemble(payload)
             self._send_json(result)
+            return
+
+        elif path == "/api/rerig_all":
+            try:
+                from scripts.generate_rig_animations import rerig_all_existing_scenes
+                updated = rerig_all_existing_scenes()
+                self._send_json({"status": "success", "count": len(updated), "characters": updated})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)})
             return
 
         elif path == "/api/comfy_setup":
@@ -702,10 +728,15 @@ HTML_PAGE = """<!DOCTYPE html>
   .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; flex-shrink: 0; }
 
   /* ==== ASSET LIBRARY TAB ==== */
-  .library-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; min-height: 600px; }
-  @media (max-width: 900px) { .library-layout { grid-template-columns: 1fr; } }
+  .library-layout { display: grid; grid-template-columns: 320px 1fr; gap: 20px; min-height: 640px; }
+  @media (max-width: 960px) { .library-layout { grid-template-columns: 1fr; } }
 
-  .char-roster { display: flex; flex-direction: column; gap: 8px; max-height: 620px; overflow-y: auto; padding-right: 4px; }
+  .roster-filter-bar { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+  .filter-chip { font-size: 11px; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+  .filter-chip:hover { border-color: var(--primary); color: var(--text); }
+  .filter-chip.active { background: rgba(88,166,255,0.18); border-color: var(--primary); color: var(--primary); font-weight: 600; }
+
+  .char-roster { display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 4px; }
   .char-roster-item { background: #10131b; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px; }
   .char-roster-item:hover { border-color: var(--primary); background: #141822; }
   .char-roster-item.selected { border-color: var(--primary); background: rgba(88,166,255,0.08); }
@@ -713,23 +744,71 @@ HTML_PAGE = """<!DOCTYPE html>
   .char-roster-thumb-placeholder { width: 48px; height: 48px; background: #1a1f2c; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; }
   .char-roster-info { flex: 1; min-width: 0; }
   .char-roster-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .char-roster-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .char-roster-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; }
   .lib-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
   .lib-badge-scene { background: rgba(46,160,67,0.2); color: #3fb950; border: 1px solid rgba(46,160,67,0.3); }
   .lib-badge-no-scene { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid rgba(210,153,34,0.3); }
+  .lib-badge-anim { background: rgba(163,113,247,0.2); color: #d2a8ff; border: 1px solid rgba(163,113,247,0.3); }
 
   /* Viewer */
   .viewer-panel { display: flex; flex-direction: column; gap: 14px; }
   .viewer-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
-  .viewer-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .viewer-title { font-size: 17px; font-weight: 700; color: var(--text); }
   .viewer-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Subnav */
+  .viewer-subnav { display: flex; gap: 6px; border-bottom: 1px solid var(--border); padding-bottom: 8px; flex-wrap: wrap; }
+  .subnav-btn { background: none; border: 1px solid transparent; font-size: 12.5px; font-weight: 600; color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+  .subnav-btn:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+  .subnav-btn.active { color: var(--primary); background: rgba(88,166,255,0.12); border-color: rgba(88,166,255,0.3); }
+
+  .viewer-subpane { display: none; }
+  .viewer-subpane.active { display: block; }
+
+  /* Animation Player */
+  .anim-stage-container { display: flex; flex-direction: column; gap: 12px; }
+  .anim-viewport { background: repeating-conic-gradient(#141824 0% 25%, #0e111a 0% 50%) 50% / 16px 16px; border: 1px solid var(--border); border-radius: 8px; height: 380px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+  #anim-canvas { width: 100%; height: 100%; display: block; }
+  .anim-viewport-overlay { position: absolute; top: 12px; left: 14px; pointer-events: none; display: flex; flex-direction: column; gap: 3px; }
+  .anim-curr-title { font-size: 14px; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.8); }
+  .anim-curr-sub { font-size: 11px; color: var(--text-muted); text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+  .anim-controls-bar { display: flex; align-items: center; gap: 10px; background: #10131b; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; flex-wrap: wrap; }
+  .anim-scrub-wrap { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 180px; }
+  .anim-scrub { flex: 1; accent-color: var(--primary); cursor: pointer; }
+  .anim-time-label { font-size: 11px; color: var(--text-muted); font-variant-numeric: tabular-nums; min-width: 75px; text-align: right; }
+  
+  .anim-chip-groups { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+  .anim-group-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .anim-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .anim-chip { font-size: 11px; padding: 5px 11px; border-radius: 12px; background: #10131b; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+  .anim-chip:hover { border-color: var(--primary); color: #fff; transform: translateY(-1px); }
+  .anim-chip.active { background: linear-gradient(135deg, rgba(88,166,255,0.25), rgba(163,113,247,0.25)); border-color: var(--primary); color: #fff; font-weight: 600; box-shadow: 0 0 12px rgba(88,166,255,0.35); }
+
+  /* Sliced Limbs Grid */
   .viewer-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; max-height: 480px; overflow-y: auto; padding: 2px; }
   .viewer-sprite-card { background: #10131b; border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; cursor: pointer; transition: all 0.15s; }
   .viewer-sprite-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(88,166,255,0.2); }
   .viewer-sprite-img { width: 100%; height: 90px; object-fit: contain; background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 12px 12px; border-radius: 5px; }
   .viewer-sprite-name { font-size: 10px; color: var(--text-muted); margin-top: 5px; font-weight: 500; }
   .viewer-sprite-size { font-size: 9px; color: #4a5568; }
-  .viewer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; color: var(--text-muted); gap: 10px; font-size: 13px; }
+
+  /* Master Exploded Sheet */
+  .exploded-sheet-wrap { background: repeating-conic-gradient(#141824 0% 25%, #0e111a 0% 50%) 50% / 16px 16px; border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: center; max-height: 440px; overflow: hidden; cursor: pointer; }
+  .exploded-sheet-img { max-height: 400px; max-width: 100%; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.6); transition: transform 0.2s; }
+  .exploded-sheet-img:hover { transform: scale(1.02); }
+
+  /* Godot Specs Table */
+  .spec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 14px; }
+  .spec-card { background: #10131b; border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .spec-card-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .spec-card-value { font-size: 13px; font-weight: 600; color: var(--text); }
+  .anim-table-wrap { max-height: 360px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+  .anim-table { width: 100%; border-collapse: collapse; font-size: 12px; background: #10131b; }
+  .anim-table th, .anim-table td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  .anim-table th { background: #141824; color: var(--text-muted); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+  .anim-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .viewer-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 380px; color: var(--text-muted); gap: 10px; font-size: 13px; }
   .viewer-empty-icon { font-size: 42px; opacity: 0.5; }
 
   /* Library filters */
@@ -1203,14 +1282,23 @@ HTML_PAGE = """<!DOCTYPE html>
   <!-- ======================================================= -->
   <div class="tab-content" id="tab-library">
     <div class="lib-header">
-      <div class="lib-title">Generated Characters &amp; Limb Library <span id="lib-char-count" style="font-size:12px;color:var(--text-muted);font-weight:normal;margin-left:8px;"></span></div>
-      <div style="display:flex;gap:8px;">
+      <div>
+        <div class="lib-title">Generated Characters &amp; Rigged Asset Library <span id="lib-char-count" style="font-size:12px;color:var(--text-muted);font-weight:normal;margin-left:8px;"></span></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">Complete character roster with 23 skeletal animations, master exploded sheets, limb cutouts &amp; Godot 4 scenes.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" id="btn-batch-rerig" onclick="batchRerigAll()">🦴 Batch Re-Rig All (23 Anims)</button>
         <button class="btn btn-secondary btn-sm" onclick="refreshLibrary()">🔄 Refresh Library</button>
       </div>
     </div>
     <div class="library-layout">
-      <!-- Roster -->
+      <!-- Roster (Left Column) -->
       <div>
+        <div class="roster-filter-bar">
+          <button class="filter-chip active" id="chip-filter-all" onclick="setRosterFilter('all')">All (<span id="count-all">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-scenes" onclick="setRosterFilter('scenes')">🎮 Scenes (<span id="count-scenes">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-exploded" onclick="setRosterFilter('exploded')">🖼️ Sheets (<span id="count-exploded">0</span>)</button>
+        </div>
         <div class="lib-toolbar">
           <input class="lib-search" type="text" id="lib-search" placeholder="🔍 Filter characters..." oninput="filterRoster()">
         </div>
@@ -1219,13 +1307,15 @@ HTML_PAGE = """<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- Viewer -->
+      <!-- Viewer Panel (Right Column) -->
       <div class="card viewer-panel">
         <div id="viewer-empty" class="viewer-empty">
           <div class="viewer-empty-icon">🎮</div>
-          <div>Select a character from the roster to view their sprites.</div>
+          <div style="font-size:14px;font-weight:600;color:var(--text);">Select a character from the roster</div>
+          <div style="font-size:12px;">Inspect 23 live animations, master diffusion sheets, individual limb cutouts, or Godot 4 scene specs.</div>
         </div>
         <div id="viewer-content" style="display:none;">
+          <!-- Top Header -->
           <div class="viewer-header">
             <div>
               <div class="viewer-title" id="viewer-char-name">—</div>
@@ -1234,25 +1324,194 @@ HTML_PAGE = """<!DOCTYPE html>
             <div class="viewer-actions">
               <button class="btn btn-secondary btn-sm" onclick="openExplorerFor(viewingChar)">📁 Folder</button>
               <button class="btn btn-secondary btn-sm" onclick="openGodotFor(viewingChar)">🎮 Godot</button>
-              <button class="btn btn-secondary btn-sm" onclick="rerigChar(viewingChar)">🦴 Re-Rig</button>
+              <button class="btn btn-secondary btn-sm" onclick="rerigChar(viewingChar)">🦴 Re-Rig (23 Anims)</button>
               <button class="btn btn-danger btn-sm" onclick="deleteChar(viewingChar)">🗑️ Delete</button>
             </div>
           </div>
 
-          <!-- Full Assembled Character Body Preview Card -->
-          <div id="viewer-full-body-card" style="margin-bottom:16px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;align-items:center;gap:20px;">
-            <div style="background:repeating-conic-gradient(#141824 0% 25%, #0e111a 0% 50%) 50% / 14px 14px;border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:center;min-width:140px;min-height:160px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;" onclick="openLightbox(document.getElementById('viewer-full-img').src, viewingChar + ' (Full Body)')">
-              <img id="viewer-full-img" src="" alt="Full Body Sprite" style="max-height:180px;max-width:160px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));">
-            </div>
-            <div style="flex:1;">
-              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Full Connected Sprite Preview</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Assembled puppet body showing all connected limb attachments and joints.</div>
-              <button class="btn btn-secondary btn-sm" onclick="openLightbox(document.getElementById('viewer-full-img').src, viewingChar + ' (Full Body)')">🔍 Inspect High-Res</button>
+          <!-- Multi-Pane Navigation Tabs -->
+          <div class="viewer-subnav">
+            <button class="subnav-btn active" id="subnav-anim" onclick="switchViewerSubTab('anim')">🎬 Live Animation Player (23)</button>
+            <button class="subnav-btn" id="subnav-limbs" onclick="switchViewerSubTab('limbs')">🧩 Sliced Limbs</button>
+            <button class="subnav-btn" id="subnav-exploded" onclick="switchViewerSubTab('exploded')">🖼️ Master Exploded Sheet</button>
+            <button class="subnav-btn" id="subnav-godot" onclick="switchViewerSubTab('godot')">📋 Godot Scene &amp; Rig Specs</button>
+          </div>
+
+          <!-- SUBPANE 1: LIVE ANIMATION PLAYER -->
+          <div class="viewer-subpane active" id="subpane-anim">
+            <div class="anim-stage-container">
+              <!-- Canvas Viewport -->
+              <div class="anim-viewport">
+                <canvas id="anim-canvas" width="700" height="380"></canvas>
+                <div class="anim-viewport-overlay">
+                  <span class="anim-curr-title" id="anim-overlay-title">idle</span>
+                  <span class="anim-curr-sub" id="anim-overlay-desc">Breathing rest stance with gentle head and arm sway</span>
+                </div>
+              </div>
+
+              <!-- Playback Controls Bar -->
+              <div class="anim-controls-bar">
+                <button class="btn btn-secondary btn-sm" id="btn-anim-play" onclick="togglePlayPause()">⏸ Pause</button>
+                <button class="btn btn-secondary btn-sm" onclick="restartAnimation()">⏮ Restart</button>
+                <div class="anim-scrub-wrap">
+                  <input type="range" class="anim-scrub" id="anim-scrub" min="0" max="100" value="0" oninput="onScrubInput(this.value)">
+                  <span class="anim-time-label" id="anim-time-display">0.00s / 1.80s</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);">
+                  <label for="anim-speed" style="margin-bottom:0;">Speed:</label>
+                  <select id="anim-speed" style="padding:4px 8px;font-size:11px;background:var(--bg-input);border:1px solid var(--border);border-radius:4px;color:var(--text);" onchange="animSpeed = parseFloat(this.value)">
+                    <option value="0.25">0.25x</option>
+                    <option value="0.5">0.5x</option>
+                    <option value="1.0" selected>1.0x (Normal)</option>
+                    <option value="1.5">1.5x</option>
+                    <option value="2.0">2.0x</option>
+                  </select>
+                </div>
+                <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);cursor:pointer;margin-bottom:0;">
+                  <input type="checkbox" id="anim-show-skeleton" onchange="showSkeletonOverlay = this.checked"> Skeleton Overlay
+                </label>
+              </div>
+
+              <!-- Quick Animation Selector Chips (All 23 Animations categorized) -->
+              <div class="anim-chip-groups">
+                <div>
+                  <div class="anim-group-title">🏃 Locomotion &amp; Agility (9)</div>
+                  <div class="anim-chip-row" style="margin-top:4px;">
+                    <span class="anim-chip active" data-anim="idle" onclick="selectAnim('idle')">🌱 idle</span>
+                    <span class="anim-chip" data-anim="walk" onclick="selectAnim('walk')">🚶 walk</span>
+                    <span class="anim-chip" data-anim="run" onclick="selectAnim('run')">🏃 run</span>
+                    <span class="anim-chip" data-anim="jump" onclick="selectAnim('jump')">🦘 jump</span>
+                    <span class="anim-chip" data-anim="double_jump" onclick="selectAnim('double_jump')">✨ double_jump</span>
+                    <span class="anim-chip" data-anim="dash" onclick="selectAnim('dash')">💨 dash</span>
+                    <span class="anim-chip" data-anim="slide" onclick="selectAnim('slide')">🛹 slide</span>
+                    <span class="anim-chip" data-anim="crouch" onclick="selectAnim('crouch')">🧘 crouch</span>
+                    <span class="anim-chip" data-anim="crouch_walk" onclick="selectAnim('crouch_walk')">🥷 crouch_walk</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="anim-group-title">⚔️ Combat &amp; Attacks (6)</div>
+                  <div class="anim-chip-row" style="margin-top:4px;">
+                    <span class="anim-chip" data-anim="punch" onclick="selectAnim('punch')">👊 punch</span>
+                    <span class="anim-chip" data-anim="hit" onclick="selectAnim('hit')">⚔️ hit (slash)</span>
+                    <span class="anim-chip" data-anim="kick" onclick="selectAnim('kick')">🦵 kick</span>
+                    <span class="anim-chip" data-anim="jump_kick" onclick="selectAnim('jump_kick')">🥋 jump_kick</span>
+                    <span class="anim-chip" data-anim="crouch_kick" onclick="selectAnim('crouch_kick')">🧹 crouch_kick</span>
+                    <span class="anim-chip" data-anim="fire_weapon" onclick="selectAnim('fire_weapon')">🔫 fire_weapon</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="anim-group-title">💥 Status &amp; Reactions (4)</div>
+                  <div class="anim-chip-row" style="margin-top:4px;">
+                    <span class="anim-chip" data-anim="get_hit" onclick="selectAnim('get_hit')">💢 get_hit</span>
+                    <span class="anim-chip" data-anim="get_stunned" onclick="selectAnim('get_stunned')">💫 get_stunned</span>
+                    <span class="anim-chip" data-anim="drink_potion" onclick="selectAnim('drink_potion')">🧪 drink_potion</span>
+                    <span class="anim-chip" data-anim="death" onclick="selectAnim('death')">☠️ death</span>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="anim-group-title">⚡ Special &amp; Signature Moves (4)</div>
+                  <div class="anim-chip-row" style="margin-top:4px;">
+                    <span class="anim-chip" data-anim="special_01" onclick="selectAnim('special_01')">💥 special_01 (Ground Slam)</span>
+                    <span class="anim-chip" data-anim="special_02" onclick="selectAnim('special_02')">🌪️ special_02 (Whirlwind)</span>
+                    <span class="anim-chip" data-anim="special_03" onclick="selectAnim('special_03')">🔮 special_03 (Power Charge)</span>
+                    <span class="anim-chip" data-anim="special_04" onclick="selectAnim('special_04')">👑 special_04 (Victory Flourish)</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Individual Sliced Limb Parts:</div>
-          <div id="viewer-grid" class="viewer-grid"></div>
+          <!-- SUBPANE 2: SLICED LIMBS -->
+          <div class="viewer-subpane" id="subpane-limbs">
+            <!-- Full Assembled Character Body Preview Card -->
+            <div id="viewer-full-body-card" style="margin-bottom:16px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;align-items:center;gap:20px;">
+              <div style="background:repeating-conic-gradient(#141824 0% 25%, #0e111a 0% 50%) 50% / 14px 14px;border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:center;min-width:140px;min-height:160px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;" onclick="openLightbox(document.getElementById('viewer-full-img').src, viewingChar + ' (Full Body)')">
+                <img id="viewer-full-img" src="" alt="Full Body Sprite" style="max-height:180px;max-width:160px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));">
+              </div>
+              <div style="flex:1;">
+                <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Full Connected Sprite Preview</div>
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Assembled puppet body showing all connected limb attachments and joints.</div>
+                <button class="btn btn-secondary btn-sm" onclick="openLightbox(document.getElementById('viewer-full-img').src, viewingChar + ' (Full Body)')">🔍 Inspect High-Res</button>
+              </div>
+            </div>
+
+            <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Individual Sliced Limb Parts:</div>
+            <div id="viewer-grid" class="viewer-grid"></div>
+          </div>
+
+          <!-- SUBPANE 3: MASTER EXPLODED SHEET -->
+          <div class="viewer-subpane" id="subpane-exploded">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="font-size:13px;color:var(--text-muted);">
+                The master generative texture sheet containing all 15 limb cutouts arranged on a 1024×1024 canvas before automatic slicing and padding.
+              </div>
+              <div class="exploded-sheet-wrap" id="exploded-wrap" onclick="openExplodedLightbox()">
+                <img id="viewer-exploded-img" class="exploded-sheet-img" src="" alt="Master Exploded Sheet">
+              </div>
+              <div id="exploded-meta-card" style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:12px 16px;flex-wrap:wrap;gap:10px;">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);" id="exploded-char-title">Master Sheet</div>
+                  <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">1024×1024 RGBA • Alpha transparent background • 15 limb grid</div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-secondary btn-sm" onclick="openExplodedLightbox()">🔍 Inspect 1024×1024</button>
+                  <a id="btn-download-exploded" class="btn btn-secondary btn-sm" href="#" target="_blank" download>⬇️ Download Sheet</a>
+                </div>
+              </div>
+              <div id="exploded-empty" style="display:none;text-align:center;padding:40px;color:var(--text-muted);font-size:13px;">
+                No master exploded sheet found for this character.
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBPANE 4: GODOT SCENE & RIG SPECS -->
+          <div class="viewer-subpane" id="subpane-godot">
+            <div style="display:flex;flex-direction:column;gap:16px;">
+              <div class="spec-grid">
+                <div class="spec-card">
+                  <div class="spec-card-label">Godot 4 Scene</div>
+                  <div class="spec-card-value" id="spec-scene-path" style="font-size:12px;font-family:monospace;word-break:break-all;">res://scenes/...</div>
+                </div>
+                <div class="spec-card">
+                  <div class="spec-card-label">Rig Architecture</div>
+                  <div class="spec-card-value">Humanoid Biped (15 Bones)</div>
+                </div>
+                <div class="spec-card">
+                  <div class="spec-card-label">Animation Library</div>
+                  <div class="spec-card-value">AnimationLibrary_char</div>
+                </div>
+                <div class="spec-card">
+                  <div class="spec-card-label">Total Animations</div>
+                  <div class="spec-card-value" style="color:#3fb950;">23 Default Moves</div>
+                </div>
+              </div>
+
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <div style="font-size:13px;font-weight:600;color:var(--text);">AnimationPlayer Track Catalog</div>
+                  <div style="font-size:11px;color:var(--text-muted);">23 procedural &amp; skeletal tracks bundled into scene</div>
+                </div>
+                <div class="anim-table-wrap">
+                  <table class="anim-table">
+                    <thead>
+                      <tr>
+                        <th>Animation</th>
+                        <th>Category</th>
+                        <th>Length</th>
+                        <th>Loop</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="spec-anim-table-body"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -2072,7 +2331,90 @@ function closeLightboxDirect() {
 }
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightboxDirect(); });
 
-// ---- Asset Library ----
+// ---- Asset Library & 23-Animation Player Engine ----
+let rosterFilter = "all";
+let currentViewerSubTab = "anim";
+let animCatalog = null;
+let currentAnimName = "idle";
+let animCurrentTime = 0.0;
+let animSpeed = 1.0;
+let animIsPlaying = true;
+let showSkeletonOverlay = false;
+let animLastFrameTime = performance.now();
+let loadedLimbImages = {};
+let animRafId = null;
+
+const ANIM_CATEGORIES = {
+  idle: "Locomotion", walk: "Locomotion", run: "Locomotion", jump: "Locomotion", double_jump: "Locomotion",
+  dash: "Locomotion", slide: "Locomotion", crouch: "Locomotion", crouch_walk: "Locomotion",
+  punch: "Combat", hit: "Combat", kick: "Combat", jump_kick: "Combat", crouch_kick: "Combat", fire_weapon: "Combat",
+  get_hit: "Status", get_stunned: "Status", drink_potion: "Status", death: "Status",
+  special_01: "Special", special_02: "Special", special_03: "Special", special_04: "Special"
+};
+
+// Built-in fallback animation catalog with 23 animations
+const FALLBACK_ANIM_DEFS = {
+  idle: { length: 1.8, loop: 1, desc: "Breathing rest stance with gentle head and arm sway", tracks: { "Skeleton2D/pelvis/torso:position": [[0,[0,-40]],[0.9,[0,-42]],[1.8,[0,-40]]], "Skeleton2D/pelvis/torso/head:rotation": [[0,0],[0.9,-0.035],[1.8,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.9,0.045],[1.8,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.9,-0.045],[1.8,0]] } },
+  walk: { length: 0.8, loop: 1, desc: "Natural biped walk cycle with counter-swinging arms and legs", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.2,[0,-3]],[0.4,[0,0]],[0.6,[0,-3]],[0.8,[0,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,-0.04],[0.4,0.04],[0.8,-0.04]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,-0.45],[0.2,0.1],[0.4,0.45],[0.6,-0.1],[0.8,-0.45]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,0.1],[0.2,0.6],[0.4,0],[0.6,0.2],[0.8,0.1]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0.45],[0.2,-0.1],[0.4,-0.45],[0.6,0.1],[0.8,0.45]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,0],[0.2,0.2],[0.4,0.1],[0.6,0.6],[0.8,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0.4],[0.4,-0.4],[0.8,0.4]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,-0.4],[0.4,0.4],[0.8,-0.4]] } },
+  run: { length: 0.5, loop: 1, desc: "High-speed athletic sprint with forward lean and high knees", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.125,[0,-7]],[0.25,[0,2]],[0.375,[0,-7]],[0.5,[0,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,-0.18],[0.25,-0.15],[0.5,-0.18]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,-0.85],[0.125,-0.2],[0.25,0.7],[0.375,0.1],[0.5,-0.85]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,0.3],[0.125,1.1],[0.25,0],[0.375,0.6],[0.5,0.3]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0.7],[0.125,0.1],[0.25,-0.85],[0.375,-0.2],[0.5,0.7]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,0],[0.125,0.6],[0.25,0.3],[0.375,1.1],[0.5,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0.75],[0.25,-0.75],[0.5,0.75]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,-0.75],[0.25,0.75],[0.5,-0.75]] } },
+  jump: { length: 0.6, loop: 0, desc: "Anticipation dip, vertical thrust, airborne knee tuck", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.1,[0,8]],[0.3,[0,-32]],[0.6,[0,-20]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.1,0.1],[0.3,-0.1],[0.6,-0.05]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.1,-0.5],[0.3,-0.7],[0.6,-0.3]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,0],[0.1,0.8],[0.3,1.1],[0.6,0.4]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0],[0.1,-0.5],[0.3,-0.5],[0.6,-0.2]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,0],[0.1,0.8],[0.3,0.9],[0.6,0.3]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.1,0.5],[0.3,-1.4],[0.6,-0.8]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.1,0.5],[0.3,-1.4],[0.6,-0.8]] } },
+  double_jump: { length: 0.5, loop: 0, desc: "Mid-air somersault tuck and explosive secondary boost", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.2,[0,-18]],[0.5,[0,-35]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.15,-1.6],[0.3,-3.14],[0.5,0]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,-0.3],[0.2,-1.3],[0.5,-0.2]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,0.4],[0.2,1.6],[0.5,0.2]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,-0.2],[0.2,-1.2],[0.5,-0.1]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,0.3],[0.2,1.5],[0.5,0.2]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,-0.5],[0.2,-2.0],[0.5,-0.6]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,-0.5],[0.2,-2.0],[0.5,-0.6]] } },
+  crouch: { length: 0.4, loop: 0, desc: "Drops pelvis, knees bend, defensive low profile", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.4,[0,18]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.4,-0.15]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.4,-0.75]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,0],[0.4,1.35]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0],[0.4,-0.75]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,0],[0.4,1.35]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.4,-0.4]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.4,-0.4]] } },
+  crouch_walk: { length: 0.9, loop: 1, desc: "Stealth low shuffle with crouched knees and tucked arms", tracks: { "Skeleton2D/pelvis:position": [[0,[0,16]],[0.45,[0,14]],[0.9,[0,16]]], "Skeleton2D/pelvis/torso:rotation": [[0,-0.12],[0.45,-0.16],[0.9,-0.12]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,-0.9],[0.45,-0.4],[0.9,-0.9]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,1.4],[0.45,1.1],[0.9,1.4]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,-0.4],[0.45,-0.9],[0.9,-0.4]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,1.1],[0.45,1.4],[0.9,1.1]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,-0.2],[0.45,-0.5],[0.9,-0.2]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,-0.5],[0.45,-0.2],[0.9,-0.5]] } },
+  dash: { length: 0.35, loop: 0, desc: "High velocity speed dash, aerodynamic forward thrust", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.1,[12,-4]],[0.35,[20,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.1,-0.35],[0.35,-0.2]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.15,-0.9],[0.35,-0.4]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0],[0.15,0.8],[0.35,0.3]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.15,0.95],[0.35,0.4]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.15,0.85],[0.35,0.3]] } },
+  slide: { length: 0.5, loop: 0, desc: "Baseball action slide on ground, lead leg straight", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.15,[0,26]],[0.5,[0,24]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.2,0.42],[0.5,0.35]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.2,-1.25],[0.5,-1.15]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,0],[0.2,0.1],[0.5,0.05]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0],[0.2,0.65],[0.5,0.6]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,0],[0.2,1.55],[0.5,1.5]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.2,-0.6],[0.5,-0.4]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.2,0.9],[0.5,0.7]] } },
+  fire_weapon: { length: 0.4, loop: 0, desc: "Quick weapon draw, forward aim and crisp recoil kick", tracks: { "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.08,-0.05],[0.15,0.08],[0.4,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.08,-1.45],[0.15,-1.65],[0.4,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.08,-1.1],[0.15,-1.25],[0.4,0]] } },
+  punch: { length: 0.35, loop: 0, desc: "Explosive straight jab punch with fast snap-back", tracks: { "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.08,0.15],[0.16,-0.25],[0.35,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.08,0.3],[0.16,-1.4],[0.35,0]], "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [[0,0],[0.08,-1.3],[0.16,0],[0.35,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.16,0.4],[0.35,0]] } },
+  hit: { length: 0.45, loop: 0, desc: "Heavy melee weapon downward cleaving strike", tracks: { "Skeleton2D/pelvis/torso:position": [[0,[0,-40]],[0.15,[0,-44]],[0.25,[0,-38]],[0.45,[0,-40]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.15,0.2],[0.25,-0.25],[0.45,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.15,-1.8],[0.25,0.6],[0.45,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.15,-1.5],[0.25,0.4],[0.45,0]] } },
+  kick: { length: 0.45, loop: 0, desc: "High snap kick with lead leg extension", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.18,[0,-4]],[0.45,[0,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.18,0.25],[0.45,0]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.1,-1.1],[0.2,-1.45],[0.3,-1.0],[0.45,0]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,0],[0.1,1.4],[0.2,0],[0.3,0.9],[0.45,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.2,0.5],[0.45,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.2,-0.6],[0.45,0]] } },
+  jump_kick: { length: 0.55, loop: 0, desc: "Aerial flying dropkick with horizontal body extension", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.2,[0,-28]],[0.55,[0,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.2,-0.55],[0.55,0]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.2,-1.5],[0.55,0]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0],[0.2,0.7],[0.55,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.2,0.8],[0.55,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.2,0.7],[0.55,0]] } },
+  crouch_kick: { length: 0.4, loop: 0, desc: "Low floor sweep kick sweeping forward along ground", tracks: { "Skeleton2D/pelvis:position": [[0,[0,18]],[0.18,[0,22]],[0.4,[0,18]]], "Skeleton2D/pelvis/torso:rotation": [[0,-0.15],[0.18,0.3],[0.4,-0.15]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,-0.75],[0.18,-1.3],[0.4,-0.75]], "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [[0,1.35],[0.18,0.1],[0.4,1.35]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,-0.75],[0.18,0.4],[0.4,-0.75]], "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [[0,1.35],[0.18,1.6],[0.4,1.35]] } },
+  get_hit: { length: 0.35, loop: 0, desc: "Impact hurt flinch, head snapped back and torso recoil", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.08,[-10,-2]],[0.35,[0,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.08,0.28],[0.35,0]], "Skeleton2D/pelvis/torso/head:rotation": [[0,0],[0.08,0.35],[0.35,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.08,-0.75],[0.35,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.08,0.75],[0.35,0]] } },
+  get_stunned: { length: 1.0, loop: 1, desc: "Dazed dizzy wobble loop with limp arms and swaying head", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.25,[3,-2]],[0.5,[0,2]],[0.75,[-3,-2]],[1.0,[0,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,-0.08],[0.5,0.08],[1.0,-0.08]], "Skeleton2D/pelvis/torso/head:rotation": [[0,0.2],[0.5,-0.2],[1.0,0.2]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0.15],[0.5,-0.15],[1.0,0.15]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,-0.15],[0.5,0.15],[1.0,-0.15]] } },
+  death: { length: 0.8, loop: 0, desc: "Knees buckle, body goes limp and collapses to floor", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.25,[0,15]],[0.55,[0,36]],[0.8,[0,36]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.25,0.4],[0.55,1.45],[0.8,1.55]], "Skeleton2D/pelvis/torso/head:rotation": [[0,0],[0.25,0.2],[0.55,0.5],[0.8,0.5]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.25,0.6],[0.55,1.4],[0.8,1.45]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0],[0.25,0.5],[0.55,1.3],[0.8,1.35]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.25,-0.4],[0.55,1.2],[0.8,1.3]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.25,0.4],[0.55,1.0],[0.8,1.1]] } },
+  drink_potion: { length: 1.0, loop: 0, desc: "Raise potion vial to mouth, head tilts back to chug", tracks: { "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.25,-1.35],[0.6,-1.45],[1.0,0]], "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [[0,0],[0.25,-1.5],[0.6,-1.6],[1.0,0]], "Skeleton2D/pelvis/torso/head:rotation": [[0,0],[0.25,0],[0.5,0.38],[0.75,0.38],[1.0,0]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.5,0.08],[1.0,0]] } },
+  special_01: { length: 0.8, loop: 0, desc: "Ground Slam: high airborne leap with dual overhead strike", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.2,[0,-25]],[0.45,[0,16]],[0.8,[0,0]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.2,0.3],[0.45,-0.35],[0.8,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.2,-2.1],[0.45,0.75],[0.8,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.2,-2.1],[0.45,0.75],[0.8,0]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,0],[0.2,-0.6],[0.45,-0.8],[0.8,0]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0],[0.2,-0.6],[0.45,-0.8],[0.8,0]] } },
+  special_02: { length: 0.6, loop: 1, desc: "Whirlwind Spin: rapid 360-degree blade spin with arms out", tracks: { "Skeleton2D/pelvis:position": [[0,[0,-2]],[0.3,[0,-4]],[0.6,[0,-2]]], "Skeleton2D/pelvis/torso:rotation": [[0,-0.05],[0.15,0.05],[0.3,-0.05],[0.45,0.05],[0.6,-0.05]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,-1.55],[0.3,-1.6],[0.6,-1.55]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,1.55],[0.3,1.6],[0.6,1.55]], "Skeleton2D/pelvis/leg_upper_L:rotation": [[0,-0.3],[0.3,0.3],[0.6,-0.3]], "Skeleton2D/pelvis/leg_upper_R:rotation": [[0,0.3],[0.3,-0.3],[0.6,0.3]] } },
+  special_03: { length: 1.2, loop: 1, desc: "Arcane Power Charge: chest arched, surging energy", tracks: { "Skeleton2D/pelvis:position": [[0,[0,0]],[0.3,[0,4]],[0.6,[0,-1]],[0.9,[0,4]],[1.2,[0,0]]], "Skeleton2D/pelvis/torso:position": [[0,[0,-40]],[0.3,[0,-38]],[0.6,[0,-42]],[0.9,[0,-38]],[1.2,[0,-40]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.3,0.12],[0.6,0.15],[0.9,0.12],[1.2,0]], "Skeleton2D/pelvis/torso/head:rotation": [[0,0],[0.3,0.28],[0.6,0.35],[0.9,0.28],[1.2,0]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.3,-0.65],[0.6,-0.75],[0.9,-0.65],[1.2,0]], "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [[0,0],[0.3,-1.25],[0.6,-1.35],[0.9,-1.25],[1.2,0]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.3,0.65],[0.6,0.75],[0.9,0.65],[1.2,0]], "Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation": [[0,0],[0.3,-1.25],[0.6,-1.35],[0.9,-1.25],[1.2,0]] } },
+  special_04: { length: 1.1, loop: 0, desc: "Heroic Victory Flourish: spin weapon, crisp hip sheath", tracks: { "Skeleton2D/pelvis/torso:position": [[0,[0,-40]],[0.4,[0,-40]],[0.7,[0,-43]],[1.1,[0,-42]]], "Skeleton2D/pelvis/torso:rotation": [[0,0],[0.4,-0.1],[0.7,-0.05],[1.1,-0.05]], "Skeleton2D/pelvis/torso/head:rotation": [[0,0],[0.4,0.1],[0.7,-0.08],[1.1,-0.05]], "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [[0,0],[0.3,-1.6],[0.6,0.3],[0.85,-1.2],[1.1,-0.8]], "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [[0,0],[0.3,-0.3],[0.6,-0.8],[0.85,-0.5],[1.1,-0.3]], "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [[0,0],[0.4,0.2],[0.7,-0.4],[1.1,-0.3]] } }
+};
+
+async function initAnimCatalog() {
+  try {
+    const r = await fetch('/api/animations');
+    const d = await r.json();
+    if (d.status === 'ok' && d.animations) {
+      animCatalog = d.animations;
+    } else {
+      animCatalog = FALLBACK_ANIM_DEFS;
+    }
+  } catch(e) {
+    animCatalog = FALLBACK_ANIM_DEFS;
+  }
+}
+
+function setRosterFilter(f) {
+  rosterFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+  const chip = document.getElementById(`chip-filter-${f}`);
+  if (chip) chip.classList.add('active');
+  filterRoster();
+}
+
+function filterRoster() {
+  const q = (document.getElementById("lib-search")?.value || "").toLowerCase().trim();
+  let filtered = allLibraryChars;
+  if (rosterFilter === "scenes") {
+    filtered = filtered.filter(c => c.has_godot_scene);
+  } else if (rosterFilter === "exploded") {
+    filtered = filtered.filter(c => c.has_exploded_sheet);
+  }
+  if (q) {
+    filtered = filtered.filter(c => c.name.toLowerCase().includes(q));
+  }
+  renderRoster(filtered);
+}
+
 async function refreshLibrary() {
   const roster = document.getElementById("char-roster");
   roster.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:30px 0;font-size:12px;">🔄 Loading...</div>';
@@ -2082,17 +2424,27 @@ async function refreshLibrary() {
     allLibraryChars = d.characters || [];
     const countEl = document.getElementById("lib-char-count");
     if (countEl) countEl.textContent = `(${allLibraryChars.length} character${allLibraryChars.length === 1 ? '' : 's'})`;
-    renderRoster(allLibraryChars);
+
+    // Update filter counts
+    const cntAll = allLibraryChars.length;
+    const cntScenes = allLibraryChars.filter(c => c.has_godot_scene).length;
+    const cntExploded = allLibraryChars.filter(c => c.has_exploded_sheet).length;
+    const elAll = document.getElementById("count-all"); if (elAll) elAll.textContent = cntAll;
+    const elSc = document.getElementById("count-scenes"); if (elSc) elSc.textContent = cntScenes;
+    const elEx = document.getElementById("count-exploded"); if (elEx) elEx.textContent = cntExploded;
+
+    filterRoster();
+
+    // If viewing a character, re-render view; otherwise pick the first available
+    if (viewingChar && allLibraryChars.some(c => c.name === viewingChar)) {
+      viewCharacter(viewingChar);
+    } else if (allLibraryChars.length > 0 && !viewingChar) {
+      viewCharacter(allLibraryChars[0].name);
+    }
   } catch(e) {
     console.error("[LIBRARY] Refresh error:", e);
     roster.innerHTML = '<div style="text-align:center;color:var(--danger);padding:30px 0;font-size:12px;">Failed to load characters. Check console for details.</div>';
   }
-}
-
-function filterRoster() {
-  const q = document.getElementById("lib-search").value.toLowerCase();
-  const filtered = allLibraryChars.filter(c => c.name.includes(q));
-  renderRoster(filtered);
 }
 
 function renderRoster(chars) {
@@ -2107,7 +2459,6 @@ function renderRoster(chars) {
     item.className = "char-roster-item" + (c.name === viewingChar ? " selected" : "");
     item.onclick = () => viewCharacter(c.name);
 
-    // Thumb: Use FULL CONNECTED BODY SPRITE PREVIEW, not just head!
     const fullUrl = c.full_preview_url || `/sprites/${c.name}/${c.name}_full.png`;
     const limbNames = (c.limbs || []).filter(l => !l.includes("_exploded") && !l.includes("_full"));
     const fallbackLimb = limbNames.find(l => l.includes("_head")) || limbNames.find(l => l.includes("_torso")) || (limbNames[0] || "");
@@ -2124,6 +2475,7 @@ function renderRoster(chars) {
     const sceneBadge = c.has_godot_scene
       ? '<span class="lib-badge lib-badge-scene">🎮 Scene</span>'
       : '<span class="lib-badge lib-badge-no-scene">No Scene</span>';
+    const animBadge = '<span class="lib-badge lib-badge-anim">23 Anims</span>';
 
     item.innerHTML = `
       ${thumbHtml}
@@ -2131,6 +2483,7 @@ function renderRoster(chars) {
         <div class="char-roster-name">${c.name.replace(/_/g, ' ')}</div>
         <div class="char-roster-meta">
           <span>${c.limb_count} limbs</span>
+          ${animBadge}
           ${sceneBadge}
         </div>
       </div>
@@ -2139,13 +2492,22 @@ function renderRoster(chars) {
   });
 }
 
+function switchViewerSubTab(tabName) {
+  currentViewerSubTab = tabName;
+  document.querySelectorAll('.subnav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.viewer-subpane').forEach(p => p.classList.remove('active'));
+  const btn = document.getElementById(`subnav-${tabName}`);
+  const pane = document.getElementById(`subpane-${tabName}`);
+  if (btn) btn.classList.add('active');
+  if (pane) pane.classList.add('active');
+}
+
 async function viewCharacter(name) {
   viewingChar = name;
 
-  // Update roster selection
+  // Highlight selected in roster
   document.querySelectorAll('.char-roster-item').forEach(el => el.classList.remove('selected'));
-  const clickedItems = document.querySelectorAll('.char-roster-item');
-  clickedItems.forEach(el => {
+  document.querySelectorAll('.char-roster-item').forEach(el => {
     if (el.querySelector('.char-roster-name')?.textContent === name.replace(/_/g, ' ')) {
       el.classList.add('selected');
     }
@@ -2154,11 +2516,10 @@ async function viewCharacter(name) {
   document.getElementById("viewer-empty").style.display = "none";
   document.getElementById("viewer-content").style.display = "block";
 
-  const charInfo = allLibraryChars.find(c => c.name === name);
+  const charInfo = allLibraryChars.find(c => c.name === name) || {};
   document.getElementById("viewer-char-name").textContent = name.replace(/_/g, ' ');
-  document.getElementById("viewer-char-meta").textContent = charInfo
-    ? `${charInfo.limb_count} limb cutouts • ${charInfo.has_godot_scene ? 'Godot scene available' : 'No scene yet'}`
-    : '';
+  document.getElementById("viewer-char-meta").textContent =
+    `${charInfo.limb_count || 15} limb cutouts • 23 Skeletal Animations • ${charInfo.has_godot_scene ? 'Godot 4 Scene Ready' : 'Scene Pending'}`;
 
   // Update full assembled body preview
   const fullImg = document.getElementById("viewer-full-img");
@@ -2166,7 +2527,31 @@ async function viewCharacter(name) {
     fullImg.src = `/sprites/${name}/${name}_full.png?t=${Date.now()}`;
   }
 
-  // Load sprites
+  // Populate Master Exploded Sheet pane
+  const expWrap = document.getElementById("exploded-wrap");
+  const expEmpty = document.getElementById("exploded-empty");
+  const expImg = document.getElementById("viewer-exploded-img");
+  const expMeta = document.getElementById("exploded-meta-card");
+  const expDl = document.getElementById("btn-download-exploded");
+  const expTitle = document.getElementById("exploded-char-title");
+
+  if (charInfo.has_exploded_sheet || true) {
+    const expUrl = `/sprites/${name}/${name}_exploded.png`;
+    expImg.src = `${expUrl}?t=${Date.now()}`;
+    expWrap.style.display = "flex";
+    expMeta.style.display = "flex";
+    expEmpty.style.display = "none";
+    expTitle.textContent = `${name.replace(/_/g, ' ')} Master Exploded Diffusion Sheet`;
+    expDl.href = expUrl;
+    expDl.setAttribute("download", `${name}_exploded.png`);
+  }
+
+  // Populate Godot Scene Specs pane
+  const scenePathEl = document.getElementById("spec-scene-path");
+  if (scenePathEl) scenePathEl.textContent = charInfo.scene_path || `res://scenes/${name}_character.tscn`;
+  populateAnimTable();
+
+  // Load Sprites Grid for Subpane 2
   try {
     const r = await fetch(`/api/sprites?char=${encodeURIComponent(name)}`);
     const d = await r.json();
@@ -2185,9 +2570,311 @@ async function viewCharacter(name) {
         grid.appendChild(card);
       });
     } else {
-      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;font-size:12px;">No sprites found for this character.</div>';
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;font-size:12px;">No individual cutouts found.</div>';
     }
   } catch(e) {}
+
+  // Load limbs into memory for 2D Live Animation Player
+  loadLimbImagesForChar(name);
+  selectAnim(currentAnimName || "idle");
+  ensureAnimLoopRunning();
+}
+
+function openExplodedLightbox() {
+  if (!viewingChar) return;
+  const expUrl = `/sprites/${viewingChar}/${viewingChar}_exploded.png`;
+  openLightbox(expUrl, `${viewingChar.replace(/_/g, ' ')} (Master Exploded Sheet)`, '1024×1024 RGBA Generative Sheet');
+}
+
+function populateAnimTable() {
+  const tbody = document.getElementById("spec-anim-table-body");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+  const cat = animCatalog || FALLBACK_ANIM_DEFS;
+  Object.entries(cat).forEach(([key, data]) => {
+    const tr = document.createElement("tr");
+    const category = ANIM_CATEGORIES[key] || "Movement";
+    const loopStr = data.loop ? "🔁 Yes" : "⏹ One-Shot";
+    tr.innerHTML = `
+      <td><strong style="color:var(--text);">${key}</strong><div style="font-size:10.5px;color:var(--text-muted);">${data.desc || ''}</div></td>
+      <td><span style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.04);border:1px solid var(--border);">${category}</span></td>
+      <td>${data.length}s</td>
+      <td>${loopStr}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="selectAnim('${key}');switchViewerSubTab('anim');">▶ Play</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ---- 2D Animation Player Canvas Engine ----
+const BONE_LIMBS = ["head", "torso", "arm_upper_L", "arm_lower_L", "hand_L", "arm_upper_R", "arm_lower_R", "hand_R", "leg_upper_L", "leg_lower_L", "foot_L", "leg_upper_R", "leg_lower_R", "foot_R", "pelvis"];
+
+function loadLimbImagesForChar(charName) {
+  loadedLimbImages = {};
+  BONE_LIMBS.forEach(bone => {
+    const img = new Image();
+    img.src = `/sprites/${charName}/${bone}.png?t=${Date.now()}`;
+    img.onload = () => { loadedLimbImages[bone] = img; };
+  });
+  const fullImg = new Image();
+  fullImg.src = `/sprites/${charName}/${charName}_full.png?t=${Date.now()}`;
+  fullImg.onload = () => { loadedLimbImages["_full"] = fullImg; };
+}
+
+function selectAnim(name) {
+  currentAnimName = name;
+  animCurrentTime = 0.0;
+  animIsPlaying = true;
+  document.querySelectorAll('.anim-chip').forEach(el => {
+    if (el.dataset.anim === name) el.classList.add('active');
+    else el.classList.remove('active');
+  });
+  const def = (animCatalog || FALLBACK_ANIM_DEFS)[name] || FALLBACK_ANIM_DEFS["idle"];
+  document.getElementById("anim-overlay-title").textContent = name;
+  document.getElementById("anim-overlay-desc").textContent = def.desc || "";
+  const playBtn = document.getElementById("btn-anim-play");
+  if (playBtn) playBtn.textContent = "⏸ Pause";
+}
+
+function togglePlayPause() {
+  animIsPlaying = !animIsPlaying;
+  const playBtn = document.getElementById("btn-anim-play");
+  if (playBtn) playBtn.textContent = animIsPlaying ? "⏸ Pause" : "▶ Play";
+}
+
+function restartAnimation() {
+  animCurrentTime = 0.0;
+  animIsPlaying = true;
+  const playBtn = document.getElementById("btn-anim-play");
+  if (playBtn) playBtn.textContent = "⏸ Pause";
+}
+
+function onScrubInput(val) {
+  const def = (animCatalog || FALLBACK_ANIM_DEFS)[currentAnimName] || { length: 1.0 };
+  animCurrentTime = (parseFloat(val) / 100.0) * def.length;
+}
+
+function evalKeyframes(keyframes, t) {
+  if (!keyframes || keyframes.length === 0) return 0;
+  if (keyframes.length === 1) return keyframes[0][1];
+  if (t <= keyframes[0][0]) return keyframes[0][1];
+  if (t >= keyframes[keyframes.length - 1][0]) return keyframes[keyframes.length - 1][1];
+
+  for (let i = 0; i < keyframes.length - 1; i++) {
+    const t0 = keyframes[i][0];
+    const t1 = keyframes[i+1][0];
+    if (t >= t0 && t <= t1) {
+      const v0 = keyframes[i][1];
+      const v1 = keyframes[i+1][1];
+      const f = (t - t0) / (t1 - t0);
+      if (Array.isArray(v0)) {
+        return [v0[0] + f * (v1[0] - v0[0]), v0[1] + f * (v1[1] - v0[1])];
+      }
+      return v0 + f * (v1 - v0);
+    }
+  }
+  return keyframes[0][1];
+}
+
+function getTrackVal(trackPath, defVal) {
+  const def = (animCatalog || FALLBACK_ANIM_DEFS)[currentAnimName];
+  if (!def || !def.tracks || !def.tracks[trackPath]) return defVal;
+  return evalKeyframes(def.tracks[trackPath], animCurrentTime);
+}
+
+function ensureAnimLoopRunning() {
+  if (!animRafId) {
+    animLastFrameTime = performance.now();
+    animRafId = requestAnimationFrame(animRenderLoop);
+  }
+}
+
+function animRenderLoop(now) {
+  const dt = Math.min((now - animLastFrameTime) / 1000.0, 0.1);
+  animLastFrameTime = now;
+
+  const canvas = document.getElementById("anim-canvas");
+  if (canvas) {
+    const ctx = canvas.getContext("2d");
+    const def = (animCatalog || FALLBACK_ANIM_DEFS)[currentAnimName] || { length: 1.0, loop: 1 };
+    const animLen = def.length || 1.0;
+
+    // Advance time
+    if (animIsPlaying) {
+      animCurrentTime += dt * animSpeed;
+      if (animCurrentTime >= animLen) {
+        if (def.loop) {
+          animCurrentTime = animCurrentTime % animLen;
+        } else {
+          animCurrentTime = animLen;
+          animIsPlaying = false;
+          const playBtn = document.getElementById("btn-anim-play");
+          if (playBtn) playBtn.textContent = "▶ Play";
+        }
+      }
+    }
+
+    // Update UI controls
+    const scrub = document.getElementById("anim-scrub");
+    if (scrub) scrub.value = (animCurrentTime / animLen) * 100;
+    const timeDisp = document.getElementById("anim-time-display");
+    if (timeDisp) timeDisp.textContent = `${animCurrentTime.toFixed(2)}s / ${animLen.toFixed(2)}s`;
+
+    // Clear Canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Floor Shadow & Grid Markings
+    const rootX = canvas.width / 2;
+    const rootY = canvas.height / 2 + 65;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(rootX, rootY + 68, 65, 12, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.fill();
+    ctx.restore();
+
+    // Evaluate Animated Tracks
+    const pelvisPos = getTrackVal("Skeleton2D/pelvis:position", [0, 0]);
+    const torsoPos  = getTrackVal("Skeleton2D/pelvis/torso:position", [0, -40]);
+    const torsoRot  = getTrackVal("Skeleton2D/pelvis/torso:rotation", 0);
+    const headRot   = getTrackVal("Skeleton2D/pelvis/torso/head:rotation", 0);
+
+    const armLRot   = getTrackVal("Skeleton2D/pelvis/torso/arm_upper_L:rotation", 0);
+    const armLLowRot= getTrackVal("Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation", 0);
+    const armRRot   = getTrackVal("Skeleton2D/pelvis/torso/arm_upper_R:rotation", 0);
+    const armRLowRot= getTrackVal("Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation", 0);
+
+    const legLRot   = getTrackVal("Skeleton2D/pelvis/leg_upper_L:rotation", 0);
+    const legLLowRot= getTrackVal("Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation", 0);
+    const legRRot   = getTrackVal("Skeleton2D/pelvis/leg_upper_R:rotation", 0);
+    const legRLowRot= getTrackVal("Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation", 0);
+
+    const px = rootX + pelvisPos[0] * 1.5;
+    const py = rootY + pelvisPos[1] * 1.5;
+
+    // Helper: draw limb sprite or bone
+    function drawPart(boneName, imgName, w, h, ox, oy) {
+      const img = loadedLimbImages[imgName];
+      if (img && img.complete && img.naturalWidth > 0 && !showSkeletonOverlay) {
+        ctx.drawImage(img, -w/2 + ox, -h/2 + oy, w, h);
+      } else {
+        // Stylized glowing bone fallback / skeleton overlay
+        ctx.beginPath();
+        ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = "#d2a8ff";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(ox, oy);
+        ctx.lineWidth = 4.5;
+        ctx.strokeStyle = showSkeletonOverlay ? "#58a6ff" : "rgba(88,166,255,0.7)";
+        ctx.lineCap = "round";
+        ctx.stroke();
+      }
+    }
+
+    // 1. Right Arm (Back Layer)
+    ctx.save();
+    ctx.translate(px, py + torsoPos[1]);
+    ctx.rotate(torsoRot);
+    ctx.translate(22, -32);
+    ctx.rotate(armRRot);
+    drawPart("arm_upper_R", "arm_upper_R", 34, 48, 8, 16);
+    ctx.translate(10, 26);
+    ctx.rotate(armRLowRot);
+    drawPart("arm_lower_R", "arm_lower_R", 30, 44, 4, 14);
+    ctx.translate(4, 22);
+    drawPart("hand_R", "hand_R", 24, 24, 0, 0);
+    ctx.restore();
+
+    // 2. Right Leg (Back Layer)
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.translate(14, 4);
+    ctx.rotate(legRRot);
+    drawPart("leg_upper_R", "leg_upper_R", 32, 50, 0, 16);
+    ctx.translate(0, 30);
+    ctx.rotate(legRLowRot);
+    drawPart("leg_lower_R", "leg_lower_R", 28, 48, 0, 16);
+    ctx.translate(2, 28);
+    drawPart("foot_R", "foot_R", 34, 22, 6, 0);
+    ctx.restore();
+
+    // 3. Pelvis & Torso (Core)
+    ctx.save();
+    ctx.translate(px, py);
+    drawPart("pelvis", "pelvis", 46, 32, 0, 0);
+    ctx.translate(torsoPos[0], torsoPos[1]);
+    ctx.rotate(torsoRot);
+    drawPart("torso", "torso", 64, 76, 0, 0);
+
+    // 4. Head
+    ctx.save();
+    ctx.translate(0, -42);
+    ctx.rotate(headRot);
+    drawPart("head", "head", 68, 68, 0, -8);
+    ctx.restore();
+
+    ctx.restore(); // end torso / core
+
+    // 5. Left Leg (Front Layer)
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.translate(-14, 4);
+    ctx.rotate(legLRot);
+    drawPart("leg_upper_L", "leg_upper_L", 32, 50, 0, 16);
+    ctx.translate(0, 30);
+    ctx.rotate(legLLowRot);
+    drawPart("leg_lower_L", "leg_lower_L", 28, 48, 0, 16);
+    ctx.translate(-2, 28);
+    drawPart("foot_L", "foot_L", 34, 22, -6, 0);
+    ctx.restore();
+
+    // 6. Left Arm (Front Layer)
+    ctx.save();
+    ctx.translate(px, py + torsoPos[1]);
+    ctx.rotate(torsoRot);
+    ctx.translate(-22, -32);
+    ctx.rotate(armLRot);
+    drawPart("arm_upper_L", "arm_upper_L", 34, 48, -8, 16);
+    ctx.translate(-10, 26);
+    ctx.rotate(armLLowRot);
+    drawPart("arm_lower_L", "arm_lower_L", 30, 44, -4, 14);
+    ctx.translate(-4, 22);
+    drawPart("hand_L", "hand_L", 24, 24, 0, 0);
+    ctx.restore();
+  }
+
+  animRafId = requestAnimationFrame(animRenderLoop);
+}
+
+// ---- Batch Re-Rig All Characters ----
+async function batchRerigAll() {
+  const btn = document.getElementById("btn-batch-rerig");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Re-Rigging All...';
+  }
+  log("\\n========================================================", "ci");
+  log("[RIG] Batch re-rigging all characters with 23 default animations...", "gi");
+  try {
+    const r = await fetch('/api/rerig_all', { method: 'POST' });
+    const d = await r.json();
+    if (d.status === 'success') {
+      log(`[GODOT] ✓ Successfully re-rigged ${d.count || 0} characters with 23 default animations!`, "ok");
+      refreshLibrary();
+    } else {
+      log(`[GODOT-ERROR] Batch re-rig failed: ${d.message || ''}`, "err");
+    }
+  } catch(e) {
+    log(`[ERROR] Batch re-rig error: ${e}`, "err");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '🦴 Batch Re-Rig All (23 Anims)';
+    }
+  }
 }
 
 async function deleteChar(name) {
@@ -2213,6 +2900,7 @@ async function deleteChar(name) {
 }
 
 // ---- Init ----
+initAnimCatalog();
 setActivePill('pill-cyber_alien');
 checkStatus();
 checkModelStatus();

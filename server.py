@@ -1258,21 +1258,34 @@ def download_comfyui_model(
 def list_generated_characters() -> str:
     """
     Lists all characters that have been generated and stored in the sprites/ directory,
-    along with their metadata (limb count, Godot scene availability, last modified time).
+    along with their metadata (limb count, Godot scene availability, exploded sheet URL, animations, last modified time).
 
     Returns:
         JSON string with a list of character metadata dicts.
     """
+    try:
+        from scripts.generate_rig_animations import ANIMATION_DEFS
+        anim_keys = list(ANIMATION_DEFS.keys())
+    except Exception:
+        anim_keys = [
+            "idle", "walk", "run", "jump", "double_jump", "crouch", "crouch_walk",
+            "dash", "slide", "fire_weapon", "punch", "hit", "kick", "jump_kick",
+            "crouch_kick", "get_hit", "get_stunned", "death", "drink_potion",
+            "special_01", "special_02", "special_03", "special_04"
+        ]
+
     sprites_root = PROJECT_ROOT / "sprites"
     scenes_root  = PROJECT_ROOT / "scenes"
     characters = []
+    seen_names = set()
 
     if sprites_root.is_dir():
         for char_dir in sorted(sprites_root.iterdir()):
             if not char_dir.is_dir():
                 continue
+            seen_names.add(char_dir.name)
             limb_files = sorted(char_dir.glob("*.png"))
-            limb_files = [f for f in limb_files if "_exploded" not in f.name]
+            actual_limbs = [f for f in limb_files if "_exploded" not in f.name and "_full" not in f.name]
             has_exploded = (char_dir / f"{char_dir.name}_exploded.png").is_file()
             full_preview = (char_dir / f"{char_dir.name}_full.png")
             if not full_preview.is_file():
@@ -1283,28 +1296,65 @@ def list_generated_characters() -> str:
                     pass
             has_full = full_preview.is_file()
             scene_file = scenes_root / f"{char_dir.name}_character.tscn"
+            if not scene_file.is_file():
+                alt_scene = scenes_root / f"{char_dir.name}.tscn"
+                if alt_scene.is_file():
+                    scene_file = alt_scene
+
             last_mod = 0.0
             for f in limb_files:
                 try:
                     last_mod = max(last_mod, f.stat().st_mtime)
                 except Exception:
                     pass
+
             characters.append({
                 "name": char_dir.name,
-                "limb_count": len(limb_files),
+                "limb_count": len(actual_limbs),
                 "has_exploded_sheet": has_exploded,
+                "exploded_url": f"/sprites/{char_dir.name}/{char_dir.name}_exploded.png" if has_exploded else None,
                 "has_full_preview": has_full,
                 "full_preview_url": f"/sprites/{char_dir.name}/{char_dir.name}_full.png" if has_full else None,
                 "has_godot_scene": scene_file.is_file(),
-                "scene_path": f"res://scenes/{char_dir.name}_character.tscn" if scene_file.is_file() else None,
+                "scene_path": f"res://scenes/{scene_file.name}" if scene_file.is_file() else None,
                 "sprites_dir": f"res://sprites/{char_dir.name}",
                 "last_modified_ts": last_mod,
-                "limbs": [f.name for f in limb_files]
+                "limbs": [f.name for f in actual_limbs],
+                "animation_count": len(anim_keys),
+                "animations": anim_keys
             })
+
+    # Also include any scenes that might have been assembled directly in scenes/
+    if scenes_root.is_dir():
+        for sc in sorted(scenes_root.glob("*.tscn")):
+            if sc.name in ["character_rig_template.tscn", "quadruped_rig_template.tscn"]:
+                continue
+            base_name = sc.stem
+            if base_name.endswith("_character"):
+                base_name = base_name[:-10]
+            if base_name not in seen_names:
+                seen_names.add(base_name)
+                characters.append({
+                    "name": base_name,
+                    "limb_count": 0,
+                    "has_exploded_sheet": False,
+                    "exploded_url": None,
+                    "has_full_preview": False,
+                    "full_preview_url": None,
+                    "has_godot_scene": True,
+                    "scene_path": f"res://scenes/{sc.name}",
+                    "sprites_dir": f"res://sprites/{base_name}",
+                    "last_modified_ts": sc.stat().st_mtime,
+                    "limbs": [],
+                    "animation_count": len(anim_keys),
+                    "animations": anim_keys
+                })
 
     return json.dumps({
         "status": "success",
         "count": len(characters),
+        "animation_catalog_count": len(anim_keys),
+        "animations": anim_keys,
         "characters": characters
     }, indent=2)
 
@@ -1495,24 +1545,71 @@ def get_queue_status(job_id: str = "") -> str:
 
 
 # ==============================================================================
-# MCP TOOL 11: cancel_queue_job
+# MCP TOOL 12: list_rig_animations
 # ==============================================================================
 @mcp.tool()
-def cancel_queue_job(job_id: str) -> str:
-    """Cancels a pending or running job in the generation queue.
-
-    Args:
-        job_id: The ID of the job to cancel.
+def list_rig_animations() -> str:
+    """Returns the complete catalog of 23 default skeletal animations built into the Godot rigs.
 
     Returns:
-        JSON string indicating whether cancellation succeeded.
+        JSON string containing animation names, descriptions, loop modes, and track metadata.
     """
-    success = cancel_job(job_id)
-    return json.dumps({
-        "status": "cancelled" if success else "not_found_or_finished",
-        "job_id": job_id,
-        "success": success
-    }, indent=2)
+    try:
+        from scripts.generate_rig_animations import ANIMATION_DEFS
+        return json.dumps({
+            "status": "ok",
+            "total_animations": len(ANIMATION_DEFS),
+            "animations": [
+                {
+                    "name": k,
+                    "description": v.get("desc", ""),
+                    "length": v.get("length", 1.0),
+                    "loop": bool(v.get("loop", 0)),
+                    "track_count": len(v.get("tracks", {}))
+                }
+                for k, v in ANIMATION_DEFS.items()
+            ]
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({"status": "error", "message": str(e)}, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 13: batch_rerig_characters
+# ==============================================================================
+@mcp.tool()
+def batch_rerig_characters(character_names: List[str] = None) -> str:
+    """Batch re-rigs characters in the library with all 23 default animations into Godot .tscn scenes.
+
+    Args:
+        character_names: Optional list of character names to re-rig. If omitted, re-rigs all characters.
+
+    Returns:
+        JSON string reporting results for each character scene.
+    """
+    try:
+        from scripts.generate_rig_animations import rerig_all_existing_scenes
+        if not character_names:
+            updated = rerig_all_existing_scenes()
+            return json.dumps({
+                "status": "success",
+                "message": f"Successfully re-rigged {len(updated)} character scenes with 23 default animations.",
+                "characters": updated
+            }, indent=2)
+        else:
+            results = []
+            for name in character_names:
+                clean_name = name.strip().lower().replace(" ", "_")
+                rig_type = "quadruped" if clean_name in ["fenrir", "celestial_wolf"] else "biped"
+                r = assemble_godot_rig(clean_name, f"res://sprites/{clean_name}", f"res://scenes/{clean_name}_character.tscn", rig_type=rig_type)
+                results.append({"character": clean_name, "result": json.loads(r)})
+            return json.dumps({
+                "status": "success",
+                "re_rigged_count": len(results),
+                "results": results
+            }, indent=2)
+    except Exception as e:
+        return json.dumps({"status": "error", "message": str(e)}, indent=2)
 
 
 if __name__ == "__main__":
