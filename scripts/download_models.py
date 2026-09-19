@@ -62,13 +62,13 @@ MODELS_CATALOG: Dict[str, dict] = {
         "style_hint": "masterpiece, best quality, highres, anime character"
     },
     "pony_xl": {
-        "filename": "ponyDiffusionV6XL.safetensors",
+        "filename": "ponyDiffusionV6XL_v6StartWithThisOne.safetensors",
         "subfolder": "checkpoints",
-        "url": "https://huggingface.co/AstraliteHeart/pony-diffusion-v6-xl/resolve/main/ponyDiffusionV6XL_v6StartWithThisOne.safetensors",
-        "size_mb": 6614.0,
+        "url": "https://huggingface.co/LyliaEngine/Pony_Diffusion_V6_XL/resolve/main/ponyDiffusionV6XL_v6StartWithThisOne.safetensors",
+        "size_mb": 6460.0,
         "type": "checkpoint",
         "base": "SDXL",
-        "desc": "Pony Diffusion XL v6 — Expressive stylized SDXL game character art (6.6 GB)",
+        "desc": "Pony Diffusion XL v6 — Expressive stylized SDXL game character art (6.5 GB)",
         "tags": ["anime", "game-art", "sdxl", "stylized"],
         "style_hint": "score_9, score_8_up, score_7_up, source_anime, game character"
     },
@@ -88,10 +88,10 @@ MODELS_CATALOG: Dict[str, dict] = {
     # SD 1.5 Checkpoints (~2 GB, runs on 4+ GB VRAM)
     # =========================================================
     "anything_v5": {
-        "filename": "anything-v5-PrtRE.safetensors",
+        "filename": "AnythingV5.safetensors",
         "subfolder": "checkpoints",
-        "url": "https://huggingface.co/stablediffusionapi/anything-v5/resolve/main/anything-v5-PrtRE.safetensors",
-        "size_mb": 2082.4,
+        "url": "https://huggingface.co/Yntec/AnythingV5/resolve/main/AnythingV5.safetensors",
+        "size_mb": 1993.4,
         "type": "checkpoint",
         "base": "SD1.5",
         "desc": "AnythingV5 — Ultra clean, flat-color anime SD 1.5 (~2 GB)",
@@ -121,46 +121,46 @@ MODELS_CATALOG: Dict[str, dict] = {
         "style_hint": "masterpiece, highly detailed, fantasy game character design, concept art"
     },
     "toonyou": {
-        "filename": "toonyou_beta6.safetensors",
+        "filename": "toonyou_alpha3.safetensors",
         "subfolder": "checkpoints",
-        "url": "https://huggingface.co/aipicasso/toon-you/resolve/main/toonyou_beta6.safetensors",
-        "size_mb": 2082.0,
+        "url": "https://huggingface.co/ckpt/toonyou/resolve/main/toonyou_alpha3.safetensors",
+        "size_mb": 1993.0,
         "type": "checkpoint",
         "base": "SD1.5",
-        "desc": "ToonYou Beta 6 — Bright cartoon / cel-shaded toon game character art (~2 GB)",
+        "desc": "ToonYou Alpha 3 — Bright cartoon / cel-shaded toon game character art (~2 GB)",
         "tags": ["cartoon", "toon", "cel-shading", "sd15", "bright"],
         "style_hint": "toon, cartoon, cel shading, colorful, clean line art, game character"
     },
     "rpg_v5": {
-        "filename": "rpg_v5.safetensors",
+        "filename": "RPG_Remix.safetensors",
         "subfolder": "checkpoints",
-        "url": "https://huggingface.co/Anashel/rpg/resolve/main/rpg_v5.safetensors",
-        "size_mb": 2082.0,
+        "url": "https://huggingface.co/Yntec/RPG_Remix/resolve/main/RPG_Remix.safetensors",
+        "size_mb": 4067.6,
         "type": "checkpoint",
         "base": "SD1.5",
-        "desc": "RPG v5 — Rich RPG character concept sheet art (~2 GB)",
+        "desc": "RPG Remix v5 — Rich RPG character concept sheet art (~4 GB)",
         "tags": ["rpg", "fantasy", "character", "sd15", "concept-art"],
         "style_hint": "RPG character art, concept sheet, detailed armor and costume, game character design"
     },
-    "mix_pro_v4": {
-        "filename": "majicMIX_pro_v4.safetensors",
+    "cuteyuki_v2": {
+        "filename": "cuteyukimixAdorable_v20.safetensors",
         "subfolder": "checkpoints",
-        "url": "https://huggingface.co/digiplay/majicMIX_pro/resolve/main/majicMIX_pro_v4.safetensors",
+        "url": "https://huggingface.co/Yntec/CuteYuki2/resolve/main/cuteyukimixAdorable_v20.safetensors",
         "size_mb": 1993.0,
         "type": "checkpoint",
         "base": "SD1.5",
-        "desc": "MajicMIX Pro v4 — Hyper-detailed realistic anime & stylized character art (~2 GB)",
-        "tags": ["hyper-detailed", "anime", "realistic-mix", "sd15"],
-        "style_hint": "masterpiece, ultra detailed, intricate detail, anime character art, game sprite"
+        "desc": "CuteYukiMix Adorable v2 — Polished anime character illustration fine-tune (~2 GB)",
+        "tags": ["anime", "illustration", "sd15", "clean"],
+        "style_hint": "masterpiece, ultra detailed, vibrant anime character art, game sprite"
     },
-    "waifu_diffusion": {
-        "filename": "wd-1-4-anime_e2.safetensors",
+    "anything_v3": {
+        "filename": "Anything-V3.0-non-ema-fp16.safetensors",
         "subfolder": "checkpoints",
-        "url": "https://huggingface.co/hakurei/waifu-diffusion-v1-4/resolve/main/wd-1-4-anime_e2.ckpt",
-        "size_mb": 2082.0,
+        "url": "https://huggingface.co/swl-models/anything-v3.0/resolve/main/Anything-V3.0-non-ema-fp16.safetensors",
+        "size_mb": 2080.0,
         "type": "checkpoint",
         "base": "SD1.5",
-        "desc": "Waifu Diffusion 1.4 — Foundational 2D anime character fine-tune (~2 GB)",
+        "desc": "Anything V3.0 — Benchmark classic 2D anime character generation (~2 GB)",
         "tags": ["anime", "2d", "foundational", "sd15"],
         "style_hint": "anime, 2d illustration, high quality character design, anime sprite"
     },
@@ -213,23 +213,34 @@ MODELS_CATALOG: Dict[str, dict] = {
         "style_hint": ""
     },
     "pixel_lora": {
-        "filename": "pixel_art_style_lora.safetensors",
+        "filename": "PixelArtRedmond15V-PixelArt-PIXARFK.safetensors",
         "subfolder": "loras",
-        "url": "https://huggingface.co/Pclanglais/Pixel-Sprites/resolve/main/pixel_sprite_lora.safetensors",
-        "size_mb": 144.0,
+        "url": "https://huggingface.co/artificialguybr/pixelartredmond-1-5v-pixel-art-loras-for-sd-1-5/resolve/main/PixelArtRedmond15V-PixelArt-PIXARFK.safetensors",
+        "size_mb": 26.0,
         "type": "lora",
         "base": "SD1.5",
-        "desc": "Pixel Art Sprite LoRA — Converts SD 1.5 output to pixel-art sprites",
+        "desc": "PixelArt Redmond LoRA (SD 1.5) — Converts SD 1.5 models to pixel-art sprites (26 MB)",
         "tags": ["lora", "pixel-art", "sprite", "sd15"],
-        "style_hint": "pixel art, 8-bit sprite, retro game character"
+        "style_hint": "PixelArt, pixel art, 8-bit, 16-bit retro sprite, pixelated character"
+    },
+    "pixel_lora_xl": {
+        "filename": "pixel-art-xl.safetensors",
+        "subfolder": "loras",
+        "url": "https://huggingface.co/nerijs/pixel-art-xl/resolve/main/pixel-art-xl.safetensors",
+        "size_mb": 170.5,
+        "type": "lora",
+        "base": "SDXL",
+        "desc": "Pixel Art XL LoRA (SDXL) — Converts SDXL models to crisp pixel-art sprites (170 MB)",
+        "tags": ["lora", "pixel-art", "sprite", "sdxl"],
+        "style_hint": "pixel art, 16-bit, sprite sheet, game sprite, crisp pixels, pixel character"
     },
 }
 
 # Grouped for UI display
 MODEL_GROUPS = {
-    "SDXL Checkpoints (High Quality, 8+ GB VRAM)": ["animagine_xl", "pony_xl", "pixel_xl"],
-    "SD 1.5 Checkpoints (Fast, ~2 GB, 4+ GB VRAM)": ["anything_v5", "counterfeit_v3", "dreamshaper_8", "toonyou", "rpg_v5", "mix_pro_v4", "waifu_diffusion"],
-    "Essential Add-ons": ["layer_conv", "vae_decoder", "controlnet_openpose", "flat_anime_lora", "pixel_lora"],
+    "SDXL Checkpoints (High Quality, 8+ GB VRAM)": ["animagine_xl", "pony_xl"],
+    "SD 1.5 Checkpoints (Fast, ~2 GB, 4+ GB VRAM)": ["anything_v5", "counterfeit_v3", "dreamshaper_8", "toonyou", "rpg_v5", "cuteyuki_v2", "anything_v3"],
+    "Essential Add-ons & LoRAs": ["layer_conv", "vae_decoder", "controlnet_openpose", "flat_anime_lora", "pixel_lora", "pixel_lora_xl"],
 }
 
 
@@ -388,6 +399,11 @@ def download_model(
             temp_path.rename(dest_path)
             return True, f"Successfully downloaded and verified '{info['filename']}' ({info['size_mb']:.1f} MB)"
 
+    except urllib.error.HTTPError as e:
+        if e.code == 416 and temp_path.is_file():
+            temp_path.unlink(missing_ok=True)
+            return download_model(model_key, models_dir=models_dir, progress_callback=progress_callback)
+        return False, f"Download failed for '{info['filename']}': {str(e)}"
     except Exception as e:
         return False, f"Download failed for '{info['filename']}': {str(e)}"
 

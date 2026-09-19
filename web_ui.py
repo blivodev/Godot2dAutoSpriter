@@ -1258,18 +1258,21 @@ HTML_PAGE = """<!DOCTYPE html>
       <div class="row-2" style="margin-bottom:8px;max-width:600px;">
         <div class="form-group" style="margin-bottom:0;">
           <select id="model-select">
+            <option value="pixel_lora">PixelArt Redmond LoRA SD 1.5 (~26 MB - Retro Pixel Sprites)</option>
+            <option value="pixel_lora_xl">Pixel Art XL LoRA SDXL (~170 MB - High-Res Pixel Sprites)</option>
             <option value="animagine_xl">Animagine XL 3.1 (SDXL ~6.6 GB - Premier Anime)</option>
-            <option value="waifu_diffusion">Waifu Diffusion 1.4 (SD 1.5 ~2 GB - Foundational 2D Anime)</option>
+            <option value="pony_xl">Pony Diffusion XL v6 (SDXL ~6.5 GB - Expressive Game Art)</option>
             <option value="anything_v5">AnythingV5 (SD 1.5 ~2 GB - Clean Anime)</option>
-            <option value="toonyou">ToonYou (SD 1.5 ~2 GB - Cel-Shaded Game Cartoon)</option>
-            <option value="rpg_v5">RPG v5 (SD 1.5 ~2 GB - RPG Concept Character Art)</option>
-            <option value="mix_pro_v4">MIX-Pro v4 (SD 1.5 ~2 GB - Hyper Detailed Mix)</option>
-            <option value="pixel_xl">Pixel Art XL (SDXL ~6.6 GB - Pixel Sprite Sheets)</option>
             <option value="counterfeit_v3">Counterfeit V3.0 (SD 1.5 ~2 GB - Fast Anime)</option>
             <option value="dreamshaper_8">DreamShaper 8 (SD 1.5 ~2 GB - Game Concept)</option>
-            <option value="flat_anime_lora">Flat 2D Anime LoRA (~150 MB - Style modifier)</option>
-            <option value="pixel_lora">Pixel Art Style LoRA (~100 MB - Retro Pixel Art)</option>
-            <option value="controlnet_openpose">ControlNet OpenPose XL (~2.5 GB - Pose guidance)</option>
+            <option value="toonyou">ToonYou Alpha 3 (SD 1.5 ~2 GB - Cel-Shaded Game Cartoon)</option>
+            <option value="rpg_v5">RPG Remix v5 (SD 1.5 ~4 GB - RPG Concept Character Art)</option>
+            <option value="cuteyuki_v2">CuteYukiMix Adorable v2 (SD 1.5 ~2 GB - Anime Character Art)</option>
+            <option value="anything_v3">Anything V3.0 (SD 1.5 ~2 GB - Benchmark Anime)</option>
+            <option value="flat_anime_lora">Flat 2D Anime LoRA (~218 MB - Style Modifier)</option>
+            <option value="controlnet_openpose">ControlNet OpenPose XL (~2.4 GB - Pose Guidance)</option>
+            <option value="layer_conv">LayerDiffuse SDXL Conv (~3.4 GB - Transparent RGBA)</option>
+            <option value="vae_decoder">LayerDiffuse VAE Decoder (~198 MB - Alpha Decoder)</option>
           </select>
         </div>
         <button id="btn-download-model" class="btn btn-secondary" onclick="startModelDownload()">⬇️ Download Model</button>
