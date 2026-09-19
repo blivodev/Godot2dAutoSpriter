@@ -8,28 +8,33 @@ This system connects **ComfyUI generative AI workflows** (using ControlNet OpenP
 
 ## 🌟 Key Components
 
-1. **Organic Curved Anime Sprite Engine (`scripts/generate_sample_sprites.py`)**:
+1. **Organic Curved Anime & Pixel Sprite Engine (`scripts/generate_sample_sprites.py`)**:
    * **Catmull-Rom Organic Splines**: High-resolution continuous curvature replacing flat polygonal cutouts.
+   * **Pixel Art & Detail Level Modes**: 8-bit and 16-bit retro color palette quantization, nearest-neighbor downscaling, and variable detail slider (Levels 1–5).
    * **Expressive Anime Eyes**: Multi-layered sclera, gradient-colored iris, deep pupil, dual specular catchlights, winged eyelashes, and anime blush.
    * **Convex Joint Articulation Caps**: Rounded pivot caps on shoulders, elbows, hips, and knees ensuring smooth 360° skeletal rotation with zero gaps or sharp corner breaks.
    * **Multi-Tier Cel-Shading & Hair Halos**: Ambient occlusion, cylindrical limb highlights, and anime hair sheen bands rendered with 4x supersampling and downsampled via `LANCZOS`.
+   * **Full-Body Connected Preview Compositor**: Assembles detached cut-out parts into a complete anatomical reference preview (`{prefix}_full.png`) for both biped and quadruped rigs.
 2. **Enhanced Godot 4 Rigging System (`scenes/character_rig_template.tscn`)**:
    * **Built-in `AnimationPlayer`**: Auto-looping `idle` animation track with natural breathing and limb bobbing (`autoplay = "idle"`).
    * **Equipment Marker Sockets**: `Marker2D` nodes ready for immediate attachment: `WeaponSlot_R` (main hand), `WeaponSlot_L` (off-hand/shield), `HatSlot` (headwear), and `BackSlot` (cape, quiver, wings).
    * **2.5D Visual Z-Ordering**: Layered limb depth (`arm_upper_R` at `-1`, `torso` at `1`, `arm_upper_L` at `2`, `head` at `3`).
    * **Natural A-Pose Hierarchy**: Arms relaxed downward at ~25° for natural resting posture.
-3. **AI Model Downloader & Management (`scripts/download_models.py` & MCP Tool `download_comfyui_model`)**:
-   * Download Animagine XL 3.1 (SDXL 6.6 GB), Counterfeit V3.0 (SD 1.5 2.0 GB), or DreamShaper 8 directly into ComfyUI's model repository.
+3. **AI Model Downloader & Catalog (`scripts/download_models.py` & MCP Tool `download_comfyui_model`)**:
+   * Catalog of **12 curated generative models**: SDXL (Animagine XL 3.1, Pony Diffusion V6 XL, PixelWave XL), SD 1.5 (Counterfeit V3.0, DreamShaper 8, Anything V5, Waifu Diffusion, ToonYou, RPG v5, MIX-Pro v4), Flat-Anime LoRAs, and OpenPose ControlNets.
    * Features chunked streaming, live MB/s speed, ETA, and HTTP Range resumption (`.part` files).
 4. **ComfyUI Front-End & Chained Separation**:
    * **Base Generation**: Text-to-Image stage creating 2D anime-style sprites (clean cel-shading, crisp outlines, flat colors).
    * **Bridge to Exploded Separation**: Chains base generation via **IP-Adapter** + **OpenPose ControlNet** + **LayerDiffuse** to render detached limbs with true alpha transparency.
    * **VRAM Management**: Sequential queueing and model offloading to run locally on consumer GPUs (8GB–12GB VRAM).
-5. **Web UI Dashboard & Standalone Executable (`web_ui.py` / `launch_ui.bat` / `dist/Godot2dAutoSpriterUI.exe`)**:
-   * Complete browser dashboard with archetype presets, custom creature studio, live generation console, interactive model downloader, and 1-click Godot editor launching.
-6. **Model Context Protocol (MCP) Server (`server.py`)**:
-   * Exposes end-to-end pipeline tools (`generate_character_sprites`, `slice_character_limbs`, `assemble_godot_rig`, `setup_comfyui_environment`, `download_comfyui_model`) to AI agents (Claude Desktop, Cline, Cursor, OpenCode).
-7. **Master Rig Templates (`scenes/character_rig_template.tscn` & `scenes/quadruped_rig_template.tscn`)**:
+5. **Generation Queue System**:
+   * Background asynchronous queue worker processing sequential character generations without blocking the UI or MCP server.
+   * Complete queue controls: Enqueue multiple characters, inspect pending/running/done jobs, cancel active jobs, and clear queue history.
+6. **Web UI Dashboard & Standalone Executable (`web_ui.py` / `launch_ui.bat` / `dist/Godot2dAutoSpriterUI.exe`)**:
+   * Complete browser dashboard with 14 archetype presets, expanded custom creature studio, live generation console, interactive model downloader, asset library with full-body thumbnails, and 1-click Godot editor launching.
+7. **Model Context Protocol (MCP) Server (`server.py`)**:
+   * Exposes end-to-end pipeline tools (`generate_character_sprites`, `queue_character_generation`, `get_queue_status`, `cancel_queue_job`, `slice_character_limbs`, `assemble_godot_rig`, `list_generated_characters`, `get_character_details`, `setup_comfyui_environment`, `download_comfyui_model`) to AI agents.
+8. **Master Rig Templates (`scenes/character_rig_template.tscn` & `scenes/quadruped_rig_template.tscn`)**:
    * Complete 15-bone humanoid and 20-bone quadruped hierarchies with zero-warning leaf-bone setup and equipment sockets.
 
 ---
@@ -60,30 +65,28 @@ Once launched, your default web browser automatically opens to `http://localhost
 
 ### 🎨 Dashboard Features:
 1. **Convenient Presets & Custom Studio**:
-   * **✨ Custom Creature**: Dedicated studio mode allowing full creative freedom! Mix & match anatomies (alien, demon, undead, reptilian, insectoid, mech, humanoid head/torso/hands/feet), toggle appendages (wings, tail), and pick custom interactive hex colors (`Body/Skin`, `Cloth/Hair`, `Glow/Eyes`, `Outline`).
-   * **👾 Cyber Alien**: Cyberpunk warrior alien with neon bioluminescent crest, plasma blade, and chitin plates.
-   * **🧝 Elf Mage**: Arcane sorceress with flowing hair, glowing robes, and crystal staff.
-   * **😈 Demon Fiend**: Crimson fiend with obsidian horns, runic chest brand, shadow talons, and wings.
-   * **💀 Skeleton Lich**: Undead lich with glowing cyan soul eyes, bone ribcage, and tattered shroud.
-   * **🦎 Dragonkin**: Emerald dragonkin warrior with horned brow, ridge scales, and reptilian claws.
-   * **🐺 Dire Beast**: Mythical celestial dire wolf with emerald predator eyes, multi-tail, and fur ruff.
-   * **🦗 Mantis**: Insectoid mantis assassin with compound phosphor eyes, chitin carapace, and scythe claws.
-   * **⚔️ Paladin**: Noble human paladin in regal blue and gold armor with glowing blade.
-   * **🤖 Heavy Mech**: Heavy dieselpunk mech juggernaut with caution hazard stripes and furnace core.
-2. **Custom Parameter Tuning**:
+   * **✨ Custom Creature**: Dedicated studio mode allowing full creative freedom! Mix & match anatomies with **32 Head styles**, **32 Torso styles**, **26 Hand styles**, and **26 Foot styles** (alien, demon, undead, reptilian, insectoid, mech, humanoid, beast), toggle appendages (wings, tail, halo, pauldrons), and pick custom interactive hex colors (`Body/Skin`, `Cloth/Hair`, `Glow/Eyes`, `Outline`).
+   * **14 Archetype Presets**: Cyber Alien, Elf Mage, Demon Fiend, Skeleton Lich, Dragonkin, Dire Beast, Mantis, Paladin, Heavy Mech, Necromancer, Berserker, Trickster, Pyromancer, Cryomancer.
+2. **Style & Detail Controls**:
+   * **Render Style**: Anime Cel-Shaded, Pixel Art (8-bit retro quantized), Pixel Art (16-bit enhanced quantized), Dark Fantasy, Cyberpunk Synthwave, or Comic Ink.
+   * **Detail Level**: 1 (Minimalistic / Clean) through 5 (Hyper-Detailed).
+3. **Generation Queue**:
+   * "Add to Queue" button and real-time polling queue monitor displaying queued, active, and completed jobs with instant cancellation.
+4. **Media & Asset Library**:
+   * Full connected sprite/body thumbnail gallery for every generated character.
+   * Character inspector with assembled full-body preview, transparent limb gallery, and direct folder/Godot launching.
+5. **Custom Parameter Tuning**:
    * **Seed**: Random or manual seed input for deterministic re-generation.
    * **Diffusion Steps (15–50)** & **CFG Scale (4.0–12.0)**.
    * **ControlNet Guidance Weight (0.2–1.5)**.
    * **Rig Architecture**: Toggle between Humanoid Biped (15 bones) and Quadruped / Beast (20 bones).
    * **Engine Mode**: Switch between live local ComfyUI API (`127.0.0.1:8188`) and Offline Smart Spriter.
-3. **Live Streaming Console**:
+6. **Live Streaming Console**:
    * View live generation, slicing, and Godot scene assembly logs in real time.
-4. **Transparent Limb Gallery**:
-   * Inspect generated transparent PNG cutouts directly in the browser with dark checkerboard preview.
-5. **Direct System Integration**:
+7. **Direct System Integration**:
    * **"Open Sprite Folder"**: Opens Windows Explorer directly to the character's asset folder.
    * **"Open Rigged Scene in Godot"**: Launches Godot 4 editor and automatically opens the character scene directly in the active 2D workspace viewport via `addons/godot_2d_auto_spriter`.
-6. **ComfyUI Diagnostics**:
+8. **ComfyUI Diagnostics**:
    * Real-time indicator of Godot and ComfyUI backend status, plus 1-click installer trigger.
 
 ---

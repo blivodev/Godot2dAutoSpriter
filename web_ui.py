@@ -198,9 +198,29 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             self._send_json(json.loads(result_str))
             return
 
+        elif path == "/api/queue/status":
+            import server as srv
+            result_str = srv.get_queue_status()
+            self._send_json(json.loads(result_str))
+            return
+
         elif path.startswith("/sprites/"):
             rel = urllib.parse.unquote(path[len("/sprites/"):])
             file_path = PROJECT_ROOT / "sprites" / rel
+
+            # If requesting full preview and not yet on disk, generate on the fly
+            if not file_path.is_file() and rel.endswith("_full.png"):
+                parts = rel.split("/")
+                if len(parts) >= 2:
+                    char_name = parts[0]
+                    char_dir = PROJECT_ROOT / "sprites" / char_name
+                    if char_dir.is_dir():
+                        try:
+                            from scripts.generate_sample_sprites import create_character_assembled_preview
+                            create_character_assembled_preview(char_dir, prefix=char_name)
+                        except Exception:
+                            pass
+
             if file_path.is_file() and str(file_path.resolve()).startswith(str((PROJECT_ROOT / "sprites").resolve())):
                 self.send_response(200)
                 self.send_header("Content-Type", "image/png")
@@ -233,6 +253,26 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         if path == "/api/generate":
             result = self._handle_generate(payload)
             self._send_json(result)
+            return
+
+        elif path == "/api/queue/add":
+            import server as srv
+            items = payload.get("characters") or ([payload] if payload.get("character_name") else [])
+            created = srv.add_to_queue(items)
+            self._send_json({"status": "ok", "queued": len(created), "jobs": created})
+            return
+
+        elif path == "/api/queue/cancel":
+            import server as srv
+            job_id = payload.get("job_id", "")
+            success = srv.cancel_job(job_id)
+            self._send_json({"status": "ok", "cancelled": success, "job_id": job_id})
+            return
+
+        elif path == "/api/queue/clear":
+            import server as srv
+            cleared = srv.clear_completed_queue_jobs()
+            self._send_json({"status": "ok", "cleared": cleared})
             return
 
         elif path == "/api/assemble":
@@ -370,6 +410,17 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         self.send_response(404)
         self.end_headers()
 
+    def do_DELETE(self):
+        parsed = urllib.parse.urlparse(self.path)
+        path = parsed.path
+        if path == "/api/queue/clear":
+            import server as srv
+            cleared = srv.clear_completed_queue_jobs()
+            self._send_json({"status": "ok", "cleared": cleared})
+            return
+        self.send_response(404)
+        self.end_headers()
+
     def _send_json(self, data, code=200):
         self.send_response(code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
@@ -388,15 +439,18 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         mode = payload.get("mode", "auto")
         seed = int(payload.get("seed", -1))
         auto_rig = payload.get("auto_rig", True)
+        art_style = payload.get("art_style", "anime")
+        detail_level = int(payload.get("detail_level", 3))
 
         custom_colors = payload.get("custom_colors")
-        custom_features = payload.get("custom_features")
+        custom_features = payload.get("custom_features") or {}
+        custom_features["detail_level"] = detail_level
 
         sprites_dir = PROJECT_ROOT / "sprites" / char_name
         sprites_dir.mkdir(parents=True, exist_ok=True)
 
         logs = []
-        logs.append(f"[INIT] Creating character '{char_name}' (Archetype: {archetype.upper()}, Rig: {rig_type.upper()})")
+        logs.append(f"[INIT] Creating character '{char_name}' (Archetype: {archetype.upper()}, Rig: {rig_type.upper()}, Style: {art_style.upper()}, Detail: {detail_level})")
         logs.append(f"[CONCEPT] \"{concept}\"")
 
         checkpoint = payload.get("checkpoint", "").strip() or "animagineXL_v31.safetensors"
@@ -405,7 +459,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         if mode in ["auto", "comfyui"]:
             comfy_status = _check_comfyui_status()
             if comfy_status.get("online", False) and comfy_status.get("has_checkpoint", False):
-                logs.append(f"[COMFYUI] Connected to host (127.0.0.1:8188). Dispatching diffusion workflow using model '{checkpoint}'...")
+                logs.append(f"[COMFYUI] Connected to host (127.0.0.1:8188). Dispatching diffusion workflow using model '{checkpoint}' ({art_style})...")
                 try:
                     import server
                     gen_res_str = server.generate_character_sprites(
@@ -413,7 +467,9 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                         archetype_prompt=concept,
                         seed=seed,
                         rig_type=rig_type,
-                        checkpoint=checkpoint
+                        checkpoint=checkpoint,
+                        art_style=art_style,
+                        detail_level=detail_level
                     )
                     gen_res = json.loads(gen_res_str)
                     source = gen_res.get("source", "")
@@ -436,10 +492,10 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 logs.append(f"[FALLBACK] Generating procedural sprites (ComfyUI diffusion unavailable).")
             from scripts.generate_sample_sprites import generate_all, generate_quadruped, detect_species
             detected_sp = species if (species and species not in ("auto", "custom")) else detect_species(concept, archetype)
-            logs.append(f"[GENERATOR] Synthesizing {detected_sp.upper()} anatomy for '{char_name}' (Seed: {seed if seed >= 0 else 'Random'})...")
+            logs.append(f"[GENERATOR] Synthesizing {detected_sp.upper()} anatomy for '{char_name}' (Seed: {seed if seed >= 0 else 'Random'}, Style: {art_style})...")
 
             if rig_type.lower() == "quadruped":
-                parts = generate_quadruped(str(sprites_dir), prefix=char_name, archetype=archetype, prompt=concept, seed=seed)
+                parts = generate_quadruped(str(sprites_dir), prefix=char_name, archetype=archetype, prompt=concept, seed=seed, art_style=art_style, detail_level=detail_level)
             else:
                 parts = generate_all(
                     str(sprites_dir),
@@ -448,10 +504,18 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                     prompt=concept,
                     seed=seed,
                     custom_colors=custom_colors,
-                    custom_features=custom_features
+                    custom_features=custom_features,
+                    art_style=art_style
                 )
             parts = parts or []
             logs.append(f"[GENERATOR] Created {len(parts)} transparent limb cutouts in: res://sprites/{char_name}")
+
+        # Ensure full assembled preview exists
+        try:
+            from scripts.generate_sample_sprites import create_character_assembled_preview
+            create_character_assembled_preview(sprites_dir, prefix=char_name, rig_type=rig_type)
+        except Exception as e:
+            pass
 
         # Assemble Godot rig
         scene_path = f"res://scenes/{char_name}_character.tscn"
@@ -739,6 +803,11 @@ HTML_PAGE = """<!DOCTYPE html>
             <span class="preset-pill" id="pill-mantis_stalker" onclick="applyPreset('mantis_stalker','insectoid mantis assassin with compound phosphor eyes, chitin carapace and scythe claws','assassin','biped','insectoid')">🦗 Mantis</span>
             <span class="preset-pill" id="pill-holy_paladin" onclick="applyPreset('holy_paladin','noble human paladin in regal blue and gold armor with glowing blade','warrior','biped','humanoid')">⚔️ Paladin</span>
             <span class="preset-pill" id="pill-diesel_mech" onclick="applyPreset('diesel_mech','heavy dieselpunk mech juggernaut with caution hazard stripes and furnace core','mech','biped','mech')">🤖 Heavy Mech</span>
+            <span class="preset-pill" id="pill-necromancer" onclick="applyPreset('necromancer','undead death priest in tattered purple and obsidian robes with bone staff','mage','biped','undead')">💀 Necromancer</span>
+            <span class="preset-pill" id="pill-berserker" onclick="applyPreset('berserker','raging barbarian warrior with war paint, double battle axes and spiked iron armor','warrior','biped','humanoid')">🪓 Berserker</span>
+            <span class="preset-pill" id="pill-trickster" onclick="applyPreset('trickster','shadow rogue trickster in emerald and violet dual cloaks with venom daggers','assassin','biped','humanoid')">🎭 Trickster</span>
+            <span class="preset-pill" id="pill-pyromancer" onclick="applyPreset('pyromancer','fire elemental sorcerer enveloped in blazing magma robes with ember crown','mage','biped','demon')">🔥 Pyromancer</span>
+            <span class="preset-pill" id="pill-cryomancer" onclick="applyPreset('cryomancer','frost elemental mage in arctic crystal ice armor with frozen staff','mage','biped','alien')">❄️ Cryomancer</span>
           </div>
         </div>
 
@@ -769,70 +838,186 @@ HTML_PAGE = """<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- Render Style & Detail Controls -->
+        <div class="row-2" style="margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="art-style">Render Style:</label>
+            <select id="art-style" onchange="syncCustomPrompt()">
+              <option value="anime" selected>✨ Anime Cel-Shading (Vibrant &amp; Sparkling Eyes)</option>
+              <option value="pixel_8bit">👾 Retro 8-Bit Pixel Art (Quantized 16 Colors)</option>
+              <option value="pixel_16bit">🎮 Classic 16-Bit Pixel Art (32 Colors Clean Grid)</option>
+              <option value="dark_fantasy">🗡️ Dark Fantasy (Deep Shadows &amp; Grim Contrast)</option>
+              <option value="cyberpunk">⚡ Cyberpunk Neon (Intense Glows &amp; Circuits)</option>
+              <option value="comic_ink">🖋️ Comic Ink &amp; Halftone (Bold Dynamic Outlines)</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label for="detail-level">Detail Level: <span id="detail-val" style="color:#78c8ff;font-weight:600;">3 (Detailed)</span></label>
+            <input type="range" id="detail-level" min="1" max="5" value="3" step="1" style="width:100%;margin-top:8px;" oninput="document.getElementById('detail-val').textContent = ['1 (Flat Silhouette)', '2 (Simple Minimal)', '3 (Detailed)', '4 (High Intricacy)', '5 (Masterpiece Ultra)'][this.value-1]">
+          </div>
+        </div>
+
         <!-- Custom Design Studio -->
         <div id="custom-studio" class="accordion" style="border-color: rgba(227,179,65,0.35);">
           <div class="accordion-header" style="background: rgba(227,179,65,0.08); color: #f0c654;" onclick="toggleCustomStudio()">
-            <span>🎨 Custom Creature Studio (Anatomy, Wings/Tail &amp; Colors)</span>
+            <span>🎨 Custom Creature Studio (30+ Anatomical Parts, Appendages &amp; Colors)</span>
             <span id="custom-studio-arrow">▼</span>
           </div>
           <div id="custom-studio-body" class="accordion-content">
             <div class="row-2" style="margin-bottom:12px;">
               <div class="form-group">
-                <label for="custom-head">Head Shape / Style:</label>
+                <label for="custom-head">Head Shape / Style (32 Styles):</label>
                 <select id="custom-head" onchange="syncCustomPrompt()">
-                  <option value="alien">👾 Alien Cranium (Bio-Crest &amp; Vents)</option>
                   <option value="humanoid" selected>🧝 Humanoid / Elf (Anime Hair &amp; Face)</option>
-                  <option value="demon">😈 Demon Horns &amp; Fangs</option>
+                  <option value="vampire">🧛 Vampire Lord (Fangs &amp; Piercing Eyes)</option>
                   <option value="undead">💀 Bony Skull &amp; Soul Flame</option>
-                  <option value="reptilian">🦎 Dragon Brow Horns &amp; Snout</option>
+                  <option value="lich">👑 Ancient Lich Crown &amp; Ghostly Eyes</option>
+                  <option value="orc">👹 Orc Warlord (War Paint &amp; Heavy Tusks)</option>
+                  <option value="goblin">👺 Goblin Trickster (Pointed Ears &amp; Goggles)</option>
+                  <option value="sorcerer">🧙 Dark Sorcerer (Deep Hood &amp; Shadow Eyes)</option>
+                  <option value="angel">👼 Angelic Seraph (Golden Halo &amp; Fair Tresses)</option>
+                  <option value="kitsune">🦊 Kitsune Fox Spirit (Fox Ears &amp; Whiskers)</option>
+                  <option value="minotaur">🐂 Minotaur Bull (Curved Heavy Horns)</option>
+                  <option value="alien">👾 Alien Cranium (Bio-Crest &amp; Vents)</option>
+                  <option value="xenomorph">👽 Xenomorph Dome (Elongated Biomechanical)</option>
+                  <option value="void_wraith">👤 Void Stalker (Faceless Obsidian Mask)</option>
+                  <option value="demon">😈 Demon Horns &amp; Obsidian Fangs</option>
+                  <option value="oni">👹 Oni Demon (Twin Horns &amp; Crimson Brow)</option>
+                  <option value="reptilian">🦎 Dragon Brow Horns &amp; Reptile Snout</option>
+                  <option value="basilisk">🐍 Basilisk Crest (Slit Golden Eyes)</option>
                   <option value="insectoid">🦗 Mantis Antennae &amp; Compound Eyes</option>
-                  <option value="beast">🐺 Beast / Wolf Snout &amp; Ears</option>
-                  <option value="mech">🤖 Mech Visor &amp; Armor Helmet</option>
+                  <option value="spider_queen">🕷️ Arachnid Queen (Multi-Beaded Eyes)</option>
+                  <option value="beast">🐺 Beast / Wolf Snout &amp; Pointed Ears</option>
+                  <option value="lion">🦁 Lion Sovereign (Full Majestic Mane)</option>
+                  <option value="griffin">🦅 Griffin / Birdfolk (Curved Hooked Beak)</option>
+                  <option value="mech">🤖 Mech Visor &amp; LED Armor Helmet</option>
+                  <option value="clockwork">⚙️ Clockwork Automaton (Brass Gears &amp; Monocle)</option>
+                  <option value="siren">🧜 Deep Sea Siren (Fin-Ears &amp; Coral Crown)</option>
+                  <option value="crystal_golem">💎 Crystal Golem (Faceted Gemstone Head)</option>
+                  <option value="flame_elemental">🔥 Blazing Fire Elemental (Fire Crown)</option>
+                  <option value="plague_doctor">🎭 Plague Doctor (Beaked Leather Mask)</option>
+                  <option value="samurai">🥷 Samurai Kabuto (Crested Menpo Mask)</option>
+                  <option value="pharaoh">🐕 Jackal God (Anubis Mask &amp; Nemes)</option>
+                  <option value="myconid">🍄 Fungal Myconid (Spotted Mushroom Cap)</option>
+                  <option value="astronaut">🚀 Void Astronaut (Gold Bubble Visor)</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="custom-torso">Torso Style:</label>
+                <label for="custom-torso">Torso Style (32 Styles):</label>
                 <select id="custom-torso" onchange="syncCustomPrompt()">
+                  <option value="plate_armor">Noble Steel Cuirass &amp; Gold Filigree</option>
+                  <option value="mage_robe">Enchanted Silk Robe &amp; Rune Collar</option>
+                  <option value="leather_jerkin">Adventurer Leather Jerkin &amp; Straps</option>
+                  <option value="shadow_cloak">Assassin Shadow Cloak &amp; Tattered Wraps</option>
+                  <option value="fur_harness">Berserker Wolf Fur &amp; Iron Studs</option>
+                  <option value="paladin_tabard">Paladin Sacred Tabard &amp; Chainmail</option>
+                  <option value="undead" selected>Exposed Skeletal Ribcage &amp; Shroud</option>
+                  <option value="demon">Muscular Demonic Obsidian &amp; Runic Brand</option>
+                  <option value="dragon_scutes">Overlapping Dragon Scutes &amp; Flame Scales</option>
                   <option value="alien">Biomechanical Carapace &amp; Core</option>
-                  <option value="humanoid">Cloth Tunic / Robes / Vest</option>
-                  <option value="demon">Muscular Demonic Runic Brand</option>
-                  <option value="undead" selected>Exposed Skeletal Ribcage</option>
-                  <option value="reptilian">Overlapping Dragon Scutes</option>
-                  <option value="insectoid">Segmented Chitin Thorax</option>
-                  <option value="mech">Plated Armor &amp; Furnace Core</option>
+                  <option value="xeno_ribs">Ribbed Xenomorph Chitin Exoskeleton</option>
+                  <option value="insectoid">Segmented Glossy Mantis Chitin Thorax</option>
+                  <option value="mech">Heavy Hydraulic Mech Chest &amp; Arc Reactor</option>
+                  <option value="nanosuit">Cyberpunk Fibre Nanosuit &amp; Glowing Circuits</option>
+                  <option value="clockwork_brass">Clockwork Brass Torso &amp; Rotating Gears</option>
+                  <option value="crystal_core">Prismatic Crystal Geode &amp; Gem Clusters</option>
+                  <option value="sea_coral">Living Sea-Coral &amp; Barnacle Breastplate</option>
+                  <option value="dryad_wood">Living Wood Dryad Bark &amp; Woven Vines</option>
+                  <option value="bioluminescent_jelly">Bioluminescent Translucent Jelly Torso</option>
+                  <option value="volcanic_magma">Cracked Obsidian Plates &amp; Molten Lava Core</option>
+                  <option value="glacial_ice">Solid Glacial Rime Ice &amp; Frost Crystals</option>
+                  <option value="celestial_weave">Star-Woven Constellation Robes</option>
+                  <option value="bone_armor">Bone-Forged Linked Vertebrae &amp; Talismans</option>
+                  <option value="corset_doublet">Royal Brocade Doublet &amp; Velvet Coat</option>
+                  <option value="gladiator_harness">Gladiator Leather Harness &amp; Medallion</option>
+                  <option value="nomad_linen">Desert Nomad Linen Wraps &amp; Sand Scarves</option>
+                  <option value="tactical_vest">Spec-Ops Kevlar Plate Carrier &amp; Pouches</option>
+                  <option value="vampire_waistcoat">Vampire Brocade Waistcoat &amp; Cravat</option>
+                  <option value="fungal_spores">Mycelium Spore-Cap &amp; Shelf Mushrooms</option>
+                  <option value="origami_paper">Folded Origami Lacquered Paper Armor</option>
+                  <option value="ethereal_mist">Ghostly Translucent Spectral Ribcage</option>
+                  <option value="sunburst_gold">Solar Sunburst Medallion Cuirass</option>
                 </select>
               </div>
             </div>
             <div class="row-2" style="margin-bottom:12px;">
               <div class="form-group">
-                <label for="custom-hands">Hands / Claws Style:</label>
+                <label for="custom-hands">Hands / Claws Style (26 Styles):</label>
                 <select id="custom-hands" onchange="syncCustomPrompt()">
-                  <option value="alien">Alien Elongated Talons</option>
                   <option value="humanoid" selected>Humanoid Articulated Fingers</option>
+                  <option value="leather_gloves">Adventurer Leather Gloves &amp; Wraps</option>
+                  <option value="steel_gauntlets">Steel Knight Plate Gauntlets</option>
+                  <option value="arcane_rings">Mage Ringed Hands &amp; Palm Runes</option>
                   <option value="demon">Sharp Obsidian Demonic Claws</option>
                   <option value="undead">Bony Skeletal Digits</option>
-                  <option value="reptilian">Heavy Dragon Claws</option>
+                  <option value="reptilian">Heavy Dragon Claws &amp; Scaled Talons</option>
+                  <option value="alien">Alien Elongated Four-Joint Talons</option>
+                  <option value="scythe_blades">Mantis Serrated Scythe Sickles</option>
+                  <option value="pincer_servo">Cybernetic Hydraulic Pincer Grip</option>
+                  <option value="power_fists">Heavy Mech Pneumatic Power Fists</option>
+                  <option value="flame_fists">Blazing Flame-Wreathed Fists</option>
+                  <option value="frost_claws">Sub-Zero Frost Rime Ice Claws</option>
+                  <option value="lightning_knuckles">Lightning Arc Conduit Knuckles</option>
+                  <option value="shadow_tendrils">Billowing Smoke Shadow Tendril Hands</option>
+                  <option value="vine_claws">Thorn-Wrapped Poisonous Vine Claws</option>
+                  <option value="crab_pincers">Crustacean Heavy Chitin Crab Pincers</option>
+                  <option value="wing_fingers">Feathered Harpy Wing-Tip Claw Fingers</option>
+                  <option value="crystal_shards">Prismatic Crystal Gem Spike Claws</option>
+                  <option value="silk_gloves">Gilded Silk Noble Lace Gloves</option>
+                  <option value="calligraphy_pens">Needle Calligrapher Ink Claws</option>
+                  <option value="wood_knuckles">Dryad Wooden Branch Knuckles</option>
+                  <option value="suction_pods">Translucent Jelly Suction Pods</option>
+                  <option value="brass_calipers">Clockwork Brass Cogs &amp; Calipers</option>
+                  <option value="chem_sprayers">Toxic Chem-Sprayer Nozzle Gauntlets</option>
+                  <option value="gladiator_cestus">Spiked Gladiator Iron Brawling Cestus</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="custom-feet">Feet / Base Style:</label>
+                <label for="custom-feet">Feet / Base Style (26 Styles):</label>
                 <select id="custom-feet" onchange="syncCustomPrompt()">
-                  <option value="alien">Digitigrade Alien Talons</option>
-                  <option value="humanoid">Adventurer Boots / Sandals</option>
-                  <option value="demon">Cloven Hooves / Raptor Spurs</option>
-                  <option value="undead" selected>Skeletal Foot Bones</option>
-                  <option value="reptilian">Raptor / Dragon Claw Feet</option>
+                  <option value="humanoid">Adventurer Cuffed Leather Boots</option>
+                  <option value="knight_sabatons">Steel Knight Segmented Sabatons</option>
+                  <option value="cloven_hooves">Cloven Demon / Minotaur Hooves</option>
+                  <option value="undead" selected>Bare Skeletal Foot Bones</option>
+                  <option value="reptilian">Raptor / Dragon Talon Feet</option>
+                  <option value="alien">Digitigrade Reversed Alien Talons</option>
+                  <option value="wolf_paws">Padded Beast Wolf Paws &amp; Claws</option>
+                  <option value="mech_pistons">Industrial Mech Hydraulic Stomp Boots</option>
+                  <option value="hover_jets">Anti-Gravity Cybernetic Hover Thrusters</option>
+                  <option value="serpent_tail">Naga Scaled Serpent Coiled Lower Body</option>
+                  <option value="spider_legs">Octopod Segmented Arachnid Stilts</option>
+                  <option value="centaur_base">Centaur Equine Four-Legged Stallion Base</option>
+                  <option value="crystal_pillars">Crystal Stalagmite Mineral Pillars</option>
+                  <option value="whirlwind_base">Floating Elemental Whirlwind Tornado</option>
+                  <option value="spectral_tail">Legless Spectral Mist Floating Shroud</option>
+                  <option value="mermaid_tail">Mermaid Iridescent Fluke Tail</option>
+                  <option value="lava_pillar">Bubbling Volcanic Magma Pillar</option>
+                  <option value="ice_skates">Glacial Solid Ice Rime Blades</option>
+                  <option value="mycelium_stem">Rooted Fungal Mycelium Stem Mat</option>
+                  <option value="mangrove_roots">Living Mangrove Tangled Woody Roots</option>
+                  <option value="monowheel">Clockwork Brass Rolling Monowheel</option>
+                  <option value="maglev_skids">High-Tech Mag-Lev Hover Skids</option>
+                  <option value="harpy_talons">Avian Harpy Perching Talons</option>
+                  <option value="gladiator_sandals">Gladiator Strapped Shin Sandals</option>
+                  <option value="trench_boots">Reinforced Armored Mud Tread Boots</option>
+                  <option value="slime_base">Translucent Gelatinous Amoeba Mass</option>
                 </select>
               </div>
             </div>
             <div class="form-group" style="margin-bottom:14px;">
-              <label>Custom Appendages:</label>
-              <div style="display:flex;gap:18px;align-items:center;padding-top:4px;">
+              <label>Custom Appendages &amp; Accents:</label>
+              <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center;padding-top:4px;">
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;">
-                  <input type="checkbox" id="custom-wings" onchange="syncCustomPrompt()"> 🪽 Add Wings
+                  <input type="checkbox" id="custom-wings" onchange="syncCustomPrompt()"> 🪽 Wings
                 </label>
                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;">
-                  <input type="checkbox" id="custom-tail" onchange="syncCustomPrompt()"> 🐉 Add Tail
+                  <input type="checkbox" id="custom-tail" onchange="syncCustomPrompt()"> 🐉 Articulated Tail
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;">
+                  <input type="checkbox" id="custom-halo" onchange="syncCustomPrompt()"> 😇 Glowing Halo / Crest
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text);font-size:13px;font-weight:500;">
+                  <input type="checkbox" id="custom-pauldrons" onchange="syncCustomPrompt()"> 🛡️ Heavy Pauldrons
                 </label>
               </div>
             </div>
@@ -905,8 +1090,14 @@ HTML_PAGE = """<!DOCTYPE html>
                     <span class="tip">Select the ComfyUI checkpoint to use for AI generation. Only active when using ComfyUI engine mode. Installed models shown with [INSTALLED].</span>
                   </span>
                 </label>
-                <select id="model-checkpoint">
+                              <select id="model-checkpoint">
                   <option value="animagineXL_v31.safetensors" selected>Animagine XL 3.1 (SDXL Premier Anime) [INSTALLED]</option>
+                  <option value="waifuDiffusion_v14.safetensors">Waifu Diffusion 1.4 (SD 1.5 2D Anime)</option>
+                  <option value="anythingV5_PrtRE.safetensors">AnythingV5 (SD 1.5 High-Quality Anime)</option>
+                  <option value="toonyou_beta6.safetensors">ToonYou Beta 6 (SD 1.5 Cartoon Cel-Shading)</option>
+                  <option value="rpg_V5.safetensors">RPG v5 (SD 1.5 RPG Concept Art)</option>
+                  <option value="mixProV4.safetensors">MIX-Pro v4 (SD 1.5 Hyper-Detailed)</option>
+                  <option value="pixelArtXL_v11.safetensors">Pixel Art XL (SDXL Pixel Sprite Sheet)</option>
                   <option value="counterfeit_v3.safetensors">Counterfeit V3.0 (SD 1.5 Lightweight Anime)</option>
                   <option value="dreamshaper_8.safetensors">DreamShaper 8 (SD 1.5 Game Concept Art)</option>
                 </select>
@@ -928,14 +1119,34 @@ HTML_PAGE = """<!DOCTYPE html>
           </div>
         </div>
 
-        <div style="margin-top:18px;">
-          <button id="btn-generate" class="btn btn-primary" onclick="runPipeline('generate')">
-            🚀 Generate &amp; Assemble Full Character Scene
+        <div style="margin-top:18px;display:flex;gap:12px;">
+          <button id="btn-generate" class="btn btn-primary" style="flex:1;" onclick="runPipeline('generate')">
+            🚀 Generate &amp; Assemble Character
+          </button>
+          <button id="btn-add-queue" class="btn btn-secondary" style="border-color:var(--accent);color:#f0c654;display:flex;align-items:center;gap:6px;" onclick="addToQueue()">
+            ➕ Add to Queue
           </button>
         </div>
         <div class="actions">
           <button class="btn btn-secondary" onclick="runPipeline('sprites_only')">🎨 Generate Sprites Only</button>
           <button class="btn btn-secondary" onclick="runPipeline('rig_only')">🦴 Auto-Rig Skeleton Scene</button>
+        </div>
+
+        <!-- Generation Queue Panel -->
+        <div id="queue-panel" class="card" style="margin-top:16px;border-color:rgba(120,200,255,0.25);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px;">
+              <span>📦 Generation Queue</span>
+              <span id="queue-badge" class="lib-badge lib-badge-scene" style="display:none;">0 active</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="clearCompletedQueue()">Clear Finished</button>
+            </div>
+          </div>
+          <div id="queue-empty" style="text-align:center;color:var(--text-muted);padding:14px 0;font-size:12px;">
+            Queue is empty. Click "➕ Add to Queue" to batch multiple character generations!
+          </div>
+          <div id="queue-list" style="display:none;max-height:220px;overflow-y:auto;gap:8px;flex-direction:column;"></div>
         </div>
       </div>
 
@@ -950,37 +1161,35 @@ HTML_PAGE = """<!DOCTYPE html>
               <button class="btn btn-secondary btn-sm" onclick="clearConsole()">Clear</button>
             </div>
           </div>
-          <div id="console" class="console">[System Ready] Select a preset or click ✨ Custom Creature to start!</div>
+          <div id="console" class="console">
+            <div class="console-line ci">[READY] Godot 2D Auto Spriter Dashboard initialized.</div>
+            <div class="console-line ci">[INFO] Select a preset or customize anatomy, wings, and colors above.</div>
+          </div>
         </div>
 
-        <!-- Assets Preview -->
-        <div class="card" style="flex:1;">
+        <!-- Sprite Gallery / Output Preview -->
+        <div class="card" id="gallery-card">
           <div class="card-title">
-            <span>Transparent Limb Cutouts</span>
-            <div style="display:flex;gap:6px;">
-              <button class="btn btn-secondary btn-sm" onclick="openExplorer()">📁 Open Folder</button>
-              <button class="btn btn-secondary btn-sm" onclick="openInGodot()">🎮 Open in Godot</button>
-            </div>
+            <span id="gallery-title">Generated Sprite Sheet Parts (cyber_alien)</span>
+            <span id="gallery-count" style="font-size:11px;color:var(--text-muted);">0 parts</span>
           </div>
-          <div id="sprite-gallery" class="gallery">
-            <div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:30px 0;font-size:12px;">Generate a character to see limb cutouts here.</div>
+          <div id="gallery-empty" class="gallery-empty">
+            No sprites generated yet for this character. Click Generate to build them!
           </div>
+          <div id="gallery-grid" class="sprite-grid" style="display:none;"></div>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ======================================================= -->
-  <!-- TAB 2: ASSET LIBRARY                                    -->
+  <!-- TAB 2: ASSET LIBRARY & VIEWER                           -->
   <!-- ======================================================= -->
   <div class="tab-content" id="tab-library">
-    <div class="card" style="margin-bottom:16px;padding:14px 18px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-        <span style="font-size:14px;font-weight:600;color:var(--primary);">📦 Generated Character Asset Library</span>
-        <div style="display:flex;gap:8px;">
-          <button class="btn btn-secondary btn-sm" onclick="refreshLibrary()">🔄 Refresh</button>
-          <span id="lib-char-count" style="font-size:12px;color:var(--text-muted);align-self:center;"></span>
-        </div>
+    <div class="lib-header">
+      <div class="lib-title">Generated Characters &amp; Limb Library</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="refreshLibrary()">🔄 Refresh Library</button>
       </div>
     </div>
     <div class="library-layout">
@@ -1013,6 +1222,20 @@ HTML_PAGE = """<!DOCTYPE html>
               <button class="btn btn-danger btn-sm" onclick="deleteChar(viewingChar)">🗑️ Delete</button>
             </div>
           </div>
+
+          <!-- Full Assembled Character Body Preview Card -->
+          <div id="viewer-full-body-card" style="margin-bottom:16px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:14px;display:flex;align-items:center;gap:20px;">
+            <div style="background:repeating-conic-gradient(#141824 0% 25%, #0e111a 0% 50%) 50% / 14px 14px;border-radius:6px;padding:10px;display:flex;align-items:center;justify-content:center;min-width:140px;min-height:160px;border:1px solid rgba(255,255,255,0.06);cursor:pointer;" onclick="openLightbox(document.getElementById('viewer-full-img').src, viewingChar + ' (Full Body)')">
+              <img id="viewer-full-img" src="" alt="Full Body Sprite" style="max-height:180px;max-width:160px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.6));">
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;">Full Connected Sprite Preview</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Assembled puppet body showing all connected limb attachments and joints.</div>
+              <button class="btn btn-secondary btn-sm" onclick="openLightbox(document.getElementById('viewer-full-img').src, viewingChar + ' (Full Body)')">🔍 Inspect High-Res</button>
+            </div>
+          </div>
+
+          <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">Individual Sliced Limb Parts:</div>
           <div id="viewer-grid" class="viewer-grid"></div>
         </div>
       </div>
@@ -1020,7 +1243,7 @@ HTML_PAGE = """<!DOCTYPE html>
   </div>
 
   <!-- ======================================================= -->
-  <!-- TAB 3: AI MODELS                                        -->
+  <!-- TAB 3: AI MODELS                                    -->
   <!-- ======================================================= -->
   <div class="tab-content" id="tab-models">
     <div class="card">
@@ -1036,9 +1259,16 @@ HTML_PAGE = """<!DOCTYPE html>
         <div class="form-group" style="margin-bottom:0;">
           <select id="model-select">
             <option value="animagine_xl">Animagine XL 3.1 (SDXL ~6.6 GB - Premier Anime)</option>
+            <option value="waifu_diffusion">Waifu Diffusion 1.4 (SD 1.5 ~2 GB - Foundational 2D Anime)</option>
+            <option value="anything_v5">AnythingV5 (SD 1.5 ~2 GB - Clean Anime)</option>
+            <option value="toonyou">ToonYou (SD 1.5 ~2 GB - Cel-Shaded Game Cartoon)</option>
+            <option value="rpg_v5">RPG v5 (SD 1.5 ~2 GB - RPG Concept Character Art)</option>
+            <option value="mix_pro_v4">MIX-Pro v4 (SD 1.5 ~2 GB - Hyper Detailed Mix)</option>
+            <option value="pixel_xl">Pixel Art XL (SDXL ~6.6 GB - Pixel Sprite Sheets)</option>
             <option value="counterfeit_v3">Counterfeit V3.0 (SD 1.5 ~2 GB - Fast Anime)</option>
             <option value="dreamshaper_8">DreamShaper 8 (SD 1.5 ~2 GB - Game Concept)</option>
             <option value="flat_anime_lora">Flat 2D Anime LoRA (~150 MB - Style modifier)</option>
+            <option value="pixel_lora">Pixel Art Style LoRA (~100 MB - Retro Pixel Art)</option>
             <option value="controlnet_openpose">ControlNet OpenPose XL (~2.5 GB - Pose guidance)</option>
           </select>
         </div>
@@ -1175,13 +1405,21 @@ function syncCustomPrompt(force = false) {
   if (!force && sp !== "custom") return;
   const head  = document.getElementById("custom-head").value;
   const torso = document.getElementById("custom-torso").value;
+  const hands = document.getElementById("custom-hands") ? document.getElementById("custom-hands").value : "humanoid";
+  const feet  = document.getElementById("custom-feet") ? document.getElementById("custom-feet").value : "humanoid";
   const wings = document.getElementById("custom-wings").checked;
   const tail  = document.getElementById("custom-tail").checked;
+  const halo  = document.getElementById("custom-halo") ? document.getElementById("custom-halo").checked : false;
+  const pauldrons = document.getElementById("custom-pauldrons") ? document.getElementById("custom-pauldrons").checked : false;
+  const artStyle = document.getElementById("art-style") ? document.getElementById("art-style").value : "anime";
   const pCol  = document.getElementById("col-primary").value;
   const gCol  = document.getElementById("col-glow").value;
-  let desc = `custom hybrid creature with ${head} head silhouette, ${torso} body`;
+
+  let desc = `custom creature in ${artStyle} style with ${head} head silhouette, ${torso} body, ${hands} hands, ${feet} base`;
   if (wings) desc += ", large spreading wings";
   if (tail)  desc += ", articulated tail";
+  if (halo)  desc += ", glowing ethereal halo";
+  if (pauldrons) desc += ", heavy armor pauldrons";
   desc += `, primary color ${pCol} and glowing core ${gCol}`;
   document.getElementById("concept").value = desc;
 }
@@ -1201,18 +1439,24 @@ function applyPreset(name, concept, arch, rig, species = "auto") {
 
   // Update color pickers to match species
   const colorMap = {
-    alien:    { p: "#2b4764", g: "#00f0ff" },
-    demon:    { p: "#5f1c2a", g: "#ff2d1e" },
-    undead:   { p: "#a09b91", g: "#00eeff" },
-    reptilian:{ p: "#1e4a20", g: "#8eff52" },
-    beast:    { p: "#3b2a1e", g: "#00cc44" },
-    humanoid: { p: "#e8c9a0", g: "#a071f7" },
-    insectoid:{ p: "#2a3e1a", g: "#aaff00" },
-    mech:     { p: "#3c4454", g: "#ff9900" },
+    alien:       { p: "#2b4764", g: "#00f0ff" },
+    demon:       { p: "#5f1c2a", g: "#ff2d1e" },
+    undead:      { p: "#a09b91", g: "#00eeff" },
+    reptilian:   { p: "#1e4a20", g: "#8eff52" },
+    beast:       { p: "#3b2a1e", g: "#00cc44" },
+    humanoid:    { p: "#e8c9a0", g: "#a071f7" },
+    insectoid:   { p: "#2a3e1a", g: "#aaff00" },
+    mech:        { p: "#3c4454", g: "#ff9900" },
+    necromancer: { p: "#381a4d", g: "#00f0ff" },
+    berserker:   { p: "#5c1d1d", g: "#ff4d4d" },
+    trickster:   { p: "#1a4030", g: "#b438d9" },
+    pyromancer:  { p: "#61220a", g: "#ff6600" },
+    cryomancer:  { p: "#1c3c54", g: "#8fe9ff" },
   };
-  if (colorMap[species]) {
-    document.getElementById("col-primary").value = colorMap[species].p;
-    document.getElementById("col-glow").value = colorMap[species].g;
+  if (colorMap[species] || colorMap[name]) {
+    const pal = colorMap[species] || colorMap[name];
+    document.getElementById("col-primary").value = pal.p;
+    document.getElementById("col-glow").value = pal.g;
   }
 
   log(`[PRESET] Loaded '${name}' (${species.toUpperCase()}, ${rig.toUpperCase()})`, "ci");
@@ -1312,6 +1556,8 @@ async function runPipeline(actionType) {
   const mode      = document.getElementById("engine-mode").value;
   const ckpt      = document.getElementById("model-checkpoint") ? document.getElementById("model-checkpoint").value : "";
   const seed      = document.getElementById("seed").value;
+  const artStyle  = document.getElementById("art-style") ? document.getElementById("art-style").value : "anime";
+  const detailLevel = document.getElementById("detail-level") ? parseInt(document.getElementById("detail-level").value) : 3;
 
   if (!name) { log("[ERROR] Character Identifier is required.", "err"); return; }
 
@@ -1322,12 +1568,15 @@ async function runPipeline(actionType) {
     outline: document.getElementById("col-outline").value
   };
   const customFeatures = {
-    head_style:  document.getElementById("custom-head").value,
-    torso_style: document.getElementById("custom-torso").value,
-    hand_style:  document.getElementById("custom-hands").value,
-    foot_style:  document.getElementById("custom-feet").value,
-    has_wings:   document.getElementById("custom-wings").checked,
-    has_tail:    document.getElementById("custom-tail").checked
+    head_style:    document.getElementById("custom-head").value,
+    torso_style:   document.getElementById("custom-torso").value,
+    hand_style:    document.getElementById("custom-hands").value,
+    foot_style:    document.getElementById("custom-feet").value,
+    has_wings:     document.getElementById("custom-wings").checked,
+    has_tail:      document.getElementById("custom-tail").checked,
+    has_halo:      document.getElementById("custom-halo") ? document.getElementById("custom-halo").checked : false,
+    has_pauldrons: document.getElementById("custom-pauldrons") ? document.getElementById("custom-pauldrons").checked : false,
+    detail_level:  detailLevel
   };
 
   btn.disabled = true;
@@ -1341,7 +1590,7 @@ async function runPipeline(actionType) {
 
   // For rig_only, just call assemble endpoint
   if (actionType === 'rig_only') {
-    log("\\n---", "warn");
+    log("\n---", "warn");
     log(`[RIG] Re-rigging skeleton for '${name}' (${rig})...`, "gi");
     try {
       const r = await fetch('/api/assemble', {
@@ -1365,9 +1614,9 @@ async function runPipeline(actionType) {
     return;
   }
 
-  log("\\n========================================================", "ci");
+  log("\n========================================================", "ci");
   log(`[PIPELINE] Starting generation for '${name}'...`, "ci");
-  log(`[ENGINE] Mode: ${mode.toUpperCase()}${actionType === 'sprites_only' ? ' | Sprites Only (No Auto-Rig)' : ''}`, "ci");
+  log(`[ENGINE] Mode: ${mode.toUpperCase()} | Style: ${artStyle.toUpperCase()} | Detail: ${detailLevel}${actionType === 'sprites_only' ? ' | Sprites Only' : ''}`, "ci");
 
   try {
     const r = await fetch('/api/generate', {
@@ -1377,6 +1626,8 @@ async function runPipeline(actionType) {
         character_name: name, concept, archetype,
         rig_type: rig, species, mode,
         checkpoint: ckpt, seed,
+        art_style: artStyle,
+        detail_level: detailLevel,
         auto_rig: (actionType !== 'sprites_only'),
         custom_colors:   (species === "custom" ? customColors   : null),
         custom_features: (species === "custom" ? customFeatures : null),
@@ -1414,6 +1665,129 @@ async function runPipeline(actionType) {
     btn.innerHTML = origBtnHtml;
     btn.disabled = false;
   }
+}
+
+// ---- Generation Queue Functions ----
+let queuePollTimer = null;
+
+async function addToQueue() {
+  const name = document.getElementById("char-name").value.trim().toLowerCase().replace(/\\s+/g, '_') || "custom_character";
+  const concept = document.getElementById("concept").value.trim();
+  const rig = document.getElementById("rig-type").value;
+  const artStyle = document.getElementById("art-style") ? document.getElementById("art-style").value : "anime";
+  const detailLevel = document.getElementById("detail-level") ? parseInt(document.getElementById("detail-level").value) : 3;
+  const seed = parseInt(document.getElementById("seed").value) || -1;
+  const ckpt = document.getElementById("model-checkpoint") ? document.getElementById("model-checkpoint").value : "";
+
+  const job = {
+    character_name: name,
+    concept: concept,
+    rig_type: rig,
+    art_style: artStyle,
+    detail_level: detailLevel,
+    seed: seed,
+    checkpoint: ckpt,
+    auto_rig: true
+  };
+
+  try {
+    const r = await fetch('/api/queue/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(job)
+    });
+    const d = await r.json();
+    log(`[QUEUE] Added '${name}' to background generation queue.`, "ok");
+    pollQueue();
+  } catch (e) {
+    log(`[QUEUE] Error queuing job: ${e}`, "err");
+  }
+}
+
+async function pollQueue() {
+  try {
+    const r = await fetch('/api/queue/status');
+    const d = await r.json();
+    renderQueue(d);
+
+    const hasActive = d.jobs && d.jobs.some(j => j.status === 'pending' || j.status === 'running');
+    if (hasActive) {
+      if (!queuePollTimer) {
+        queuePollTimer = setInterval(pollQueue, 2500);
+      }
+    } else {
+      if (queuePollTimer) {
+        clearInterval(queuePollTimer);
+        queuePollTimer = null;
+      }
+    }
+  } catch (e) {}
+}
+
+function renderQueue(data) {
+  const list = document.getElementById("queue-list");
+  const empty = document.getElementById("queue-empty");
+  const badge = document.getElementById("queue-badge");
+
+  if (!list || !empty || !badge) return;
+
+  if (!data.jobs || data.jobs.length === 0) {
+    list.style.display = "none";
+    empty.style.display = "block";
+    badge.style.display = "none";
+    return;
+  }
+
+  empty.style.display = "none";
+  list.style.display = "flex";
+
+  const activeCount = data.counts ? (data.counts.pending + data.counts.running) : 0;
+  badge.textContent = `${activeCount} active`;
+  badge.style.display = activeCount > 0 ? "inline-block" : "none";
+
+  list.innerHTML = "";
+  data.jobs.forEach(j => {
+    const row = document.createElement("div");
+    row.style.cssText = "display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:6px;font-size:12px;gap:8px;";
+
+    let statusColor = "var(--text-muted)";
+    let statusText = j.status.toUpperCase();
+    if (j.status === "running") { statusColor = "#d29922"; statusText = "⚡ RUNNING"; }
+    else if (j.status === "done") { statusColor = "#3fb950"; statusText = "✓ DONE"; }
+    else if (j.status === "error") { statusColor = "#f85149"; statusText = "✕ ERROR"; }
+    else if (j.status === "pending") { statusColor = "#78c8ff"; statusText = "⏳ PENDING"; }
+
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+        <span style="font-size:11px;font-weight:600;color:${statusColor};white-space:nowrap;">${statusText}</span>
+        <strong style="color:var(--text);white-space:nowrap;">${j.character_name}</strong>
+        <span style="color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;">${j.concept}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        ${(j.status === 'pending' || j.status === 'running') ? `<button class="btn btn-danger btn-sm" onclick="cancelQueueJob('${j.id}')">Cancel</button>` : ''}
+        ${j.status === 'done' ? `<button class="btn btn-secondary btn-sm" onclick="switchTab('library');viewCharacter('${j.character_name}')">View</button>` : ''}
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+async function cancelQueueJob(jobId) {
+  try {
+    await fetch('/api/queue/cancel', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({job_id: jobId})
+    });
+    pollQueue();
+  } catch (e) {}
+}
+
+async function clearCompletedQueue() {
+  try {
+    await fetch('/api/queue/clear', {method: 'DELETE'});
+    pollQueue();
+  } catch (e) {}
 }
 
 // ---- Folder & Godot actions ----
@@ -1610,14 +1984,19 @@ function renderRoster(chars) {
     item.className = "char-roster-item" + (c.name === viewingChar ? " selected" : "");
     item.onclick = () => viewCharacter(c.name);
 
-    // Thumb: use first limb png if available (not exploded)
-    const limbNames = (c.limbs || []).filter(l => !l.includes("_exploded"));
-    let thumbHtml = `<div class="char-roster-thumb-placeholder">🎮</div>`;
-    if (limbNames.length > 0) {
-      // prefer head or torso for thumbnail
-      const preferred = limbNames.find(l => l.includes("_head")) || limbNames.find(l => l.includes("_torso")) || limbNames[0];
-      thumbHtml = `<img class="char-roster-thumb" src="/sprites/${c.name}/${preferred}?t=${Date.now()}" alt="${c.name}" loading="lazy">`;
-    }
+    // Thumb: Use FULL CONNECTED BODY SPRITE PREVIEW, not just head!
+    const fullUrl = c.full_preview_url || `/sprites/${c.name}/${c.name}_full.png`;
+    const limbNames = (c.limbs || []).filter(l => !l.includes("_exploded") && !l.includes("_full"));
+    const fallbackLimb = limbNames.find(l => l.includes("_head")) || limbNames.find(l => l.includes("_torso")) || (limbNames[0] || "");
+    const fallbackUrl = fallbackLimb ? `/sprites/${c.name}/${fallbackLimb}` : '';
+
+    const thumbHtml = `
+      <img class="char-roster-thumb"
+           src="${fullUrl}?t=${Date.now()}"
+           alt="${c.name}"
+           loading="lazy"
+           onerror="this.onerror=null;${fallbackUrl ? `this.src='${fallbackUrl}?t=${Date.now()}';` : `this.style.display='none';`}">
+    `;
 
     const sceneBadge = c.has_godot_scene
       ? '<span class="lib-badge lib-badge-scene">🎮 Scene</span>'
@@ -1657,6 +2036,12 @@ async function viewCharacter(name) {
   document.getElementById("viewer-char-meta").textContent = charInfo
     ? `${charInfo.limb_count} limb cutouts • ${charInfo.has_godot_scene ? 'Godot scene available' : 'No scene yet'}`
     : '';
+
+  // Update full assembled body preview
+  const fullImg = document.getElementById("viewer-full-img");
+  if (fullImg) {
+    fullImg.src = `/sprites/${name}/${name}_full.png?t=${Date.now()}`;
+  }
 
   // Load sprites
   try {
@@ -1705,12 +2090,14 @@ async function deleteChar(name) {
 }
 
 // ---- Init ----
-setActivePill('pill-cyber_alien');  // cyber_alien is default, not custom_creature
+setActivePill('pill-cyber_alien');
 checkStatus();
 checkModelStatus();
 refreshGallery();
+pollQueue();
 setInterval(checkStatus, 7000);
 setInterval(checkModelStatus, 12000);
+setInterval(pollQueue, 3500);
 </script>
 </body>
 </html>

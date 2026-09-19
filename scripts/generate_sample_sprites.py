@@ -5,13 +5,34 @@ import random
 import re
 from PIL import Image, ImageDraw
 
-def create_sprite(size, draw_func):
-    """Render at 4x resolution for smooth anti-aliased edges, then downsample with LANCZOS."""
-    scale = 4
+def create_sprite(size, draw_func, art_style="anime", detail_level=3):
+    """
+    Renders sprite according to chosen art style and detail level.
+    - anime / dark_fantasy / cyberpunk: 4x resolution downsampled with LANCZOS
+    - pixel_8bit: Render at 2x, downsample with NEAREST, quantize to 16-color palette
+    - pixel_16bit: Render at 2x, downsample with NEAREST, quantize to 32-color palette
+    """
+    is_pixel = art_style in ("pixel_8bit", "pixel_16bit")
+    scale = 2 if is_pixel else 4
     w, h = size[0] * scale, size[1] * scale
     img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     draw_func(draw, w, h, scale)
+
+    if is_pixel:
+        small = img.resize(size, Image.Resampling.NEAREST)
+        r, g, b, a = small.split()
+        a = a.point(lambda p: 255 if p > 80 else 0)
+        num_colors = 16 if art_style == "pixel_8bit" else 32
+        try:
+            rgb = small.convert("RGB")
+            quantized = rgb.quantize(colors=num_colors, method=Image.Quantize.MEDIANCUT).convert("RGBA")
+            quantized.putalpha(a)
+            return quantized
+        except Exception:
+            small.putalpha(a)
+            return small
+
     return img.resize(size, Image.Resampling.LANCZOS)
 
 
@@ -1401,16 +1422,24 @@ def generate_all(out_dir, prefix="warrior", archetype="warrior", prompt="", seed
 
     generated_paths = []
     for name, (size, fn) in parts.items():
-        img = create_sprite(size, fn)
+        img = create_sprite(size, fn, art_style=art_style, detail_level=feat.get("detail_level", 3))
         out_path = os.path.join(out_dir, f"{prefix}_{name}.png")
         img.save(out_path, "PNG")
         generated_paths.append(out_path)
+
+    # Automatically composite connected full-body preview
+    try:
+        preview_path = create_character_assembled_preview(out_dir, prefix=prefix, rig_type="biped")
+        if preview_path and os.path.isfile(preview_path):
+            generated_paths.append(str(preview_path))
+    except Exception as e:
+        print(f"[Generator] Warning: Could not create assembled preview for '{prefix}': {e}")
 
     print(f"[Generator] Created {len(generated_paths)} {theme['species'].upper()} sprites for '{prefix}' in: {out_dir}")
     return generated_paths
 
 
-def generate_quadruped(out_dir, prefix="fenrir", archetype="beast", prompt="", seed=-1, art_style="anime"):
+def generate_quadruped(out_dir, prefix="fenrir", archetype="beast", prompt="", seed=-1, art_style="anime", detail_level=3):
     """Generates all 20 quadruped body part sprites."""
     os.makedirs(out_dir, exist_ok=True)
     theme = build_palette(prompt, archetype, seed, art_style=art_style)
@@ -1441,13 +1470,198 @@ def generate_quadruped(out_dir, prefix="fenrir", archetype="beast", prompt="", s
 
     generated_paths = []
     for name, (size, fn) in parts.items():
-        img = create_sprite(size, fn)
+        img = create_sprite(size, fn, art_style=art_style, detail_level=detail_level)
         out_path = os.path.join(out_dir, f"{prefix}_{name}.png")
         img.save(out_path, "PNG")
         generated_paths.append(out_path)
 
+    # Automatically composite connected full-body preview
+    try:
+        preview_path = create_character_assembled_preview(out_dir, prefix=prefix, rig_type="quadruped")
+        if preview_path and os.path.isfile(preview_path):
+            generated_paths.append(str(preview_path))
+    except Exception as e:
+        print(f"[Generator] Warning: Could not create quadruped assembled preview for '{prefix}': {e}")
+
     print(f"[Generator] Created {len(generated_paths)} QUADRUPED sprites for '{prefix}' in: {out_dir}")
     return generated_paths
+
+
+def create_character_assembled_preview(char_dir, prefix=None, rig_type="biped"):
+    """
+    Composites all sliced limb sprites in char_dir into a single full-body
+    connected character preview ({prefix}_full.png).
+    Returns the Path to the generated full-body preview image.
+    """
+    from pathlib import Path
+    char_dir = Path(char_dir)
+    if not prefix:
+        prefix = char_dir.name
+
+    limbs = {}
+    for p in char_dir.glob("*.png"):
+        if "_exploded" in p.name or "_full" in p.name or p.name.startswith("."):
+            continue
+        bone = p.stem
+        if bone.startswith(prefix + "_"):
+            bone = bone[len(prefix) + 1:]
+        try:
+            limbs[bone] = Image.open(p).convert("RGBA")
+        except Exception:
+            pass
+
+    if not limbs:
+        return None
+
+    # Detect quadruped vs biped
+    is_quadruped = rig_type.lower() == "quadruped" or "leg_front_upper_L" in limbs or "paw_front_L" in limbs
+
+    if is_quadruped:
+        # Quadruped layout
+        tw, th = limbs.get("torso", Image.new("RGBA", (80, 64))).size
+        hw, hh = limbs.get("head", Image.new("RGBA", (64, 64))).size
+        pw, ph = limbs.get("pelvis", Image.new("RGBA", (64, 56))).size
+        canvas_w = max(400, tw + hw + pw + 120)
+        canvas_h = max(360, th + hh + ph + 120)
+        canvas = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
+        cx = canvas_w // 2
+        cy = canvas_h // 2
+
+        # Back legs (R)
+        if "leg_back_upper_R" in limbs: canvas.alpha_composite(limbs["leg_back_upper_R"], (cx + 50, cy))
+        if "leg_back_lower_R" in limbs: canvas.alpha_composite(limbs["leg_back_lower_R"], (cx + 54, cy + 40))
+        if "paw_back_R" in limbs: canvas.alpha_composite(limbs["paw_back_R"], (cx + 56, cy + 80))
+        if "leg_front_upper_R" in limbs: canvas.alpha_composite(limbs["leg_front_upper_R"], (cx - 70, cy))
+        if "leg_front_lower_R" in limbs: canvas.alpha_composite(limbs["leg_front_lower_R"], (cx - 72, cy + 40))
+        if "paw_front_R" in limbs: canvas.alpha_composite(limbs["paw_front_R"], (cx - 72, cy + 80))
+
+        # Tail
+        for t in ["tail_03", "tail_02", "tail_01"]:
+            if t in limbs: canvas.alpha_composite(limbs[t], (cx + 70, cy - 20))
+        # Spine & Pelvis
+        if "pelvis" in limbs: canvas.alpha_composite(limbs["pelvis"], (cx + 30, cy - 20))
+        if "spine" in limbs: canvas.alpha_composite(limbs["spine"], (cx, cy - 20))
+        # Torso
+        if "torso" in limbs: canvas.alpha_composite(limbs["torso"], (cx - 40, cy - 24))
+        # Neck & Head
+        if "neck" in limbs: canvas.alpha_composite(limbs["neck"], (cx - 80, cy - 40))
+        if "head" in limbs: canvas.alpha_composite(limbs["head"], (cx - 120, cy - 60))
+
+        # Front legs (L)
+        if "leg_front_upper_L" in limbs: canvas.alpha_composite(limbs["leg_front_upper_L"], (cx - 85, cy + 10))
+        if "leg_front_lower_L" in limbs: canvas.alpha_composite(limbs["leg_front_lower_L"], (cx - 87, cy + 50))
+        if "paw_front_L" in limbs: canvas.alpha_composite(limbs["paw_front_L"], (cx - 87, cy + 90))
+        if "leg_back_upper_L" in limbs: canvas.alpha_composite(limbs["leg_back_upper_L"], (cx + 35, cy + 10))
+        if "leg_back_lower_L" in limbs: canvas.alpha_composite(limbs["leg_back_lower_L"], (cx + 38, cy + 50))
+        if "paw_back_L" in limbs: canvas.alpha_composite(limbs["paw_back_L"], (cx + 40, cy + 90))
+    else:
+        # Biped layout
+        tw, th = limbs.get("torso", Image.new("RGBA", (60, 60))).size
+        pw, ph = limbs.get("pelvis", Image.new("RGBA", (50, 40))).size
+        hw, hh = limbs.get("head", Image.new("RGBA", (60, 60))).size
+
+        ulw, ulh = limbs.get("leg_upper_L", limbs.get("leg_upper_R", Image.new("RGBA", (40, 50)))).size
+        llw, llh = limbs.get("leg_lower_L", limbs.get("leg_lower_R", Image.new("RGBA", (35, 50)))).size
+        fw, fh = limbs.get("foot_L", limbs.get("foot_R", Image.new("RGBA", (40, 30)))).size
+
+        uaw, uah = limbs.get("arm_upper_L", limbs.get("arm_upper_R", Image.new("RGBA", (40, 50)))).size
+        law, lah = limbs.get("arm_lower_L", limbs.get("arm_lower_R", Image.new("RGBA", (35, 50)))).size
+        haw, hah = limbs.get("hand_L", limbs.get("hand_R", Image.new("RGBA", (30, 30)))).size
+
+        canvas_w = max(400, tw + uaw*2 + law*2 + 100)
+        canvas_h = max(500, hh + th + ph + ulh + llh + fh + 100)
+        cx = canvas_w // 2
+
+        canvas = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
+
+        torso_top = hh + 30
+        torso_y = torso_top
+        pelvis_y = torso_y + int(th * 0.82)
+        leg_y = pelvis_y + int(ph * 0.75)
+
+        # 1. Back Wings
+        if "wing_upper_R" in limbs:
+            w_img = limbs["wing_upper_R"]
+            canvas.alpha_composite(w_img, (cx + int(tw * 0.2), torso_y - int(w_img.height * 0.4)))
+        if "wing_lower_R" in limbs:
+            w_img = limbs["wing_lower_R"]
+            canvas.alpha_composite(w_img, (cx + int(tw * 0.4), torso_y))
+        if "wing_upper_L" in limbs:
+            w_img = limbs["wing_upper_L"]
+            canvas.alpha_composite(w_img, (cx - int(tw * 0.2) - w_img.width, torso_y - int(w_img.height * 0.4)))
+        if "wing_lower_L" in limbs:
+            w_img = limbs["wing_lower_L"]
+            canvas.alpha_composite(w_img, (cx - int(tw * 0.4) - w_img.width, torso_y))
+
+        # Tail
+        for t_name in ["tail_03", "tail_02", "tail_01", "tail"]:
+            if t_name in limbs:
+                t_img = limbs[t_name]
+                canvas.alpha_composite(t_img, (cx + int(tw * 0.1), pelvis_y + int(ph * 0.2)))
+
+        # 2. Right Arm (Back side)
+        r_arm_x = cx + int(tw * 0.45) - int(uaw * 0.2)
+        if "arm_upper_R" in limbs:
+            canvas.alpha_composite(limbs["arm_upper_R"], (r_arm_x, torso_y + int(th * 0.1)))
+        r_low_y = torso_y + int(th * 0.1) + int(uah * 0.8)
+        if "arm_lower_R" in limbs:
+            canvas.alpha_composite(limbs["arm_lower_R"], (r_arm_x + int(uaw * 0.1), r_low_y))
+        if "hand_R" in limbs:
+            canvas.alpha_composite(limbs["hand_R"], (r_arm_x + int(uaw * 0.1), r_low_y + int(lah * 0.8)))
+
+        # 3. Legs
+        r_leg_x = cx + int(pw * 0.1)
+        if "leg_upper_R" in limbs:
+            canvas.alpha_composite(limbs["leg_upper_R"], (r_leg_x, leg_y))
+        r_leg_low_y = leg_y + int(ulh * 0.8)
+        if "leg_lower_R" in limbs:
+            canvas.alpha_composite(limbs["leg_lower_R"], (r_leg_x, r_leg_low_y))
+        if "foot_R" in limbs:
+            canvas.alpha_composite(limbs["foot_R"], (r_leg_x - int(fw * 0.1), r_leg_low_y + int(llh * 0.85)))
+
+        l_leg_x = cx - int(pw * 0.1) - ulw
+        if "leg_upper_L" in limbs:
+            canvas.alpha_composite(limbs["leg_upper_L"], (l_leg_x, leg_y))
+        l_leg_low_y = leg_y + int(ulh * 0.8)
+        if "leg_lower_L" in limbs:
+            canvas.alpha_composite(limbs["leg_lower_L"], (l_leg_x, l_leg_low_y))
+        if "foot_L" in limbs:
+            canvas.alpha_composite(limbs["foot_L"], (l_leg_x - int(fw * 0.2), l_leg_low_y + int(llh * 0.85)))
+
+        # 4. Pelvis
+        if "pelvis" in limbs:
+            canvas.alpha_composite(limbs["pelvis"], (cx - pw // 2, pelvis_y))
+
+        # 5. Torso
+        if "torso" in limbs:
+            canvas.alpha_composite(limbs["torso"], (cx - tw // 2, torso_y))
+
+        # 6. Head
+        if "head" in limbs:
+            canvas.alpha_composite(limbs["head"], (cx - hw // 2, torso_y - int(hh * 0.82)))
+
+        # 7. Left Arm (Front side)
+        l_arm_x = cx - int(tw * 0.45) - int(uaw * 0.8)
+        if "arm_upper_L" in limbs:
+            canvas.alpha_composite(limbs["arm_upper_L"], (l_arm_x, torso_y + int(th * 0.1)))
+        l_low_y = torso_y + int(th * 0.1) + int(uah * 0.8)
+        if "arm_lower_L" in limbs:
+            canvas.alpha_composite(limbs["arm_lower_L"], (l_arm_x - int(uaw * 0.05), l_low_y))
+        if "hand_L" in limbs:
+            canvas.alpha_composite(limbs["hand_L"], (l_arm_x - int(uaw * 0.05), l_low_y + int(lah * 0.8)))
+
+    # Crop bounding box
+    bbox = canvas.getbbox()
+    if bbox:
+        pad = 8
+        bbox = (max(0, bbox[0]-pad), max(0, bbox[1]-pad), min(canvas.width, bbox[2]+pad), min(canvas.height, bbox[3]+pad))
+        cropped = canvas.crop(bbox)
+    else:
+        cropped = canvas
+
+    out_file = char_dir / f"{prefix}_full.png"
+    cropped.save(out_file, "PNG")
+    return out_file
 
 
 if __name__ == "__main__":

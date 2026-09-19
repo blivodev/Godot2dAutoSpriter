@@ -6,14 +6,17 @@ Exposes end-to-end 2D sprite generation, alpha-blob limb slicing, and Godot 4
 auto-rigging tools to AI coding agents (Cline, Claude Desktop, Cursor, OpenCode).
 
 MCP Tools:
-  1. generate_character_sprites     - ComfyUI diffusion or procedural sprite generation
-  2. slice_character_limbs          - Alpha-blob detection limb segmentation
-  3. assemble_godot_rig             - Headless Godot 4 Skeleton2D rig builder
-  4. setup_comfyui_environment      - ComfyUI node/model installer & status checker
-  5. download_comfyui_model         - AI model checkpoint downloader (resumable)
-  6. list_generated_characters      - Lists all characters in the sprites/ directory
-  7. delete_character               - Removes a character's sprites and scene file
-  8. get_character_info             - Returns detailed metadata for a character
+  1.  generate_character_sprites     - ComfyUI diffusion or procedural sprite generation
+  2.  slice_character_limbs          - Alpha-blob detection limb segmentation
+  3.  assemble_godot_rig             - Headless Godot 4 Skeleton2D rig builder
+  4.  setup_comfyui_environment      - ComfyUI node/model installer & status checker
+  5.  download_comfyui_model         - AI model checkpoint downloader (resumable)
+  6.  list_generated_characters      - Lists all characters in the sprites/ directory
+  7.  delete_character               - Removes a character's sprites and scene file
+  8.  get_character_info             - Returns detailed metadata for a character
+  9.  queue_character_generation     - Add one or more characters to the generation queue
+  10. get_queue_status               - Get current state of all queued generation jobs
+  11. cancel_queue_job               - Cancel a pending or running queue job
 """
 
 import os
@@ -22,11 +25,128 @@ import json
 import time
 import uuid
 import shutil
+import threading
 import urllib.request
 import urllib.error
 import subprocess
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+
+# ==============================================================================
+# Generation Queue State (shared across MCP tools and Web UI)
+# ==============================================================================
+_QUEUE_LOCK = threading.Lock()
+_QUEUE_JOBS: List[Dict] = []           # list of job dicts
+_QUEUE_WORKER_RUNNING = False
+
+def _queue_worker():
+    """Background thread that processes queued generation jobs sequentially."""
+    global _QUEUE_WORKER_RUNNING
+    while True:
+        job = None
+        with _QUEUE_LOCK:
+            pending = [j for j in _QUEUE_JOBS if j["status"] == "pending"]
+            if not pending:
+                _QUEUE_WORKER_RUNNING = False
+                return
+            job = pending[0]
+            job["status"] = "running"
+            job["started_at"] = time.time()
+
+        try:
+            result_str = generate_character_sprites(
+                character_name=job["character_name"],
+                archetype_prompt=job["concept"],
+                seed=job.get("seed", -1),
+                rig_type=job.get("rig_type", "biped"),
+                checkpoint=job.get("checkpoint", ""),
+                art_style=job.get("art_style", "anime"),
+                detail_level=job.get("detail_level", 3),
+            )
+            result = json.loads(result_str)
+            with _QUEUE_LOCK:
+                job["status"] = "done"
+                job["result"] = result
+                job["finished_at"] = time.time()
+
+            if job.get("auto_rig", True):
+                assemble_godot_rig(
+                    character_name=job["character_name"],
+                    assets_dir=f"res://sprites/{job['character_name']}",
+                    target_scene_path=f"res://scenes/{job['character_name']}_character.tscn",
+                    rig_type=job.get("rig_type", "biped"),
+                )
+        except Exception as e:
+            with _QUEUE_LOCK:
+                job["status"] = "error"
+                job["error"] = str(e)
+                job["finished_at"] = time.time()
+
+
+def _ensure_queue_worker():
+    """Starts the background queue worker thread if not already running."""
+    global _QUEUE_WORKER_RUNNING
+    with _QUEUE_LOCK:
+        if not _QUEUE_WORKER_RUNNING:
+            _QUEUE_WORKER_RUNNING = True
+            t = threading.Thread(target=_queue_worker, daemon=True)
+            t.start()
+
+
+def add_to_queue(job_dicts: List[Dict]) -> List[Dict]:
+    """Adds a batch of character generation job dicts to the shared queue."""
+    created_jobs = []
+    with _QUEUE_LOCK:
+        for item in job_dicts:
+            job_id = f"job_{int(time.time()*1000)}_{uuid.uuid4().hex[:6]}"
+            job = {
+                "id": job_id,
+                "character_name": item.get("character_name", "custom_character").strip().lower().replace(" ", "_"),
+                "concept": item.get("concept") or item.get("archetype_prompt") or "heroic adventurer",
+                "seed": item.get("seed", -1),
+                "rig_type": item.get("rig_type", "biped"),
+                "checkpoint": item.get("checkpoint", ""),
+                "art_style": item.get("art_style", "anime"),
+                "detail_level": item.get("detail_level", 3),
+                "auto_rig": item.get("auto_rig", True),
+                "status": "pending",
+                "created_at": time.time(),
+                "started_at": None,
+                "finished_at": None,
+                "error": None,
+                "result": None
+            }
+            _QUEUE_JOBS.append(job)
+            created_jobs.append(job)
+    _ensure_queue_worker()
+    return created_jobs
+
+
+def get_all_queue_jobs() -> List[Dict]:
+    """Returns a snapshot copy of all jobs currently in the queue."""
+    with _QUEUE_LOCK:
+        return [dict(j) for j in _QUEUE_JOBS]
+
+
+def cancel_job(job_id: str) -> bool:
+    """Cancels a pending or running job by ID."""
+    with _QUEUE_LOCK:
+        for j in _QUEUE_JOBS:
+            if j["id"] == job_id:
+                if j["status"] in ("pending", "running"):
+                    j["status"] = "cancelled"
+                    j["finished_at"] = time.time()
+                    return True
+    return False
+
+
+def clear_completed_queue_jobs() -> int:
+    """Removes finished (done, error, cancelled) jobs from the queue."""
+    global _QUEUE_JOBS
+    with _QUEUE_LOCK:
+        before = len(_QUEUE_JOBS)
+        _QUEUE_JOBS = [j for j in _QUEUE_JOBS if j["status"] in ("pending", "running")]
+        return before - len(_QUEUE_JOBS)
 
 from PIL import Image
 from mcp.server.fastmcp import FastMCP
@@ -380,141 +500,230 @@ def generate_character_sprites(
     seed: int = -1,
     rig_type: str = "biped",
     checkpoint: str = "",
-    art_style: str = "anime"
+    art_style: str = "anime",
+    detail_level: int = 3
 ) -> str:
     """
-    Connects to the local ComfyUI API to trigger the base anime character generation
-    bridged into the exploded OpenPose + LayerDiffuse stage.
+    Connects to the local ComfyUI API to trigger character generation via the
+    exploded OpenPose + LayerDiffuse pipeline. Automatically adapts the workflow
+    based on checkpoint base (SDXL vs SD1.5), art style, and detail level.
+    The LoRA node is skipped if the LoRA file is not present.
 
     Args:
         character_name: Alphanumeric identifier for the character (e.g. 'ronin', 'fenrir').
         archetype_prompt: Visual prompt (e.g. 'cyberpunk cyber-blade assassin, neon visor').
         seed: Random seed for generation (-1 for randomized).
         rig_type: Rig hierarchy type ('biped' or 'quadruped').
-        checkpoint: Optional custom ComfyUI checkpoint filename (e.g. 'animagineXL_v31.safetensors').
-        art_style: Graphic art style ('anime', 'dark_fantasy', 'pixel_arcade', 'cyberpunk', 'moba_chibi', 'comic_ink').
+        checkpoint: ComfyUI checkpoint filename (e.g. 'animagineXL_v31.safetensors').
+        art_style: Render style: 'anime', 'dark_fantasy', 'pixel_8bit', 'pixel_16bit',
+                   'cyberpunk', 'moba_chibi', 'comic_ink', 'painterly', 'watercolor'.
+        detail_level: 1=minimal, 2=standard, 3=detailed (default), 4=hyper, 5=ultra.
 
     Returns:
         JSON string containing status, output image path, and parameters.
     """
+    import random as _random
     clean_name = character_name.strip().lower().replace(" ", "_")
     if seed == -1:
-        import random
-        seed = random.randint(1, 2147483647)
+        seed = _random.randint(1, 2147483647)
 
     out_dir = PROJECT_ROOT / "sprites" / clean_name
     out_dir.mkdir(parents=True, exist_ok=True)
     exploded_image_path = out_dir / f"{clean_name}_exploded.png"
 
     client_id = uuid.uuid4().hex
-
     ckpt_name = checkpoint.strip() if checkpoint else os.environ.get("COMFYUI_CHECKPOINT", "animagineXL_v31.safetensors")
 
-    style_prompts = {
-        "anime": "masterpiece, anime 2d game sprite, clean flat cel shading, crisp bold outlines, vibrant colors",
-        "dark_fantasy": "dark fantasy, gothic grimdark game sprite, weathered steel armor, runic markings, eerie soul glow, etched shadows",
-        "pixel_arcade": "16-bit retro pixel art game sprite, arcade colors, dithered shading, crisp pixel borders, nostalgic palette",
-        "cyberpunk": "neon cyberpunk synth game sprite, high-tech carbon plates, glowing bioluminescent circuit lines, plasma highlights",
-        "moba_chibi": "chibi stylized MOBA hero sprite, exaggerated proportions, clean friendly contours, luminous highlights",
-        "comic_ink": "comic graphic novel game sprite, heavy black inking, bold halftone crosshatching, dramatic shading"
-    }
-    style_prefix = style_prompts.get(art_style, style_prompts["anime"])
+    # Detect model base from filename
+    ckpt_lower = ckpt_name.lower()
+    is_sdxl = any(k in ckpt_lower for k in ["xl", "sdxl", "pony", "animagine"])
+    is_pixel = any(k in ckpt_lower for k in ["pixel", "sprite"])
 
-    workflow = {
+    # Style-specific prompt prefix and sampler tuning
+    style_cfg = {
+        "anime":      {"prefix": "masterpiece, best quality, anime 2d game sprite, clean flat cel shading, crisp bold outlines, vibrant saturated colors",          "steps": 22, "cfg": 7.0, "neg": "blurry, 3d, photorealistic, deformed, watermark"},
+        "dark_fantasy":{"prefix": "dark fantasy, gothic grimdark game character, weathered steel armor, runic glowing markings, painted shadows, eerie soul glow",    "steps": 26, "cfg": 7.5, "neg": "bright, cheerful, 3d render, blurry, photorealistic"},
+        "pixel_8bit": {"prefix": "pixel art, 8-bit retro video game sprite, 8 color palette, crisp pixels, dithering, NES style game character, flat pixel blocks",   "steps": 18, "cfg": 6.5, "neg": "blurry, smooth, 3d, anti-aliased, realistic, gradient"},
+        "pixel_16bit":{"prefix": "pixel art, 16-bit SNES-era video game character sprite, 32 color palette, clean pixel clusters, RPG sprite, SNES style character",   "steps": 20, "cfg": 7.0, "neg": "blurry, anti-aliased, 3d render, photorealistic, gradient"},
+        "cyberpunk":  {"prefix": "neon cyberpunk synth game sprite, high-tech carbon fiber plates, glowing bioluminescent circuit traces, holo-visor, plasma accents",  "steps": 24, "cfg": 7.5, "neg": "natural, fantasy, medieval, blurry, 3d render"},
+        "moba_chibi": {"prefix": "chibi stylized MOBA hero game character, exaggerated cute head proportions, clean flat contours, luminous highlight, League of Legends style", "steps": 20, "cfg": 7.0, "neg": "realistic, 3d, dark, gory, blurry"},
+        "comic_ink":  {"prefix": "comic graphic novel game sprite, heavy bold black ink outlines, solid halftone shading, dramatic ink wash, ink splash effects",        "steps": 22, "cfg": 7.5, "neg": "blurry, 3d render, photorealistic, gradient"},
+        "painterly":  {"prefix": "painterly oil painting style game character, impressionist brushwork, rich color layering, textured surface, artstation quality",       "steps": 28, "cfg": 8.0, "neg": "flat, cartoon, 3d render, blurry, amateur"},
+        "watercolor": {"prefix": "soft watercolor illustration game character, transparent wash layers, bleeding ink edges, whimsical palette, studio ghibli aesthetic",   "steps": 24, "cfg": 7.5, "neg": "3d render, photorealistic, sharp lines, pixel, blurry"},
+    }
+    sc = style_cfg.get(art_style, style_cfg["anime"])
+
+    # Detail level adjustments
+    detail_prefixes = {
+        1: "simple flat silhouette, minimal details, clean shape",
+        2: "clean standard anime details, basic shading",
+        3: "detailed anatomy, layered shading, intricate costume",
+        4: "hyper detailed, ultra intricate costume, rich texture, fine line art",
+        5: "ultra detailed masterpiece, extremely intricate detail, every thread visible, museum quality",
+    }
+    detail_steps_bonus = {1: -6, 2: -3, 3: 0, 4: +5, 5: +10}
+    detail_cfg_bonus   = {1: -1.0, 2: -0.5, 3: 0.0, 4: +0.5, 5: +1.0}
+    dl = max(1, min(5, int(detail_level)))
+    detail_prefix = detail_prefixes[dl]
+    total_steps = max(10, sc["steps"] + detail_steps_bonus[dl])
+    total_cfg = round(sc["cfg"] + detail_cfg_bonus[dl], 1)
+
+    full_prompt = f"{sc['prefix']}, {detail_prefix}, {archetype_prompt}, orthographic front view, modular exploded character cut-out sheet, transparent background"
+    neg_prompt = sc["neg"] + ", low quality, extra limbs, missing limbs, mutation, deformed, ugly"
+
+    # Determine if LoRA is available
+    from scripts.download_models import find_comfyui_models_directory
+    mdir = find_comfyui_models_directory()
+    lora_path = mdir / "loras" / "flat2DAnimerge_v10.safetensors"
+    has_lora = lora_path.is_file() and is_sdxl  # Only use SDXL LoRA with SDXL checkpoints
+    pixel_lora_path = mdir / "loras" / "pixel_art_style_lora.safetensors"
+    has_pixel_lora = pixel_lora_path.is_file() and art_style in ("pixel_8bit", "pixel_16bit")
+
+    # LayerDiffuse config per base
+    ld_config = "SDXL, Conv Injection" if is_sdxl else "SD1.5, Conv Injection"
+    latent_size = 512 if (not is_sdxl or art_style in ("pixel_8bit", "pixel_16bit")) else 1024
+
+    # Build workflow dynamically — LoRA is optional
+    checkpoint_node_id = "1"
+    model_ref = ["1", 0]
+    clip_ref  = ["1", 1]
+    next_node = 2
+
+    workflow: Dict = {
         "1": {
             "class_type": "CheckpointLoaderSimple",
             "inputs": {"ckpt_name": ckpt_name}
-        },
-        "2": {
+        }
+    }
+
+    # Optional style LoRA
+    if has_lora:
+        workflow[str(next_node)] = {
             "class_type": "LoraLoader",
             "inputs": {
                 "lora_name": "flat2DAnimerge_v10.safetensors",
-                "strength_model": 0.8,
-                "strength_clip": 0.8,
-                "model": ["1", 0],
-                "clip": ["1", 1]
+                "strength_model": 0.75,
+                "strength_clip": 0.75,
+                "model": model_ref,
+                "clip": clip_ref
             }
-        },
-        "3": {
-            "class_type": "CLIPTextEncode",
+        }
+        model_ref = [str(next_node), 0]
+        clip_ref  = [str(next_node), 1]
+        next_node += 1
+    elif has_pixel_lora:
+        workflow[str(next_node)] = {
+            "class_type": "LoraLoader",
             "inputs": {
-                "text": f"{style_prefix}, {archetype_prompt}, orthographic front view, modular character cut-out, anime character sprite sheet, transparent background",
-                "clip": ["2", 1]
+                "lora_name": "pixel_art_style_lora.safetensors",
+                "strength_model": 0.9,
+                "strength_clip": 0.9,
+                "model": model_ref,
+                "clip": clip_ref
             }
-        },
-        "4": {
-            "class_type": "CLIPTextEncode",
-            "inputs": {
-                "text": "photorealistic, 3d render, shadows on background, noise, blurry, low quality",
-                "clip": ["2", 1]
-            }
-        },
-        "5": {
-            "class_type": "LayeredDiffusionApply",
-            "inputs": {
-                "config": "SDXL, Conv Injection",
-                "weight": 1.0,
-                "model": ["2", 0]
-            }
-        },
-        "6": {
-            "class_type": "ControlNetLoader",
-            "inputs": {"control_net_name": "thibaud_xl_openpose.safetensors"}
-        },
-        "7": {
-            "class_type": "LoadImage",
-            "inputs": {"image": "exploded_openpose_template.png"}
-        },
-        "8": {
-            "class_type": "ControlNetApply",
-            "inputs": {
-                "strength": 0.90,
-                "conditioning": ["3", 0],
-                "control_net": ["6", 0],
-                "image": ["7", 0]
-            }
-        },
-        "9": {
-            "class_type": "EmptyLatentImage",
-            "inputs": {"width": 1024, "height": 1024, "batch_size": 1}
-        },
-        "10": {
-            "class_type": "KSampler",
-            "inputs": {
-                "seed": seed,
-                "steps": 22,
-                "cfg": 7.0,
-                "sampler_name": "dpmpp_2m",
-                "scheduler": "karras",
-                "denoise": 1.0,
-                "model": ["5", 0],
-                "positive": ["8", 0],
-                "negative": ["4", 0],
-                "latent_image": ["9", 0]
-            }
-        },
-        "11": {
-            "class_type": "VAEDecode",
-            "inputs": {
-                "samples": ["10", 0],
-                "vae": ["1", 2]
-            }
-        },
-        "12": {
-            "class_type": "LayeredDiffusionDecodeRGBA",
-            "inputs": {
-                "samples": ["10", 0],
-                "images": ["11", 0],
-                "sd_version": "SDXL",
-                "sub_batch_size": 16
-            }
-        },
-        "13": {
-            "class_type": "SaveImage",
-            "inputs": {
-                "filename_prefix": f"exploded_{clean_name}",
-                "images": ["12", 0]
-            }
+        }
+        model_ref = [str(next_node), 0]
+        clip_ref  = [str(next_node), 1]
+        next_node += 1
+
+    pos_node = str(next_node)
+    workflow[pos_node] = {
+        "class_type": "CLIPTextEncode",
+        "inputs": {"text": full_prompt, "clip": clip_ref}
+    }
+    next_node += 1
+
+    neg_node = str(next_node)
+    workflow[neg_node] = {
+        "class_type": "CLIPTextEncode",
+        "inputs": {"text": neg_prompt, "clip": clip_ref}
+    }
+    next_node += 1
+
+    ld_node = str(next_node)
+    workflow[ld_node] = {
+        "class_type": "LayeredDiffusionApply",
+        "inputs": {"config": ld_config, "weight": 1.0, "model": model_ref}
+    }
+    next_node += 1
+
+    cn_load_node = str(next_node)
+    workflow[cn_load_node] = {
+        "class_type": "ControlNetLoader",
+        "inputs": {"control_net_name": "thibaud_xl_openpose.safetensors"}
+    }
+    next_node += 1
+
+    pose_img_node = str(next_node)
+    template_file = "exploded_openpose_template.png"
+    workflow[pose_img_node] = {
+        "class_type": "LoadImage",
+        "inputs": {"image": template_file}
+    }
+    next_node += 1
+
+    cn_apply_node = str(next_node)
+    workflow[cn_apply_node] = {
+        "class_type": "ControlNetApply",
+        "inputs": {
+            "strength": 0.85,
+            "conditioning": [pos_node, 0],
+            "control_net": [cn_load_node, 0],
+            "image": [pose_img_node, 0]
+        }
+    }
+    next_node += 1
+
+    latent_node = str(next_node)
+    workflow[latent_node] = {
+        "class_type": "EmptyLatentImage",
+        "inputs": {"width": latent_size, "height": latent_size, "batch_size": 1}
+    }
+    next_node += 1
+
+    sampler_node = str(next_node)
+    workflow[sampler_node] = {
+        "class_type": "KSampler",
+        "inputs": {
+            "seed": seed,
+            "steps": total_steps,
+            "cfg": total_cfg,
+            "sampler_name": "dpmpp_2m",
+            "scheduler": "karras",
+            "denoise": 1.0,
+            "model": [ld_node, 0],
+            "positive": [cn_apply_node, 0],
+            "negative": [neg_node, 0],
+            "latent_image": [latent_node, 0]
+        }
+    }
+    next_node += 1
+
+    vae_node = str(next_node)
+    workflow[vae_node] = {
+        "class_type": "VAEDecode",
+        "inputs": {"samples": [sampler_node, 0], "vae": [checkpoint_node_id, 2]}
+    }
+    next_node += 1
+
+    decode_node = str(next_node)
+    workflow[decode_node] = {
+        "class_type": "LayeredDiffusionDecodeRGBA",
+        "inputs": {
+            "samples": [sampler_node, 0],
+            "images": [vae_node, 0],
+            "sd_version": "SDXL" if is_sdxl else "SD1.5",
+            "sub_batch_size": 16
+        }
+    }
+    next_node += 1
+
+    save_node = str(next_node)
+    workflow[save_node] = {
+        "class_type": "SaveImage",
+        "inputs": {
+            "filename_prefix": f"exploded_{clean_name}",
+            "images": [decode_node, 0]
         }
     }
 
@@ -675,9 +884,23 @@ def slice_character_limbs(
                     cropped.save(dest, "PNG")
                     generated_files.append(str(dest.resolve()))
 
-                # For any bones not assigned by blob matching, generate a placeholder
+                # For any bones not assigned by blob matching, evaluate whether fallback is needed
                 missing_bones = [b for b in bone_list if b not in blob_map]
-                if missing_bones:
+                if len(missing_bones) > 2 or "torso" in missing_bones or "head" in missing_bones:
+                    # Too many essential parts missing or missing critical core; fall back to procedural generator
+                    _procedural_fallback(clean_name, target_dir, rig_type, character_name)
+                    generated_files = []
+                    for bone in bone_list:
+                        fpath = target_dir / f"{clean_name}_{bone}.png"
+                        if fpath.is_file():
+                            generated_files.append(str(fpath.resolve()))
+                    try:
+                        from scripts.generate_sample_sprites import create_character_assembled_preview
+                        create_character_assembled_preview(target_dir, clean_name, rig_type)
+                    except Exception:
+                        pass
+                    return generated_files
+                elif missing_bones:
                     _generate_placeholder_limbs(clean_name, target_dir, missing_bones, src, blob_map)
                     for bone in missing_bones:
                         dest = target_dir / f"{clean_name}_{bone}.png"
@@ -685,6 +908,11 @@ def slice_character_limbs(
                             generated_files.append(str(dest.resolve()))
 
                 if generated_files:
+                    try:
+                        from scripts.generate_sample_sprites import create_character_assembled_preview
+                        create_character_assembled_preview(target_dir, clean_name, rig_type)
+                    except Exception:
+                        pass
                     return generated_files
             else:
                 # Too few blobs — image is mostly solid, fall through to procedural
@@ -700,6 +928,12 @@ def slice_character_limbs(
         fpath = target_dir / f"{clean_name}_{bone}.png"
         if fpath.is_file():
             generated_files.append(str(fpath.resolve()))
+
+    try:
+        from scripts.generate_sample_sprites import create_character_assembled_preview
+        create_character_assembled_preview(target_dir, clean_name, rig_type)
+    except Exception:
+        pass
 
     return generated_files
 
@@ -988,6 +1222,14 @@ def list_generated_characters() -> str:
             limb_files = sorted(char_dir.glob("*.png"))
             limb_files = [f for f in limb_files if "_exploded" not in f.name]
             has_exploded = (char_dir / f"{char_dir.name}_exploded.png").is_file()
+            full_preview = (char_dir / f"{char_dir.name}_full.png")
+            if not full_preview.is_file():
+                try:
+                    from scripts.generate_sample_sprites import create_character_assembled_preview
+                    create_character_assembled_preview(char_dir, prefix=char_dir.name)
+                except Exception:
+                    pass
+            has_full = full_preview.is_file()
             scene_file = scenes_root / f"{char_dir.name}_character.tscn"
             last_mod = 0.0
             for f in limb_files:
@@ -999,6 +1241,8 @@ def list_generated_characters() -> str:
                 "name": char_dir.name,
                 "limb_count": len(limb_files),
                 "has_exploded_sheet": has_exploded,
+                "has_full_preview": has_full,
+                "full_preview_url": f"/sprites/{char_dir.name}/{char_dir.name}_full.png" if has_full else None,
                 "has_godot_scene": scene_file.is_file(),
                 "scene_path": f"res://scenes/{char_dir.name}_character.tscn" if scene_file.is_file() else None,
                 "sprites_dir": f"res://sprites/{char_dir.name}",
@@ -1109,15 +1353,113 @@ def get_character_info(
     is_exploded = any(l["bone_name"] == "exploded" for l in limbs)
     actual_limbs = [l for l in limbs if l["bone_name"] != "exploded"]
 
+    full_preview = (sprites_dir / f"{clean_name}_full.png")
+    if not full_preview.is_file():
+        try:
+            from scripts.generate_sample_sprites import create_character_assembled_preview
+            create_character_assembled_preview(sprites_dir, prefix=clean_name)
+        except Exception:
+            pass
+
     return json.dumps({
         "status": "found",
         "character_name": clean_name,
         "sprites_dir": f"res://sprites/{clean_name}",
         "limb_count": len(actual_limbs),
         "has_exploded_sheet": is_exploded,
+        "has_full_preview": full_preview.is_file(),
+        "full_preview_url": f"/sprites/{clean_name}/{clean_name}_full.png" if full_preview.is_file() else None,
         "has_godot_scene": scene_file.is_file(),
         "scene_path": f"res://scenes/{clean_name}_character.tscn" if scene_file.is_file() else None,
         "limbs": actual_limbs
+    }, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 9: queue_character_generation
+# ==============================================================================
+@mcp.tool()
+def queue_character_generation(characters: List[Dict[str, Any]]) -> str:
+    """Queues one or more characters for background generation and auto-rigging.
+
+    Args:
+        characters: List of character config dicts. Each dict can have:
+                    - 'character_name' (str, required): e.g. 'shadow_ninja'
+                    - 'concept' or 'archetype_prompt' (str): concept description
+                    - 'seed' (int, optional): random seed (-1 for random)
+                    - 'rig_type' (str, optional): 'biped' or 'quadruped'
+                    - 'checkpoint' (str, optional): model checkpoint name
+                    - 'art_style' (str, optional): 'anime', 'pixel_8bit', 'pixel_16bit', etc.
+                    - 'detail_level' (int, optional): 1-5 (default 3)
+                    - 'auto_rig' (bool, optional): whether to auto-rig into Godot (default True)
+
+    Returns:
+        JSON string with queue submission status and queued jobs.
+    """
+    if not isinstance(characters, list) or not characters:
+        return json.dumps({"status": "error", "message": "Expected a non-empty list of character configs."}, indent=2)
+
+    created = add_to_queue(characters)
+    return json.dumps({
+        "status": "queued",
+        "queued_count": len(created),
+        "jobs": created
+    }, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 10: get_queue_status
+# ==============================================================================
+@mcp.tool()
+def get_queue_status(job_id: str = "") -> str:
+    """Returns the current status of all jobs or a specific job in the generation queue.
+
+    Args:
+        job_id: Optional specific job ID to query. If omitted, returns all jobs.
+
+    Returns:
+        JSON string with queue status, counts (pending, running, done, error, cancelled), and jobs list.
+    """
+    all_jobs = get_all_queue_jobs()
+    if job_id:
+        match = [j for j in all_jobs if j["id"] == job_id]
+        if not match:
+            return json.dumps({"status": "not_found", "job_id": job_id}, indent=2)
+        return json.dumps({"status": "found", "job": match[0]}, indent=2)
+
+    counts = {
+        "pending": sum(1 for j in all_jobs if j["status"] == "pending"),
+        "running": sum(1 for j in all_jobs if j["status"] == "running"),
+        "done": sum(1 for j in all_jobs if j["status"] == "done"),
+        "error": sum(1 for j in all_jobs if j["status"] == "error"),
+        "cancelled": sum(1 for j in all_jobs if j["status"] == "cancelled"),
+    }
+    return json.dumps({
+        "status": "ok",
+        "total_jobs": len(all_jobs),
+        "counts": counts,
+        "jobs": all_jobs
+    }, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 11: cancel_queue_job
+# ==============================================================================
+@mcp.tool()
+def cancel_queue_job(job_id: str) -> str:
+    """Cancels a pending or running job in the generation queue.
+
+    Args:
+        job_id: The ID of the job to cancel.
+
+    Returns:
+        JSON string indicating whether cancellation succeeded.
+    """
+    success = cancel_job(job_id)
+    return json.dumps({
+        "status": "cancelled" if success else "not_found_or_finished",
+        "job_id": job_id,
+        "success": success
     }, indent=2)
 
 
