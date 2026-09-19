@@ -329,6 +329,30 @@ def _find_alpha_blobs(img: Image.Image, alpha_threshold: int = 30) -> List[Dict]
     w, h = rgba.size
     alpha = rgba.split()[3]
 
+    # Auto-keying: If image has a solid background (e.g. from standard VAE decode without LayerDiffuse),
+    # sample corner pixels and key out the background color to transparent alpha.
+    try:
+        extrema = alpha.getextrema()
+        if extrema[0] > 240:
+            corners = [rgba.getpixel((0, 0)), rgba.getpixel((w - 1, 0)), rgba.getpixel((0, h - 1)), rgba.getpixel((w - 1, h - 1))]
+            bg_r = sum(c[0] for c in corners) // 4
+            bg_g = sum(c[1] for c in corners) // 4
+            bg_b = sum(c[2] for c in corners) // 4
+            new_img = Image.new("RGBA", (w, h))
+            src_data = rgba.getdata()
+            out_data = []
+            for p in src_data:
+                dist = abs(p[0] - bg_r) + abs(p[1] - bg_g) + abs(p[2] - bg_b)
+                if dist < 50:
+                    out_data.append((p[0], p[1], p[2], 0))
+                else:
+                    out_data.append((p[0], p[1], p[2], 255))
+            new_img.putdata(out_data)
+            rgba = new_img
+            alpha = rgba.split()[3]
+    except Exception:
+        pass
+
     # Build binary mask: 1 = opaque enough, 0 = transparent
     mask = bytearray(w * h)
     alpha_bytes = alpha.tobytes()
@@ -575,15 +599,27 @@ def generate_character_sprites(
     from scripts.download_models import find_comfyui_models_directory
     mdir = find_comfyui_models_directory()
     lora_path = mdir / "loras" / "flat2DAnimerge_v10.safetensors"
-    has_lora = lora_path.is_file() and is_sdxl  # Only use SDXL LoRA with SDXL checkpoints
-    pixel_lora_path = mdir / "loras" / "pixel_art_style_lora.safetensors"
-    has_pixel_lora = pixel_lora_path.is_file() and art_style in ("pixel_8bit", "pixel_16bit")
+    has_lora = lora_path.is_file() and is_sdxl  # Only use SDXL flat LoRA with SDXL checkpoints
 
-    # LayerDiffuse config per base
-    ld_config = "SDXL, Conv Injection" if is_sdxl else "SD1.5, Conv Injection"
+    # Pixel Art LoRA (SDXL vs SD 1.5)
+    pixel_lora_file = "pixel-art-xl.safetensors" if is_sdxl else "PixelArtRedmond15V-PixelArt-PIXARFK.safetensors"
+    has_pixel_lora = (mdir / "loras" / pixel_lora_file).is_file() and art_style in ("pixel_8bit", "pixel_16bit")
+
+    # ControlNet availability
+    cn_file = "thibaud_xl_openpose.safetensors" if is_sdxl else "control_v11p_sd15_openpose_fp16.safetensors"
+    has_cn = (mdir / "controlnet" / cn_file).is_file()
+
+    # LayerDiffuse availability
+    if is_sdxl:
+        has_ld = (mdir / "layer_model" / "layer_xl_transparent_conv.safetensors").is_file() and (mdir / "layer_model" / "vae_transparent_decoder.safetensors").is_file()
+        ld_config = "SDXL, Conv Injection"
+    else:
+        has_ld = (mdir / "layer_model" / "layer_sd15_transparent_attn.safetensors").is_file() and (mdir / "layer_model" / "vae_transparent_decoder.safetensors").is_file()
+        ld_config = "SD1.5, Attn Injection"
+
     latent_size = 512 if (not is_sdxl or art_style in ("pixel_8bit", "pixel_16bit")) else 1024
 
-    # Build workflow dynamically — LoRA is optional
+    # Build workflow dynamically — LoRA, LayerDiffuse, and ControlNet are optional/adaptive
     checkpoint_node_id = "1"
     model_ref = ["1", 0]
     clip_ref  = ["1", 1]
@@ -615,7 +651,7 @@ def generate_character_sprites(
         workflow[str(next_node)] = {
             "class_type": "LoraLoader",
             "inputs": {
-                "lora_name": "pixel_art_style_lora.safetensors",
+                "lora_name": pixel_lora_file,
                 "strength_model": 0.9,
                 "strength_clip": 0.9,
                 "model": model_ref,
@@ -640,39 +676,47 @@ def generate_character_sprites(
     }
     next_node += 1
 
-    ld_node = str(next_node)
-    workflow[ld_node] = {
-        "class_type": "LayeredDiffusionApply",
-        "inputs": {"config": ld_config, "weight": 1.0, "model": model_ref}
-    }
-    next_node += 1
-
-    cn_load_node = str(next_node)
-    workflow[cn_load_node] = {
-        "class_type": "ControlNetLoader",
-        "inputs": {"control_net_name": "thibaud_xl_openpose.safetensors"}
-    }
-    next_node += 1
-
-    pose_img_node = str(next_node)
-    template_file = "exploded_openpose_template.png"
-    workflow[pose_img_node] = {
-        "class_type": "LoadImage",
-        "inputs": {"image": template_file}
-    }
-    next_node += 1
-
-    cn_apply_node = str(next_node)
-    workflow[cn_apply_node] = {
-        "class_type": "ControlNetApply",
-        "inputs": {
-            "strength": 0.85,
-            "conditioning": [pos_node, 0],
-            "control_net": [cn_load_node, 0],
-            "image": [pose_img_node, 0]
+    if has_ld:
+        ld_node = str(next_node)
+        workflow[ld_node] = {
+            "class_type": "LayeredDiffusionApply",
+            "inputs": {"config": ld_config, "weight": 1.0, "model": model_ref}
         }
-    }
-    next_node += 1
+        next_node += 1
+        active_model_ref = [ld_node, 0]
+    else:
+        active_model_ref = model_ref
+
+    if has_cn:
+        cn_load_node = str(next_node)
+        workflow[cn_load_node] = {
+            "class_type": "ControlNetLoader",
+            "inputs": {"control_net_name": cn_file}
+        }
+        next_node += 1
+
+        pose_img_node = str(next_node)
+        template_file = "exploded_openpose_template.png"
+        workflow[pose_img_node] = {
+            "class_type": "LoadImage",
+            "inputs": {"image": template_file}
+        }
+        next_node += 1
+
+        cn_apply_node = str(next_node)
+        workflow[cn_apply_node] = {
+            "class_type": "ControlNetApply",
+            "inputs": {
+                "strength": 0.85,
+                "conditioning": [pos_node, 0],
+                "control_net": [cn_load_node, 0],
+                "image": [pose_img_node, 0]
+            }
+        }
+        next_node += 1
+        active_pos_ref = [cn_apply_node, 0]
+    else:
+        active_pos_ref = [pos_node, 0]
 
     latent_node = str(next_node)
     workflow[latent_node] = {
@@ -691,8 +735,8 @@ def generate_character_sprites(
             "sampler_name": "dpmpp_2m",
             "scheduler": "karras",
             "denoise": 1.0,
-            "model": [ld_node, 0],
-            "positive": [cn_apply_node, 0],
+            "model": active_model_ref,
+            "positive": active_pos_ref,
             "negative": [neg_node, 0],
             "latent_image": [latent_node, 0]
         }
@@ -706,41 +750,49 @@ def generate_character_sprites(
     }
     next_node += 1
 
-    decode_node = str(next_node)
-    workflow[decode_node] = {
-        "class_type": "LayeredDiffusionDecodeRGBA",
-        "inputs": {
-            "samples": [sampler_node, 0],
-            "images": [vae_node, 0],
-            "sd_version": "SDXL" if is_sdxl else "SD1.5",
-            "sub_batch_size": 16
+    if has_ld:
+        decode_node = str(next_node)
+        workflow[decode_node] = {
+            "class_type": "LayeredDiffusionDecodeRGBA",
+            "inputs": {
+                "samples": [sampler_node, 0],
+                "images": [vae_node, 0],
+                "sd_version": "SDXL" if is_sdxl else "SD1.5",
+                "sub_batch_size": 16
+            }
         }
-    }
-    next_node += 1
+        next_node += 1
+        final_img_ref = [decode_node, 0]
+    else:
+        final_img_ref = [vae_node, 0]
 
     save_node = str(next_node)
     workflow[save_node] = {
         "class_type": "SaveImage",
         "inputs": {
             "filename_prefix": f"exploded_{clean_name}",
-            "images": [decode_node, 0]
+            "images": final_img_ref
         }
     }
 
     # Attempt to query live ComfyUI API
     comfy_url = f"http://{COMFYUI_HOST}/prompt"
     prompt_id = None
+    prompt_error = ""
     try:
         req = urllib.request.Request(
             comfy_url,
             data=json.dumps({"prompt": workflow, "client_id": client_id}).encode("utf-8"),
             headers={"Content-Type": "application/json"}
         )
-        with urllib.request.urlopen(req, timeout=5) as resp:
+        with urllib.request.urlopen(req, timeout=10) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             prompt_id = data.get("prompt_id")
+    except urllib.error.HTTPError as e:
+        err_body = e.read().decode("utf-8", errors="replace") if hasattr(e, "read") else str(e)
+        prompt_error = f"HTTP {e.code}: {err_body[:300]}"
     except Exception as e:
-        prompt_id = None
+        prompt_error = str(e)
 
     if prompt_id:
         output_filename = None
@@ -814,7 +866,7 @@ def generate_character_sprites(
         "character_name": clean_name,
         "seed": seed,
         "output_image": str(exploded_image_path),
-        "note": f"ComfyUI host ({COMFYUI_HOST}) was unreachable or failed; generated local master sprite set.",
+        "note": f"ComfyUI host ({COMFYUI_HOST}) error: {prompt_error}" if prompt_error else f"ComfyUI host ({COMFYUI_HOST}) was unreachable or timed out; generated local master sprite set.",
         "assets_directory": str(out_dir)
     }, indent=2)
 

@@ -794,6 +794,7 @@ HTML_PAGE = """<!DOCTYPE html>
           <label>Archetype &amp; Creature Presets:</label>
           <div class="quick-presets" id="preset-container">
             <span class="preset-pill preset-custom" id="pill-custom" onclick="applyCustomMode()">✨ Custom Creature</span>
+            <span class="preset-pill" id="pill-random" onclick="randomizeCreature()" style="background:linear-gradient(135deg,rgba(188,140,255,0.25),rgba(88,166,255,0.25));border-color:var(--accent-purple);color:#d2a8ff;font-weight:600;">🎲 Random Hybrid</span>
             <span class="preset-pill" id="pill-cyber_alien" onclick="applyPreset('cyber_alien','cyberpunk warrior alien with neon bioluminescent crest, plasma blade and chitin plates','warrior','biped','alien')">👾 Cyber Alien</span>
             <span class="preset-pill" id="pill-elven_sorceress" onclick="applyPreset('elven_sorceress','female elf sorceress with flowing purple hair, arcane glowing robes and crystal staff','mage','biped','humanoid')">🧝 Elf Mage</span>
             <span class="preset-pill" id="pill-winged_demon" onclick="applyPreset('winged_demon','crimson demon lord with obsidian curved horns, runic chest brand, shadow talons and wings','assassin','biped','demon')">😈 Demon Fiend</span>
@@ -808,6 +809,21 @@ HTML_PAGE = """<!DOCTYPE html>
             <span class="preset-pill" id="pill-trickster" onclick="applyPreset('trickster','shadow rogue trickster in emerald and violet dual cloaks with venom daggers','assassin','biped','humanoid')">🎭 Trickster</span>
             <span class="preset-pill" id="pill-pyromancer" onclick="applyPreset('pyromancer','fire elemental sorcerer enveloped in blazing magma robes with ember crown','mage','biped','demon')">🔥 Pyromancer</span>
             <span class="preset-pill" id="pill-cryomancer" onclick="applyPreset('cryomancer','frost elemental mage in arctic crystal ice armor with frozen staff','mage','biped','alien')">❄️ Cryomancer</span>
+            <span class="preset-pill" id="pill-shadow_shinobi" onclick="applyPreset('shadow_shinobi','stealth shadow shinobi ninja in hooded dark silk with glowing cyan eyes, dual kunai blades and smoke shrouds','assassin','biped','humanoid')">🥷 Shadow Shinobi</span>
+            <span class="preset-pill" id="pill-storm_valkyrie" onclick="applyPreset('storm_valkyrie','mythical valkyrie celestial warrior with radiant silver armor, spreading feathered wings and crackling thunder spear','warrior','biped','humanoid')">⚡ Storm Valkyrie</span>
+            <span class="preset-pill" id="pill-steampunk_artificer" onclick="applyPreset('steampunk_artificer','victorian clockwork artificer with brass goggles, heavy leather toolbelt and portable steam dynamo pack','mech','biped','humanoid')">⚙️ Steampunk Artificer</span>
+            <span class="preset-pill" id="pill-sand_golem" onclick="applyPreset('sand_golem','ancient monolith stone golem with glowing runic glyphs, floating sandstone boulders and heavy fists','mech','biped','beast')">🗿 Sand Golem</span>
+            <span class="preset-pill" id="pill-abyssal_siren" onclick="applyPreset('abyssal_siren','deep ocean siren sorceress with bioluminescent fins, iridescent scales, coral crown and hydro-trident','mage','biped','alien')">🧜 Abyssal Siren</span>
+            <span class="preset-pill" id="pill-plague_doctor" onclick="applyPreset('plague_doctor','alchemist plague doctor with beaked leather mask, wide-brim hat, long dark apothecary duster and glowing potion phials','assassin','biped','humanoid')">🎭 Plague Doctor</span>
+            <span class="preset-pill" id="pill-wandering_ronin" onclick="applyPreset('wandering_ronin','lone masterless ronin swordsman in weathered haori robes, straw kasa hat and cherry blossom katana','warrior','biped','humanoid')">🗡️ Wandering Ronin</span>
+            <span class="preset-pill" id="pill-void_reaver" onclick="applyPreset('void_reaver','cosmic void reaver wrapped in tattered dark rift fabric with single crimson eye and spatial tear scythe','assassin','biped','alien')">🌌 Void Reaver</span>
+            <span class="preset-pill" id="pill-forest_druid" onclick="applyPreset('forest_druid','ancient wild druid with stag antler headpiece, living moss cloak, wooden bark armor and blooming vine staff','mage','biped','humanoid')">🌿 Forest Druid</span>
+            <span class="preset-pill" id="pill-vampire_lord" onclick="applyPreset('vampire_lord','aristocratic vampire noble with high velvet collared cape, bat silhouette pauldrons and ruby rapier','warrior','biped','humanoid')">🧛 Vampire Lord</span>
+            <span class="preset-pill" id="pill-spore_myconid" onclick="applyPreset('spore_myconid','sentient fungal mushroom shaman with wide bioluminescent spotted cap, spore satchel and root tendrils','mage','biped','alien')">🍄 Spore Myconid</span>
+            <span class="preset-pill" id="pill-gorgon_occultist" onclick="applyPreset('gorgon_occultist','venomous gorgon serpent sorceress with emerald scaled coils, viper crown and glowing poison orb','mage','biped','reptilian')">🐍 Gorgon Occultist</span>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px;line-height:1.4;">
+            💡 <b>Creative Freedom:</b> Presets are flexible starting points — modify the visual prompt, mix anatomical parts in the Studio, or roll the 🎲 Random Hybrid anytime. You are never restricted by presets!
           </div>
         </div>
 
@@ -1187,7 +1203,7 @@ HTML_PAGE = """<!DOCTYPE html>
   <!-- ======================================================= -->
   <div class="tab-content" id="tab-library">
     <div class="lib-header">
-      <div class="lib-title">Generated Characters &amp; Limb Library</div>
+      <div class="lib-title">Generated Characters &amp; Limb Library <span id="lib-char-count" style="font-size:12px;color:var(--text-muted);font-weight:normal;margin-left:8px;"></span></div>
       <div style="display:flex;gap:8px;">
         <button class="btn btn-secondary btn-sm" onclick="refreshLibrary()">🔄 Refresh Library</button>
       </div>
@@ -1442,19 +1458,31 @@ function applyPreset(name, concept, arch, rig, species = "auto") {
 
   // Update color pickers to match species
   const colorMap = {
-    alien:       { p: "#2b4764", g: "#00f0ff" },
-    demon:       { p: "#5f1c2a", g: "#ff2d1e" },
-    undead:      { p: "#a09b91", g: "#00eeff" },
-    reptilian:   { p: "#1e4a20", g: "#8eff52" },
-    beast:       { p: "#3b2a1e", g: "#00cc44" },
-    humanoid:    { p: "#e8c9a0", g: "#a071f7" },
-    insectoid:   { p: "#2a3e1a", g: "#aaff00" },
-    mech:        { p: "#3c4454", g: "#ff9900" },
-    necromancer: { p: "#381a4d", g: "#00f0ff" },
-    berserker:   { p: "#5c1d1d", g: "#ff4d4d" },
-    trickster:   { p: "#1a4030", g: "#b438d9" },
-    pyromancer:  { p: "#61220a", g: "#ff6600" },
-    cryomancer:  { p: "#1c3c54", g: "#8fe9ff" },
+    alien:               { p: "#2b4764", g: "#00f0ff" },
+    demon:               { p: "#5f1c2a", g: "#ff2d1e" },
+    undead:              { p: "#a09b91", g: "#00eeff" },
+    reptilian:           { p: "#1e4a20", g: "#8eff52" },
+    beast:               { p: "#3b2a1e", g: "#00cc44" },
+    humanoid:            { p: "#e8c9a0", g: "#a071f7" },
+    insectoid:           { p: "#2a3e1a", g: "#aaff00" },
+    mech:                { p: "#3c4454", g: "#ff9900" },
+    necromancer:         { p: "#381a4d", g: "#00f0ff" },
+    berserker:           { p: "#5c1d1d", g: "#ff4d4d" },
+    trickster:           { p: "#1a4030", g: "#b438d9" },
+    pyromancer:          { p: "#61220a", g: "#ff6600" },
+    cryomancer:          { p: "#1c3c54", g: "#8fe9ff" },
+    shadow_shinobi:      { p: "#141822", g: "#00e5ff" },
+    storm_valkyrie:      { p: "#40507a", g: "#ffd700" },
+    steampunk_artificer: { p: "#5c3d1e", g: "#ffaa00" },
+    sand_golem:          { p: "#78613f", g: "#00ffcc" },
+    abyssal_siren:       { p: "#0b2c3d", g: "#00ffb7" },
+    plague_doctor:       { p: "#22252a", g: "#39ff14" },
+    wandering_ronin:     { p: "#3d3228", g: "#ff77aa" },
+    void_reaver:         { p: "#160b24", g: "#ff0055" },
+    forest_druid:        { p: "#263e20", g: "#76ff03" },
+    vampire_lord:        { p: "#3d141e", g: "#ff1744" },
+    spore_myconid:       { p: "#332038", g: "#00e676" },
+    gorgon_occultist:    { p: "#183624", g: "#d500f9" }
   };
   if (colorMap[species] || colorMap[name]) {
     const pal = colorMap[species] || colorMap[name];
@@ -1463,6 +1491,68 @@ function applyPreset(name, concept, arch, rig, species = "auto") {
   }
 
   log(`[PRESET] Loaded '${name}' (${species.toUpperCase()}, ${rig.toUpperCase()})`, "ci");
+  refreshGallery();
+}
+
+function randomizeCreature() {
+  setActivePill('pill-random');
+  toggleCustomStudio(true);
+
+  const speciesList = ["alien", "humanoid", "demon", "undead", "reptilian", "beast", "insectoid", "mech", "custom"];
+  const archetypes = ["warrior", "mage", "assassin", "ranger", "mech", "beast"];
+  const artStyles = ["anime", "pixel_8bit", "pixel_16bit", "dark_fantasy", "cyberpunk", "comic_ink"];
+
+  const headSelect = document.getElementById("custom-head");
+  const torsoSelect = document.getElementById("custom-torso");
+  const handSelect = document.getElementById("custom-hands");
+  const footSelect = document.getElementById("custom-feet");
+
+  const pickRandom = (sel) => {
+    if (!sel || !sel.options || sel.options.length === 0) return "";
+    const idx = Math.floor(Math.random() * sel.options.length);
+    sel.selectedIndex = idx;
+    return sel.options[idx].value;
+  };
+
+  const rHead = pickRandom(headSelect);
+  const rTorso = pickRandom(torsoSelect);
+  const rHand = pickRandom(handSelect);
+  const rFoot = pickRandom(footSelect);
+
+  document.getElementById("custom-wings").checked = (Math.random() > 0.55);
+  document.getElementById("custom-tail").checked = (Math.random() > 0.5);
+  if (document.getElementById("custom-halo")) document.getElementById("custom-halo").checked = (Math.random() > 0.7);
+  if (document.getElementById("custom-pauldrons")) document.getElementById("custom-pauldrons").checked = (Math.random() > 0.6);
+
+  const randomColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+  document.getElementById("col-primary").value = randomColor();
+  document.getElementById("col-accent").value = randomColor();
+  document.getElementById("col-glow").value = randomColor();
+  document.getElementById("col-outline").value = "#121824";
+
+  const rSpecies = speciesList[Math.floor(Math.random() * speciesList.length)];
+  const rArch = archetypes[Math.floor(Math.random() * archetypes.length)];
+  const rStyle = artStyles[Math.floor(Math.random() * artStyles.length)];
+  const rSeed = Math.floor(Math.random() * 2147483647);
+
+  document.getElementById("species").value = "custom";
+  document.getElementById("archetype").value = rArch;
+  if (document.getElementById("art-style")) document.getElementById("art-style").value = rStyle;
+  document.getElementById("seed").value = rSeed;
+
+  const adjectives = ["astral", "void", "neon", "phantom", "cyber", "infernal", "prismatic", "dread", "chrono", "solar", "lunar", "abyssal", "toxic", "titan", "storm", "celestial"];
+  const nouns = ["stalker", "sovereign", "warden", "reaper", "sentinel", "wraith", "blade", "colossus", "chimera", "vanguard", "herald", "scion", "valkyrie", "templar"];
+  const randAdj = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const randNoun = nouns[Math.floor(Math.random() * nouns.length)];
+  const randNum = Math.floor(Math.random() * 900) + 100;
+  const newName = `${randAdj}_${randNoun}_${randNum}`;
+
+  document.getElementById("char-name").value = newName;
+  document.getElementById("target-scene").value = `res://scenes/${newName}_character.tscn`;
+
+  syncCustomPrompt(true);
+
+  log(`[RANDOM] Generated unique hybrid '${newName}' (${rStyle.toUpperCase()}, Seed: ${rSeed}) — customize anything freely!`, "ci");
   refreshGallery();
 }
 
@@ -1536,14 +1626,23 @@ async function checkStatus() {
 
 // ---- Gallery ----
 async function refreshGallery() {
-  const name = document.getElementById("char-name").value.trim().toLowerCase().replace(/\\s+/g, '_');
+  const nameInput = document.getElementById("char-name");
+  const name = nameInput ? nameInput.value.trim().toLowerCase().replace(/\\s+/g, '_') : currentCharacter;
   currentCharacter = name;
   try {
     const r = await fetch(`/api/sprites?char=${encodeURIComponent(name)}`);
     const d = await r.json();
-    const g = document.getElementById("sprite-gallery");
-    g.innerHTML = "";
+    const grid = document.getElementById("gallery-grid");
+    const empty = document.getElementById("gallery-empty");
+    const title = document.getElementById("gallery-title");
+    const count = document.getElementById("gallery-count");
+    if (title) title.textContent = `Generated Sprite Sheet Parts (${name})`;
+    if (!grid) return;
+    grid.innerHTML = "";
     if (d.sprites && d.sprites.length > 0) {
+      if (empty) empty.style.display = "none";
+      grid.style.display = "grid";
+      if (count) count.textContent = `${d.sprites.length} parts`;
       d.sprites.forEach(s => {
         const card = document.createElement("div");
         card.className = "sprite-card";
@@ -1552,12 +1651,19 @@ async function refreshGallery() {
           <img class="sprite-thumb" src="${s.url}?t=${Date.now()}" alt="${s.bone}" loading="lazy">
           <div class="sprite-name">${s.bone}</div>
         `;
-        g.appendChild(card);
+        grid.appendChild(card);
       });
     } else {
-      g.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px 0;font-size:12px;">No limb cutouts found for this character. Click Generate above!</div>';
+      grid.style.display = "none";
+      if (empty) {
+        empty.style.display = "block";
+        empty.textContent = "No sprites generated yet for this character. Click Generate above to build them!";
+      }
+      if (count) count.textContent = "0 parts";
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error("[GALLERY] Error refreshing gallery:", e);
+  }
 }
 
 // ---- Pipeline runner ----
@@ -1974,10 +2080,12 @@ async function refreshLibrary() {
     const r = await fetch('/api/characters');
     const d = await r.json();
     allLibraryChars = d.characters || [];
-    document.getElementById("lib-char-count").textContent = `${allLibraryChars.length} character(s)`;
+    const countEl = document.getElementById("lib-char-count");
+    if (countEl) countEl.textContent = `(${allLibraryChars.length} character${allLibraryChars.length === 1 ? '' : 's'})`;
     renderRoster(allLibraryChars);
   } catch(e) {
-    roster.innerHTML = '<div style="text-align:center;color:var(--danger);padding:30px 0;font-size:12px;">Failed to load characters.</div>';
+    console.error("[LIBRARY] Refresh error:", e);
+    roster.innerHTML = '<div style="text-align:center;color:var(--danger);padding:30px 0;font-size:12px;">Failed to load characters. Check console for details.</div>';
   }
 }
 

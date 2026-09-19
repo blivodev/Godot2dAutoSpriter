@@ -75,163 +75,163 @@ _data = {
 &"idle": SubResource("Animation_idle")
 }
 
-[node name="Cyber AlienRoot" type="Node2D" unique_id=263073380]
+[node name="Cyber AlienRoot" type="Node2D" unique_id=695713818]
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1101052147]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1187901007]
 libraries/ = SubResource("AnimationLibrary_char")
 autoplay = &"idle"
 
-[node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=915896772]
+[node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=1661903218]
 script = ExtResource("1_db6aw")
 character_sprites_dir = "res://sprites/cyber_alien"
 character_prefix = "cyber_alien"
 
-[node name="pelvis" type="Bone2D" parent="Skeleton2D" unique_id=841827063]
+[node name="pelvis" type="Bone2D" parent="Skeleton2D" unique_id=1630705038]
 rest = Transform2D(1, 0, 0, 1, 0, 0)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis" unique_id=947383967]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis" unique_id=1116369107]
 texture = ExtResource("2_e653j")
 offset = Vector2(0, 4)
 
-[node name="torso" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=231278561]
+[node name="torso" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=465238609]
 position = Vector2(0, -40)
 rest = Transform2D(1, 0, 0, 1, 0, -40)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso" unique_id=2047441604]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso" unique_id=2071902820]
 z_index = 1
 texture = ExtResource("3_n2e43")
 offset = Vector2(0, -4)
 
-[node name="BackSlot" type="Marker2D" parent="Skeleton2D/pelvis/torso" unique_id=4242603]
+[node name="BackSlot" type="Marker2D" parent="Skeleton2D/pelvis/torso" unique_id=899640006]
 
-[node name="head" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=865311444]
+[node name="head" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=157488591]
 position = Vector2(0, -42)
 rest = Transform2D(1, 0, 0, 1, 0, -42)
 auto_calculate_length_and_angle = false
 length = 20.0
 bone_angle = -1.5707998
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/head" unique_id=1750455427]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/head" unique_id=754486687]
 z_index = 3
 texture = ExtResource("4_ot0gr")
 offset = Vector2(0, -8)
 
-[node name="HatSlot" type="Marker2D" parent="Skeleton2D/pelvis/torso/head" unique_id=465736361]
+[node name="HatSlot" type="Marker2D" parent="Skeleton2D/pelvis/torso/head" unique_id=1062659304]
 position = Vector2(0, -26)
 
-[node name="arm_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=956781249]
+[node name="arm_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1415576003]
 z_index = 2
 position = Vector2(32, -20)
 rest = Transform2D(1, 0, 0, 1, 32, -20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=544287275]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=1696550912]
 texture = ExtResource("5_61dru")
 offset = Vector2(2, 18)
 
-[node name="arm_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=304273862]
+[node name="arm_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=1597159615]
 position = Vector2(8, 36)
 rest = Transform2D(1, 0, 0, 1, 8, 36)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=1133947521]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=1689635641]
 texture = ExtResource("6_3nud2")
 offset = Vector2(1, 16)
 
-[node name="hand_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=920433315]
+[node name="hand_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=110909721]
 position = Vector2(4, 30)
 rest = Transform2D(1, 0, 0, 1, 4, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.45
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=325550768]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=300928894]
 texture = ExtResource("7_uentr")
 offset = Vector2(0, 10)
 
-[node name="WeaponSlot_L" type="Marker2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=2113765199]
+[node name="WeaponSlot_L" type="Marker2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=1551223537]
 position = Vector2(0, 14)
 
-[node name="arm_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=904073949]
+[node name="arm_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1970558516]
 z_index = -1
 position = Vector2(-32, -20)
 rest = Transform2D(1, 0, 0, 1, -32, -20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=1186319076]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=1737557514]
 texture = ExtResource("8_dqm0f")
 offset = Vector2(-2, 18)
 
-[node name="arm_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=2121211071]
+[node name="arm_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=713452892]
 position = Vector2(-8, 36)
 rest = Transform2D(1, 0, 0, 1, -8, 36)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1075689329]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1981140506]
 texture = ExtResource("9_8kka0")
 offset = Vector2(-1, 16)
 
-[node name="hand_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1983836720]
+[node name="hand_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1199084029]
 position = Vector2(-4, 30)
 rest = Transform2D(1, 0, 0, 1, -4, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.6899999
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=346287355]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=708958621]
 texture = ExtResource("10_y5i67")
 offset = Vector2(0, 10)
 
-[node name="WeaponSlot_R" type="Marker2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=196642968]
+[node name="WeaponSlot_R" type="Marker2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=1630423680]
 position = Vector2(0, 14)
 
-[node name="leg_upper_L" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=1595941191]
+[node name="leg_upper_L" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=378811907]
 position = Vector2(20, 20)
 rest = Transform2D(1, 0, 0, 1, 20, 20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=648425983]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=1555150057]
 texture = ExtResource("11_wscci")
 offset = Vector2(0, 18)
 
-[node name="leg_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=1206963321]
+[node name="leg_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=281898082]
 position = Vector2(0, 40)
 rest = Transform2D(1, 0, 0, 1, 0, 40)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=1616285106]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=384677381]
 texture = ExtResource("12_57vjn")
 offset = Vector2(0, 16)
 
-[node name="foot_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=135356717]
+[node name="foot_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=2091466096]
 position = Vector2(10, 30)
 rest = Transform2D(1, 0, 0, 1, 10, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.5707998
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L/foot_L" unique_id=2014118416]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L/foot_L" unique_id=1086170748]
 texture = ExtResource("13_r7cxt")
 offset = Vector2(8, 8)
 
-[node name="leg_upper_R" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=696682427]
+[node name="leg_upper_R" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=869234135]
 z_index = -1
 position = Vector2(-20, 20)
 rest = Transform2D(1, 0, 0, 1, -20, 20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=485941570]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=1502180105]
 texture = ExtResource("14_wgcdd")
 offset = Vector2(0, 18)
 
-[node name="leg_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=327740616]
+[node name="leg_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=1925138873]
 position = Vector2(0, 40)
 rest = Transform2D(1, 0, 0, 1, 0, 40)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=556403319]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=1418544062]
 texture = ExtResource("15_qfbuc")
 offset = Vector2(0, 16)
 
-[node name="foot_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=768838796]
+[node name="foot_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=1018506459]
 position = Vector2(-10, 30)
 rest = Transform2D(1, 0, 0, 1, -10, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.5707998
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R/foot_R" unique_id=1073036025]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R/foot_R" unique_id=312011149]
 texture = ExtResource("16_rjsh2")
 offset = Vector2(-8, 8)
