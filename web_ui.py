@@ -49,21 +49,40 @@ def _find_godot_editor_executable() -> str:
 
 def _check_comfyui_status() -> dict:
     comfy_url = "http://127.0.0.1:8188/object_info"
+    from scripts.download_models import find_comfyui_models_directory
+    mdir = find_comfyui_models_directory()
+    disk_ckpts = []
+    if mdir:
+        ckpt_dir = mdir / "checkpoints"
+        if ckpt_dir.is_dir():
+            for f in ckpt_dir.glob("*.safetensors"):
+                disk_ckpts.append(f.name)
+            for f in ckpt_dir.glob("*.ckpt"):
+                disk_ckpts.append(f.name)
+
     try:
         req = urllib.request.Request(comfy_url)
         with urllib.request.urlopen(req, timeout=1.5) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             ckpts = data.get("CheckpointLoaderSimple", {}).get("input", {}).get("required", {}).get("ckpt_name", [[]])[0]
+            all_ckpts = sorted(list(set(ckpts + disk_ckpts)))
             return {
                 "online": True,
                 "node_count": len(data),
                 "has_layerdiffuse": "LayeredDiffusionApply" in data,
                 "has_controlnet": "ControlNetLoader" in data,
-                "checkpoints": ckpts,
-                "has_checkpoint": len(ckpts) > 0
+                "checkpoints": all_ckpts,
+                "has_checkpoint": len(all_ckpts) > 0
             }
     except Exception:
-        return {"online": False, "node_count": 0, "has_layerdiffuse": False, "has_controlnet": False, "checkpoints": [], "has_checkpoint": False}
+        return {
+            "online": False,
+            "node_count": 0,
+            "has_layerdiffuse": False,
+            "has_controlnet": False,
+            "checkpoints": disk_ckpts,
+            "has_checkpoint": len(disk_ckpts) > 0
+        }
 
 
 _DOWNLOAD_STATE = {
@@ -341,33 +360,43 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         logs.append(f"[INIT] Creating character '{char_name}' (Archetype: {archetype.upper()}, Rig: {rig_type.upper()})")
         logs.append(f"[CONCEPT] \"{concept}\"")
 
+        checkpoint = payload.get("checkpoint", "").strip() or "animagineXL_v31.safetensors"
         comfy_used = False
         if mode in ["auto", "comfyui"]:
             comfy_status = _check_comfyui_status()
             if comfy_status.get("online", False) and comfy_status.get("has_checkpoint", False):
-                logs.append(f"[COMFYUI] Connected to host (127.0.0.1:8188). Dispatching diffusion workflow...")
+                logs.append(f"[COMFYUI] Connected to host (127.0.0.1:8188). Dispatching diffusion workflow using model '{checkpoint}'...")
                 try:
                     import server
                     gen_res_str = server.generate_character_sprites(
                         character_name=char_name,
                         archetype_prompt=concept,
                         seed=seed,
-                        rig_type=rig_type
+                        rig_type=rig_type,
+                        checkpoint=checkpoint
                     )
                     gen_res = json.loads(gen_res_str)
                     logs.append(f"[COMFYUI] Status: {gen_res.get('status')} (Source: {gen_res.get('source')})")
                     comfy_used = (gen_res.get("source") == "comfyui_api")
+                    if comfy_used:
+                        logs.append(f"[COMFYUI] Successfully sliced diffusion limbs into: res://sprites/{char_name}")
+                    else:
+                        logs.append(f"[COMFYUI-WARN] {gen_res.get('note', 'Diffusion could not complete; fallback engaged.')}")
                 except Exception as e:
                     logs.append(f"[COMFYUI-WARN] API error: {e}")
             elif comfy_status.get("online", False) and not comfy_status.get("has_checkpoint", False):
-                logs.append(f"[COMFYUI-NOTICE] ComfyUI online but animagineXL checkpoint is missing. Engaging Advanced Procedural Spriter...")
+                logs.append(f"[COMFYUI-NOTICE] ComfyUI online but model '{checkpoint}' is missing. Engaging Advanced Procedural Spriter...")
+            elif mode == "comfyui":
+                logs.append(f"[COMFYUI-ERROR] ComfyUI is offline on 127.0.0.1:8188. Start ComfyUI to use diffusion mode.")
 
         if not comfy_used:
+            if mode == "comfyui":
+                logs.append(f"[COMFYUI-WARN] 'ComfyUI Generative Diffusion Only' was requested but diffusion failed. Generating procedural sprites as fallback.")
             from scripts.generate_sample_sprites import generate_all, generate_quadruped, detect_species
             detected_sp = species if (species and species != "auto") else detect_species(concept, archetype)
             logs.append(f"[GENERATOR] Synthesizing {detected_sp.upper()} anatomy for '{char_name}' (Seed: {seed if seed >= 0 else 'Procedural'})...")
             
-            if rig_type == "quadruped" or archetype == "beast" or detected_sp == "beast":
+            if rig_type.lower() == "quadruped":
                 parts = generate_quadruped(str(sprites_dir), prefix=char_name, archetype=archetype, prompt=concept, seed=seed)
             else:
                 parts = generate_all(
@@ -725,6 +754,24 @@ HTML_PAGE = """<!DOCTYPE html>
         <div id="accordion-body" class="accordion-content">
           <div class="row-2">
             <div class="form-group">
+              <label for="engine-mode">Generation Engine:</label>
+              <select id="engine-mode">
+                <option value="auto" selected>Auto (ComfyUI with Smart Spriter Fallback)</option>
+                <option value="comfyui">ComfyUI Generative Diffusion Only</option>
+                <option value="local">Smart Procedural Spriter (Offline / Instant)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="model-checkpoint">AI Model Checkpoint:</label>
+              <select id="model-checkpoint">
+                <option value="animagineXL_v31.safetensors" selected>Animagine XL 3.1 (SDXL Premier Anime Checkpoint) [INSTALLED]</option>
+                <option value="counterfeit_v3.safetensors">Counterfeit V3.0 (SD 1.5 Lightweight Anime)</option>
+                <option value="dreamshaper_8.safetensors">DreamShaper 8 (SD 1.5 Game Concept Art)</option>
+              </select>
+            </div>
+          </div>
+          <div class="row-2">
+            <div class="form-group">
               <label for="seed">Variation Seed (-1 for Random):</label>
               <div style="display: flex; gap: 8px;">
                 <input type="text" id="seed" value="-1">
@@ -732,17 +779,9 @@ HTML_PAGE = """<!DOCTYPE html>
               </div>
             </div>
             <div class="form-group">
-              <label for="engine-mode">Generation Engine:</label>
-              <select id="engine-mode">
-                <option value="auto" selected>Auto (ComfyUI with Smart Spriter Fallback)</option>
-                <option value="local">Smart Procedural Spriter (Offline / Instant)</option>
-                <option value="comfyui">ComfyUI Generative Diffusion Only</option>
-              </select>
+              <label for="target-scene">Target Godot Scene Destination:</label>
+              <input type="text" id="target-scene" value="res://scenes/cyber_alien_character.tscn">
             </div>
-          </div>
-          <div class="form-group">
-            <label for="target-scene">Target Godot Scene Destination:</label>
-            <input type="text" id="target-scene" value="res://scenes/cyber_alien_character.tscn">
           </div>
         </div>
       </div>
@@ -992,6 +1031,34 @@ HTML_PAGE = """<!DOCTYPE html>
         cBadge.className = "badge badge-offline";
         cBadge.innerHTML = '<span class="badge-dot"></span> ComfyUI: Offline (Using Smart Spriter)';
       }
+
+      if (d.comfyui && d.comfyui.checkpoints && d.comfyui.checkpoints.length > 0) {
+        const sel = document.getElementById("model-checkpoint");
+        if (sel) {
+          const currentVal = sel.value;
+          const knownCkpts = [
+            {val: "animagineXL_v31.safetensors", label: "Animagine XL 3.1 (SDXL Premier Anime)"},
+            {val: "counterfeit_v3.safetensors", label: "Counterfeit V3.0 (SD 1.5 Lightweight Anime)"},
+            {val: "dreamshaper_8.safetensors", label: "DreamShaper 8 (SD 1.5 Game Concept Art)"}
+          ];
+          d.comfyui.checkpoints.forEach(c => {
+            if (!knownCkpts.some(k => k.val === c)) {
+              knownCkpts.push({val: c, label: c});
+            }
+          });
+          sel.innerHTML = "";
+          knownCkpts.forEach(k => {
+            const opt = document.createElement("option");
+            opt.value = k.val;
+            const isInst = d.comfyui.checkpoints.includes(k.val);
+            opt.textContent = isInst ? `${k.label} [INSTALLED]` : `${k.label}`;
+            if (k.val === currentVal || (!currentVal && k.val === "animagineXL_v31.safetensors")) {
+              opt.selected = true;
+            }
+            sel.appendChild(opt);
+          });
+        }
+      }
     } catch (e) {
       console.warn("Status check failed:", e);
     }
@@ -1029,6 +1096,7 @@ HTML_PAGE = """<!DOCTYPE html>
     const rig = document.getElementById("rig-type").value;
     const species = document.getElementById("species").value;
     const mode = document.getElementById("engine-mode").value;
+    const checkpoint = document.getElementById("model-checkpoint") ? document.getElementById("model-checkpoint").value : "animagineXL_v31.safetensors";
     const seed = document.getElementById("seed").value;
 
     const customColors = {
@@ -1065,6 +1133,7 @@ HTML_PAGE = """<!DOCTYPE html>
           custom_colors: (species === "custom" ? customColors : null),
           custom_features: (species === "custom" ? customFeatures : null),
           mode: mode,
+          checkpoint: checkpoint,
           seed: seed,
           auto_rig: (actionType !== 'sprites_only')
         })

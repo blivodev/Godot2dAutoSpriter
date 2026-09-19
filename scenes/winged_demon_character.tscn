@@ -21,192 +21,269 @@
 [ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_leg_lower_R.png" id="19_1iavo"]
 [ext_resource type="Texture2D" path="res://sprites/winged_demon/winged_demon_foot_R.png" id="20_kn460"]
 
-[node name="Winged DemonRoot" type="Node2D" unique_id=1990467707]
+[sub_resource type="Animation" id="Animation_idle"]
+resource_name = "idle"
+length = 1.8
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Skeleton2D/pelvis/torso:position")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0, -40), Vector2(0, -42), Vector2(0, -40)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Skeleton2D/pelvis/torso/head:rotation")
+tracks/1/interp = 2
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, -0.035, 0.0]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Skeleton2D/pelvis/torso/arm_upper_L:rotation")
+tracks/2/interp = 2
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, 0.045, 0.0]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Skeleton2D/pelvis/torso/arm_upper_R:rotation")
+tracks/3/interp = 2
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.9, 1.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [0.0, -0.045, 0.0]
+}
 
-[node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=1641832571]
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_char"]
+_data = {
+&"idle": SubResource("Animation_idle")
+}
+
+[node name="Winged DemonRoot" type="Node2D" unique_id=478717800]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=41224978]
+libraries/ = SubResource("AnimationLibrary_char")
+autoplay = &"idle"
+
+[node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=1089538902]
 script = ExtResource("1_yq83d")
 character_sprites_dir = "res://sprites/winged_demon"
 character_prefix = "winged_demon"
 
-[node name="pelvis" type="Bone2D" parent="Skeleton2D" unique_id=1272041790]
+[node name="pelvis" type="Bone2D" parent="Skeleton2D" unique_id=2041718852]
 rest = Transform2D(1, 0, 0, 1, 0, 0)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis" unique_id=105237718]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis" unique_id=1968597344]
 texture = ExtResource("2_yifs8")
 offset = Vector2(0, 4)
 
-[node name="torso" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=943071340]
+[node name="torso" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=2145201751]
 position = Vector2(0, -40)
 rest = Transform2D(1, 0, 0, 1, 0, -40)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso" unique_id=855062187]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso" unique_id=1790575612]
+z_index = 1
 texture = ExtResource("3_xjwin")
 offset = Vector2(0, -4)
 
-[node name="head" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1977376912]
+[node name="BackSlot" type="Marker2D" parent="Skeleton2D/pelvis/torso" unique_id=318464343]
+
+[node name="head" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1818553532]
 position = Vector2(0, -50)
 rest = Transform2D(1, 0, 0, 1, 0, -50)
 auto_calculate_length_and_angle = false
 length = 20.0
 bone_angle = -1.5707998
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/head" unique_id=129106696]
-z_index = 1
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/head" unique_id=1344341337]
+z_index = 3
 texture = ExtResource("4_njy37")
 offset = Vector2(0, -26)
 
-[node name="arm_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=512987042]
+[node name="HatSlot" type="Marker2D" parent="Skeleton2D/pelvis/torso/head" unique_id=1591055288]
+position = Vector2(0, -32)
+
+[node name="arm_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=38304123]
+z_index = 2
 position = Vector2(32, -20)
 rest = Transform2D(1, 0, 0, 1, 32, -20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=2068749784]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=525591411]
 texture = ExtResource("5_whty5")
 offset = Vector2(2, 18)
 
-[node name="arm_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=1948613872]
+[node name="arm_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L" unique_id=845713991]
 position = Vector2(8, 36)
 rest = Transform2D(1, 0, 0, 1, 8, 36)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=1570593768]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=926760821]
 texture = ExtResource("6_8ku0u")
 offset = Vector2(1, 16)
 
-[node name="hand_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=1875610378]
+[node name="hand_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L" unique_id=1146471670]
 position = Vector2(4, 30)
 rest = Transform2D(1, 0, 0, 1, 4, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.45
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=1102930098]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=1024731737]
 texture = ExtResource("7_ljdxj")
 offset = Vector2(0, 10)
 
-[node name="arm_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=804927509]
+[node name="WeaponSlot_L" type="Marker2D" parent="Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L/hand_L" unique_id=1223196433]
+position = Vector2(0, 14)
+
+[node name="arm_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1406259670]
+z_index = -1
 position = Vector2(-32, -20)
 rest = Transform2D(1, 0, 0, 1, -32, -20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=337642180]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=590380442]
 texture = ExtResource("8_wcug7")
 offset = Vector2(-2, 18)
 
-[node name="arm_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=1840749682]
+[node name="arm_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R" unique_id=1383036483]
 position = Vector2(-8, 36)
 rest = Transform2D(1, 0, 0, 1, -8, 36)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=444846990]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1099019661]
 texture = ExtResource("9_rx5wk")
 offset = Vector2(-1, 16)
 
-[node name="hand_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1037706357]
+[node name="hand_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R" unique_id=1658924980]
 position = Vector2(-4, 30)
 rest = Transform2D(1, 0, 0, 1, -4, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.6899999
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=1228920338]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=412563683]
 texture = ExtResource("10_h0jx6")
 offset = Vector2(0, 10)
 
-[node name="wing_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1421592196]
+[node name="WeaponSlot_R" type="Marker2D" parent="Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R/hand_R" unique_id=1459401404]
+position = Vector2(0, 14)
+
+[node name="wing_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=1489814539]
 position = Vector2(28, -20)
 rest = Transform2D(1, 0, 0, 1, 28, -20)
 auto_calculate_length_and_angle = false
 length = 24.0
 bone_angle = -0.49999997
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_L" unique_id=1512240530]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_L" unique_id=1873502026]
 z_index = -2
 texture = ExtResource("11_gu83h")
 offset = Vector2(16, 20)
 
-[node name="wing_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/wing_upper_L" unique_id=1303944620]
+[node name="wing_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/torso/wing_upper_L" unique_id=26482125]
 position = Vector2(24, 28)
 rest = Transform2D(1, 0, 0, 1, 24, 28)
 auto_calculate_length_and_angle = false
 length = 24.0
 bone_angle = 0.49999997
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_L/wing_lower_L" unique_id=1802837710]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_L/wing_lower_L" unique_id=859428040]
 z_index = -2
 texture = ExtResource("12_m5ywg")
 offset = Vector2(20, 22)
 
-[node name="wing_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=35899091]
+[node name="wing_upper_R" type="Bone2D" parent="Skeleton2D/pelvis/torso" unique_id=27585899]
 position = Vector2(-28, -20)
 rest = Transform2D(1, 0, 0, 1, -28, -20)
 auto_calculate_length_and_angle = false
 length = 24.0
 bone_angle = 3.6399996
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_R" unique_id=1983224600]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_R" unique_id=298762945]
 z_index = -2
 texture = ExtResource("13_8ycuq")
 offset = Vector2(-16, 20)
 
-[node name="wing_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/wing_upper_R" unique_id=1332373968]
+[node name="wing_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/torso/wing_upper_R" unique_id=1583865987]
 position = Vector2(-24, 28)
 rest = Transform2D(1, 0, 0, 1, -24, 28)
 auto_calculate_length_and_angle = false
 length = 24.0
 bone_angle = 2.6399999
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_R/wing_lower_R" unique_id=198676637]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/wing_upper_R/wing_lower_R" unique_id=1423839355]
 z_index = -2
 texture = ExtResource("14_pxjyd")
 offset = Vector2(-20, 22)
 
-[node name="leg_upper_L" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=750518080]
+[node name="leg_upper_L" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=1295143672]
 position = Vector2(20, 20)
 rest = Transform2D(1, 0, 0, 1, 20, 20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=1848183050]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=313326937]
 texture = ExtResource("15_jgenh")
 offset = Vector2(0, 18)
 
-[node name="leg_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=776565539]
+[node name="leg_lower_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L" unique_id=834375510]
 position = Vector2(0, 40)
 rest = Transform2D(1, 0, 0, 1, 0, 40)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=1633610849]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=1067464226]
 texture = ExtResource("16_fw41t")
 offset = Vector2(0, 16)
 
-[node name="foot_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=737044899]
+[node name="foot_L" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L" unique_id=440476824]
 position = Vector2(10, 30)
 rest = Transform2D(1, 0, 0, 1, 10, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.5707998
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L/foot_L" unique_id=740077561]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_L/leg_lower_L/foot_L" unique_id=1864425229]
 texture = ExtResource("17_03n54")
 offset = Vector2(8, 8)
 
-[node name="leg_upper_R" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=1472904830]
+[node name="leg_upper_R" type="Bone2D" parent="Skeleton2D/pelvis" unique_id=1399452080]
+z_index = -1
 position = Vector2(-20, 20)
 rest = Transform2D(1, 0, 0, 1, -20, 20)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=1972475109]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=436842814]
 texture = ExtResource("18_aebng")
 offset = Vector2(0, 18)
 
-[node name="leg_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=679862946]
+[node name="leg_lower_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R" unique_id=635440178]
 position = Vector2(0, 40)
 rest = Transform2D(1, 0, 0, 1, 0, 40)
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=419223898]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=967302937]
 texture = ExtResource("19_1iavo")
 offset = Vector2(0, 16)
 
-[node name="foot_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=1957165356]
+[node name="foot_R" type="Bone2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R" unique_id=1757237774]
 position = Vector2(-10, 30)
 rest = Transform2D(1, 0, 0, 1, -10, 30)
 auto_calculate_length_and_angle = false
 length = 16.0
 bone_angle = 1.5707998
 
-[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R/foot_R" unique_id=2125906899]
+[node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/leg_upper_R/leg_lower_R/foot_R" unique_id=919154989]
 texture = ExtResource("20_kn460")
 offset = Vector2(-8, 8)

@@ -88,18 +88,18 @@ offset = Vector2(0, -4)
 position = Vector2(0, 0)
 
 [node name="head" type="Bone2D" parent="Skeleton2D/pelvis/torso"]
-position = Vector2(0, -50)
-rest = Transform2D(1, 0, 0, 1, 0, -50)
+position = Vector2(0, -42)
+rest = Transform2D(1, 0, 0, 1, 0, -42)
 auto_calculate_length_and_angle = false
 length = 20.0
 bone_angle = -1.5708
 
 [node name="Sprite2D" type="Sprite2D" parent="Skeleton2D/pelvis/torso/head"]
 z_index = 3
-offset = Vector2(0, -26)
+offset = Vector2(0, -8)
 
 [node name="HatSlot" type="Marker2D" parent="Skeleton2D/pelvis/torso/head"]
-position = Vector2(0, -32)
+position = Vector2(0, -26)
 
 [node name="arm_upper_L" type="Bone2D" parent="Skeleton2D/pelvis/torso"]
 z_index = 2

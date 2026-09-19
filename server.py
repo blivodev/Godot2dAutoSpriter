@@ -9,6 +9,7 @@ auto-rigging tools to AI coding agents (Cline, Claude Desktop, Cursor, OpenCode)
 import os
 import sys
 import json
+import time
 import uuid
 import shutil
 import urllib.request
@@ -240,7 +241,7 @@ def generate_character_sprites(
 
     # ComfyUI API Workflow definition:
     # 1. Base Generation (Chosen Checkpoint + Flat Color LoRA + KSampler)
-    # 2. Bridge via IP-Adapter + Exploded OpenPose ControlNet + LayerDiffuse
+    # 2. Bridge via Exploded OpenPose ControlNet + LayerDiffuse Conv Injection
     # 3. LayeredDiffusionDecodeRGBA -> SaveImage
     workflow = {
         "1": {
@@ -260,7 +261,7 @@ def generate_character_sprites(
         "3": {
             "class_type": "CLIPTextEncode",
             "inputs": {
-                "text": f"{style_prefix}, {archetype_prompt}, orthographic front view, modular character cut-out, transparent background",
+                "text": f"{style_prefix}, {archetype_prompt}, orthographic front view, modular character cut-out, anime character sprite sheet, transparent background",
                 "clip": ["2", 1]
             }
         },
@@ -274,7 +275,8 @@ def generate_character_sprites(
         "5": {
             "class_type": "LayeredDiffusionApply",
             "inputs": {
-                "config": "SDXL - Foreground Transparent",
+                "config": "SDXL, Conv Injection",
+                "weight": 1.0,
                 "model": ["2", 0]
             }
         },
@@ -287,11 +289,9 @@ def generate_character_sprites(
             "inputs": {"image": "exploded_openpose_template.png"}
         },
         "8": {
-            "class_type": "ApplyControlNet",
+            "class_type": "ControlNetApply",
             "inputs": {
                 "strength": 0.90,
-                "start_percent": 0.0,
-                "end_percent": 0.90,
                 "conditioning": ["3", 0],
                 "control_net": ["6", 0],
                 "image": ["7", 0]
@@ -299,13 +299,13 @@ def generate_character_sprites(
         },
         "9": {
             "class_type": "EmptyLatentImage",
-            "inputs": {"width": 1536, "height": 1536, "batch_size": 1}
+            "inputs": {"width": 1024, "height": 1024, "batch_size": 1}
         },
         "10": {
             "class_type": "KSampler",
             "inputs": {
                 "seed": seed,
-                "steps": 28,
+                "steps": 22,
                 "cfg": 7.0,
                 "sampler_name": "dpmpp_2m",
                 "scheduler": "karras",
@@ -317,69 +317,106 @@ def generate_character_sprites(
             }
         },
         "11": {
-            "class_type": "LayeredDiffusionDecodeRGBA",
+            "class_type": "VAEDecode",
             "inputs": {
                 "samples": ["10", 0],
                 "vae": ["1", 2]
             }
         },
         "12": {
+            "class_type": "LayeredDiffusionDecodeRGBA",
+            "inputs": {
+                "samples": ["10", 0],
+                "images": ["11", 0],
+                "sd_version": "SDXL",
+                "sub_batch_size": 16
+            }
+        },
+        "13": {
             "class_type": "SaveImage",
             "inputs": {
                 "filename_prefix": f"exploded_{clean_name}",
-                "images": ["11", 0]
+                "images": ["12", 0]
             }
         }
     }
 
     # Attempt to query live ComfyUI API
     comfy_url = f"http://{COMFYUI_HOST}/prompt"
-    comfy_online = False
+    prompt_id = None
     try:
         req = urllib.request.Request(
             comfy_url,
             data=json.dumps({"prompt": workflow, "client_id": client_id}).encode("utf-8"),
             headers={"Content-Type": "application/json"}
         )
-        with urllib.request.urlopen(req, timeout=3) as resp:
+        with urllib.request.urlopen(req, timeout=5) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             prompt_id = data.get("prompt_id")
-            comfy_online = True
     except Exception as e:
-        comfy_online = False
+        prompt_id = None
 
-    if comfy_online:
-        # Connect to websocket to wait for image completion
-        try:
-            import websocket
-            ws_url = f"ws://{COMFYUI_HOST}/ws?clientId={client_id}"
-            ws = websocket.create_connection(ws_url, timeout=60)
-            while True:
-                out = ws.recv()
-                if isinstance(out, str):
-                    msg = json.loads(out)
-                    if msg.get("type") == "executing" and msg.get("data", {}).get("node") is None:
-                        # Generation finished
-                        break
-            ws.close()
-        except Exception:
-            pass
+    if prompt_id:
+        output_filename = None
+        for _ in range(90):  # poll up to 90 seconds
+            time.sleep(1.0)
+            try:
+                hist_req = urllib.request.Request(f"http://{COMFYUI_HOST}/history/{prompt_id}")
+                with urllib.request.urlopen(hist_req, timeout=3) as hresp:
+                    hist_data = json.loads(hresp.read().decode("utf-8"))
+                    if prompt_id in hist_data:
+                        task_info = hist_data[prompt_id]
+                        status = task_info.get("status", {})
+                        if status.get("completed", False):
+                            outputs = task_info.get("outputs", {})
+                            for nid, nout in outputs.items():
+                                if "images" in nout and len(nout["images"]) > 0:
+                                    output_filename = nout["images"][0].get("filename")
+                                    break
+                            break
+                        elif status.get("status_str") == "error":
+                            break
+            except Exception:
+                pass
 
-        return json.dumps({
-            "status": "completed",
-            "source": "comfyui_api",
-            "character_name": clean_name,
-            "seed": seed,
-            "output_image": str(exploded_image_path),
-            "message": f"Successfully generated exploded sheet via ComfyUI for {clean_name}"
-        }, indent=2)
+        if output_filename:
+            # Check ComfyUI shared and standard output directories
+            candidate_paths = [
+                Path(os.environ.get("LOCALAPPDATA", "")) / "Comfy-Desktop" / "ComfyUI-Shared" / "output" / output_filename,
+                Path(os.environ.get("LOCALAPPDATA", "")) / "Comfy-Desktop" / "ComfyUI-Installs" / "ComfyUI" / "ComfyUI" / "output" / output_filename
+            ]
+            saved_file = None
+            for cp in candidate_paths:
+                if cp.is_file():
+                    saved_file = cp
+                    break
 
-    # Offline / Standalone Fallback: Use our internal vector/pixel generator to produce
+            if saved_file:
+                shutil.copyfile(saved_file, exploded_image_path)
+                # Slice character limbs from exploded sheet
+                slice_character_limbs(
+                    character_name=clean_name,
+                    input_image_path=str(exploded_image_path),
+                    output_dir=str(out_dir),
+                    rig_type=rig_type,
+                    force=True
+                )
+                return json.dumps({
+                    "status": "completed",
+                    "source": "comfyui_api",
+                    "character_name": clean_name,
+                    "seed": seed,
+                    "checkpoint": ckpt_name,
+                    "output_image": str(exploded_image_path),
+                    "message": f"Successfully generated and sliced diffusion character sprites for {clean_name}"
+                }, indent=2)
+
+    # Offline / Standalone Fallback: Use internal organic spriter to produce
     # an exploded canvas with clean alpha transparency so workflows never stall.
     try:
         from scripts.generate_sample_sprites import generate_all, generate_quadruped
         arch = _detect_archetype(archetype_prompt)
-        if rig_type == "quadruped" or arch == "beast":
+        if rig_type.lower() == "quadruped":
             generate_quadruped(str(out_dir), prefix=clean_name, archetype="assassin" if arch == "beast" else arch, prompt=archetype_prompt, seed=seed)
         else:
             generate_all(str(out_dir), prefix=clean_name, archetype=arch, prompt=archetype_prompt, seed=seed)
@@ -392,7 +429,7 @@ def generate_character_sprites(
         "character_name": clean_name,
         "seed": seed,
         "output_image": str(exploded_image_path),
-        "note": f"ComfyUI host ({COMFYUI_HOST}) was unreachable; generated local master sprite set.",
+        "note": f"ComfyUI host ({COMFYUI_HOST}) was unreachable or failed; generated local master sprite set.",
         "assets_directory": str(out_dir)
     }, indent=2)
 
@@ -405,7 +442,8 @@ def slice_character_limbs(
     character_name: str,
     input_image_path: str,
     output_dir: str = "",
-    rig_type: str = "biped"
+    rig_type: str = "biped",
+    force: bool = False
 ) -> List[str]:
     """
     Executes the SAM (Segment Anything Model) pass to detect, crop, and export
@@ -416,6 +454,7 @@ def slice_character_limbs(
         input_image_path: Path to the exploded RGBA image sheet.
         output_dir: Destination folder. If omitted, defaults to 'sprites/<character_name>'.
         rig_type: Rig hierarchy type ('biped' or 'quadruped').
+        force: Force re-slicing even if files exist.
 
     Returns:
         List of generated absolute file paths for each body part.
@@ -428,9 +467,10 @@ def slice_character_limbs(
     generated_files: List[str] = []
 
     # Check if pre-separated files already exist
-    existing_parts = list(target_dir.glob(f"{clean_name}_*.png"))
-    if len(existing_parts) >= len(bone_list):
-        return [str(p.resolve()) for p in existing_parts]
+    if not force:
+        existing_parts = list(target_dir.glob(f"{clean_name}_*.png"))
+        if len(existing_parts) >= len(bone_list):
+            return [str(p.resolve()) for p in existing_parts]
 
     # SAM Alpha Slicing Algorithm
     # Extracts isolated alpha islands from the exploded canvas with 8px bounding margins
@@ -444,21 +484,21 @@ def slice_character_limbs(
                 # If connected component analysis is needed or template slicing:
                 w, h = src.size
                 grid_slices = {
-                    "head": (int(w*0.40), int(h*0.05), int(w*0.60), int(h*0.25)),
-                    "torso": (int(w*0.38), int(h*0.25), int(w*0.62), int(h*0.50)),
-                    "pelvis": (int(w*0.40), int(h*0.50), int(w*0.60), int(h*0.65)),
-                    "arm_upper_L": (int(w*0.65), int(h*0.20), int(w*0.85), int(h*0.40)),
-                    "arm_lower_L": (int(w*0.70), int(h*0.40), int(w*0.90), int(h*0.60)),
-                    "hand_L": (int(w*0.75), int(h*0.60), int(w*0.95), int(h*0.75)),
-                    "arm_upper_R": (int(w*0.15), int(h*0.20), int(w*0.35), int(h*0.40)),
-                    "arm_lower_R": (int(w*0.10), int(h*0.40), int(w*0.30), int(h*0.60)),
-                    "hand_R": (int(w*0.05), int(h*0.60), int(w*0.25), int(h*0.75)),
-                    "leg_upper_L": (int(w*0.55), int(h*0.65), int(w*0.75), int(h*0.85)),
-                    "leg_lower_L": (int(w*0.55), int(h*0.80), int(w*0.75), int(h*0.95)),
-                    "foot_L": (int(w*0.60), int(h*0.88), int(w*0.85), int(h*1.00)),
-                    "leg_upper_R": (int(w*0.25), int(h*0.65), int(w*0.45), int(h*0.85)),
-                    "leg_lower_R": (int(w*0.25), int(h*0.80), int(w*0.45), int(h*0.95)),
-                    "foot_R": (int(w*0.15), int(h*0.88), int(w*0.40), int(h*1.00)),
+                    "head": (int(w*0.38), int(h*0.10), int(w*0.62), int(h*0.30)),
+                    "torso": (int(w*0.36), int(h*0.28), int(w*0.64), int(h*0.52)),
+                    "pelvis": (int(w*0.38), int(h*0.50), int(w*0.62), int(h*0.66)),
+                    "arm_upper_L": (int(w*0.62), int(h*0.18), int(w*0.84), int(h*0.42)),
+                    "arm_lower_L": (int(w*0.68), int(h*0.38), int(w*0.88), int(h*0.62)),
+                    "hand_L": (int(w*0.72), int(h*0.58), int(w*0.92), int(h*0.78)),
+                    "arm_upper_R": (int(w*0.16), int(h*0.18), int(w*0.38), int(h*0.42)),
+                    "arm_lower_R": (int(w*0.12), int(h*0.38), int(w*0.32), int(h*0.62)),
+                    "hand_R": (int(w*0.08), int(h*0.58), int(w*0.28), int(h*0.78)),
+                    "leg_upper_L": (int(w*0.52), int(h*0.60), int(w*0.72), int(h*0.84)),
+                    "leg_lower_L": (int(w*0.52), int(h*0.76), int(w*0.72), int(h*0.96)),
+                    "foot_L": (int(w*0.54), int(h*0.86), int(w*0.82), int(h*1.00)),
+                    "leg_upper_R": (int(w*0.28), int(h*0.60), int(w*0.48), int(h*0.84)),
+                    "leg_lower_R": (int(w*0.28), int(h*0.76), int(w*0.48), int(h*0.96)),
+                    "foot_R": (int(w*0.18), int(h*0.86), int(w*0.46), int(h*1.00)),
                 }
 
                 for bone, box in grid_slices.items():

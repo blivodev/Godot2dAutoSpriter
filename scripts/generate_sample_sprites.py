@@ -1191,24 +1191,39 @@ def draw_foot(draw, w, h, s, theme, is_left=True):
     dir_mul = 1 if is_left else -1
 
     if sp in ["alien", "demon", "reptilian", "beast", "insectoid"]:
-        draw_curved_polygon(draw, [
-            (cx - 12*s * dir_mul, cy - 8*s),
-            (cx + 10*s * dir_mul, cy - 8*s),
-            (cx + 16*s * dir_mul, cy + 2*s),
-            (cx + 20*s * dir_mul, cy + 8*s),
-            (cx - 14*s * dir_mul, cy + 8*s)
-        ], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
-        for tox in [6, 12, 18]:
+        claw_pts = [
+            (cx - 12*s * dir_mul, cy - 10*s),
+            (cx + 8*s * dir_mul, cy - 10*s),
+            (cx + 14*s * dir_mul, cy - 2*s),
+            (cx + 22*s * dir_mul, cy + 4*s),
+            (cx + 25*s * dir_mul, cy + 8*s),
+            (cx + 14*s * dir_mul, cy + 10*s),
+            (cx + 4*s * dir_mul, cy + 7*s),
+            (cx - 10*s * dir_mul, cy + 10*s),
+            (cx - 14*s * dir_mul, cy + 4*s),
+            (cx - 13*s * dir_mul, cy - 2*s)
+        ]
+        draw_curved_polygon(draw, claw_pts, fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+        draw_curved_line(draw, [(cx - 10*s * dir_mul, cy + 9*s), (cx + 23*s * dir_mul, cy + 9*s)], fill=theme["outline"], width=2*s)
+        for tox in [8, 14, 20]:
             draw.polygon([
                 (cx + tox*s * dir_mul, cy + 4*s),
                 (cx + (tox+4)*s * dir_mul, cy + 10*s),
-                (cx + tox*s * dir_mul, cy + 9*s)
+                (cx + (tox+1)*s * dir_mul, cy + 9*s)
             ], fill=theme["outline"] if sp == "beast" else theme["accent_light"], outline=theme["outline"], width=s)
     elif sp == "mech":
-        rx0 = min(cx - 14*s * dir_mul, cx + 22*s * dir_mul)
-        rx1 = max(cx - 14*s * dir_mul, cx + 22*s * dir_mul)
-        draw.rectangle([rx0, cy - 8*s, rx1, cy + 9*s], fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
-        draw.line([(rx0, cy + 3*s), (rx1, cy + 3*s)], fill=theme["accent_mid"], width=2*s)
+        mech_boot = [
+            (cx - 13*s * dir_mul, cy - 10*s),
+            (cx + 9*s * dir_mul, cy - 10*s),
+            (cx + 16*s * dir_mul, cy - 2*s),
+            (cx + 23*s * dir_mul, cy + 5*s),
+            (cx + 22*s * dir_mul, cy + 11*s),
+            (cx - 13*s * dir_mul, cy + 11*s),
+            (cx - 14*s * dir_mul, cy + 4*s)
+        ]
+        draw_curved_polygon(draw, mech_boot, fill=theme["primary_mid"], outline=theme["outline"], width=2*s)
+        draw.line([(cx - 13*s * dir_mul, cy + 9*s), (cx + 22*s * dir_mul, cy + 9*s)], fill=theme["accent_mid"], width=2*s)
+        draw.rectangle([cx - 4*s, cy - 2*s, cx + 8*s, cy + 2*s], fill=theme["glow"], outline=theme["outline"], width=s)
     elif sp == "undead":
         draw.line([(cx - 10*s * dir_mul, cy - 4*s), (cx + 16*s * dir_mul, cy + 4*s)], fill=theme["primary_light"], width=3*s)
         for tx in [4, 10, 16]:

@@ -35,7 +35,7 @@ extends Skeleton2D
 
 ## Fallback anatomical offsets ensuring limb sprites pivot at their joints
 const DEFAULT_BONE_OFFSETS := {
-	"head": Vector2(0, -26),
+	"head": Vector2(0, -8),
 	"torso": Vector2(0, -4),
 	"pelvis": Vector2(0, 4),
 	"arm_upper_l": Vector2(2, 18),
