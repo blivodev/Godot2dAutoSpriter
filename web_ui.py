@@ -1367,8 +1367,18 @@ HTML_PAGE = """<!DOCTYPE html>
                     <option value="2.0">2.0x</option>
                   </select>
                 </div>
+                <!-- Render Mode Selector -->
+                <div style="display:flex;align-items:center;gap:3px;background:rgba(0,0,0,0.3);padding:2px 4px;border-radius:6px;border:1px solid var(--border);">
+                  <button class="btn btn-sm btn-primary" id="btn-mode-limbs" style="font-size:10.5px;padding:3px 7px;" onclick="setRenderMode('limbs')">🧩 Sliced Rig</button>
+                  <button class="btn btn-sm btn-secondary" id="btn-mode-full" style="font-size:10.5px;padding:3px 7px;" onclick="setRenderMode('full')">🧍 Full Model</button>
+                </div>
+                <!-- Auto-Loop Toggle -->
                 <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);cursor:pointer;margin-bottom:0;">
-                  <input type="checkbox" id="anim-show-skeleton" onchange="showSkeletonOverlay = this.checked"> Skeleton Overlay
+                  <input type="checkbox" id="anim-auto-loop" checked onchange="autoLoop = this.checked"> 🔁 Auto-Loop
+                </label>
+                <!-- Skeleton Overlay Toggle -->
+                <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text-muted);cursor:pointer;margin-bottom:0;">
+                  <input type="checkbox" id="anim-show-skeleton" onchange="showSkeletonOverlay = this.checked"> 🦴 Bones
                 </label>
               </div>
 
@@ -2574,6 +2584,37 @@ async function viewCharacter(name) {
     }
   } catch(e) {}
 
+  // Load Sprites Grid for Subpane 2 AND populate loadedLimbImages with verified URLs
+  try {
+    const r = await fetch(`/api/sprites?char=${encodeURIComponent(name)}`);
+    const d = await r.json();
+    const grid = document.getElementById("viewer-grid");
+    grid.innerHTML = "";
+    if (d.sprites && d.sprites.length > 0) {
+      d.sprites.forEach(s => {
+        // Register image in loadedLimbImages map directly from exact URL
+        const limbImg = new Image();
+        limbImg.src = `${s.url}?t=${Date.now()}`;
+        limbImg.onload = () => {
+          loadedLimbImages[s.bone] = limbImg;
+          loadedLimbImages[s.bone.toLowerCase()] = limbImg;
+        };
+
+        const card = document.createElement("div");
+        card.className = "viewer-sprite-card";
+        card.onclick = () => openLightbox(s.url, s.bone, `${s.width}×${s.height}px — ${(s.size_bytes/1024).toFixed(1)} KB`);
+        card.innerHTML = `
+          <img class="viewer-sprite-img" src="${s.url}?t=${Date.now()}" alt="${s.bone}" loading="lazy">
+          <div class="viewer-sprite-name">${s.bone}</div>
+          <div class="viewer-sprite-size">${s.width}×${s.height}px</div>
+        `;
+        grid.appendChild(card);
+      });
+    } else {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:40px;font-size:12px;">No individual cutouts found.</div>';
+    }
+  } catch(e) {}
+
   // Load limbs into memory for 2D Live Animation Player
   loadLimbImagesForChar(name);
   selectAnim(currentAnimName || "idle");
@@ -2609,16 +2650,62 @@ function populateAnimTable() {
 // ---- 2D Animation Player Canvas Engine ----
 const BONE_LIMBS = ["head", "torso", "arm_upper_L", "arm_lower_L", "hand_L", "arm_upper_R", "arm_lower_R", "hand_R", "leg_upper_L", "leg_lower_L", "foot_L", "leg_upper_R", "leg_lower_R", "foot_R", "pelvis"];
 
+let renderMode = "limbs"; // "limbs" | "full"
+let autoLoop = true;
+
+function setRenderMode(m) {
+  renderMode = m;
+  const btnLimbs = document.getElementById("btn-mode-limbs");
+  const btnFull = document.getElementById("btn-mode-full");
+  if (m === "limbs") {
+    if (btnLimbs) btnLimbs.className = "btn btn-sm btn-primary";
+    if (btnFull) btnFull.className = "btn btn-sm btn-secondary";
+  } else {
+    if (btnLimbs) btnLimbs.className = "btn btn-sm btn-secondary";
+    if (btnFull) btnFull.className = "btn btn-sm btn-primary";
+  }
+}
+
 function loadLimbImagesForChar(charName) {
   loadedLimbImages = {};
-  BONE_LIMBS.forEach(bone => {
-    const img = new Image();
-    img.src = `/sprites/${charName}/${bone}.png?t=${Date.now()}`;
-    img.onload = () => { loadedLimbImages[bone] = img; };
-  });
+
+  // 1. Full assembled body preview
   const fullImg = new Image();
   fullImg.src = `/sprites/${charName}/${charName}_full.png?t=${Date.now()}`;
   fullImg.onload = () => { loadedLimbImages["_full"] = fullImg; };
+  fullImg.onerror = () => {
+    const altFull = new Image();
+    altFull.src = `/sprites/${charName}/full.png?t=${Date.now()}`;
+    altFull.onload = () => { loadedLimbImages["_full"] = altFull; };
+  };
+
+  // 2. Load all standard limbs trying prefixed format first (cyber_scion_829_head.png) then plain (head.png)
+  BONE_LIMBS.forEach(bone => {
+    const prefixedImg = new Image();
+    prefixedImg.src = `/sprites/${charName}/${charName}_${bone}.png?t=${Date.now()}`;
+    prefixedImg.onload = () => {
+      loadedLimbImages[bone] = prefixedImg;
+      loadedLimbImages[bone.toLowerCase()] = prefixedImg;
+    };
+    prefixedImg.onerror = () => {
+      // Fallback: plain bone name
+      const plainImg = new Image();
+      plainImg.src = `/sprites/${charName}/${bone}.png?t=${Date.now()}`;
+      plainImg.onload = () => {
+        loadedLimbImages[bone] = plainImg;
+        loadedLimbImages[bone.toLowerCase()] = plainImg;
+      };
+      plainImg.onerror = () => {
+        // Fallback: lowercase prefixed
+        const lowerImg = new Image();
+        lowerImg.src = `/sprites/${charName}/${charName}_${bone.toLowerCase()}.png?t=${Date.now()}`;
+        lowerImg.onload = () => {
+          loadedLimbImages[bone] = lowerImg;
+          loadedLimbImages[bone.toLowerCase()] = lowerImg;
+        };
+      };
+    };
+  });
 }
 
 function selectAnim(name) {
@@ -2630,8 +2717,10 @@ function selectAnim(name) {
     else el.classList.remove('active');
   });
   const def = (animCatalog || FALLBACK_ANIM_DEFS)[name] || FALLBACK_ANIM_DEFS["idle"];
-  document.getElementById("anim-overlay-title").textContent = name;
-  document.getElementById("anim-overlay-desc").textContent = def.desc || "";
+  const titleEl = document.getElementById("anim-overlay-title");
+  if (titleEl) titleEl.textContent = `${viewingChar ? viewingChar.replace(/_/g, ' ') : 'Character'} • ${name}`;
+  const descEl = document.getElementById("anim-overlay-desc");
+  if (descEl) descEl.textContent = def.desc || "";
   const playBtn = document.getElementById("btn-anim-play");
   if (playBtn) playBtn.textContent = "⏸ Pause";
 }
@@ -2689,6 +2778,15 @@ function ensureAnimLoopRunning() {
   }
 }
 
+function countLoadedLimbs() {
+  let count = 0;
+  BONE_LIMBS.forEach(b => {
+    const im = loadedLimbImages[b] || loadedLimbImages[b.toLowerCase()];
+    if (im && im.complete && im.naturalWidth > 0) count++;
+  });
+  return count;
+}
+
 function animRenderLoop(now) {
   const dt = Math.min((now - animLastFrameTime) / 1000.0, 0.1);
   animLastFrameTime = now;
@@ -2699,11 +2797,11 @@ function animRenderLoop(now) {
     const def = (animCatalog || FALLBACK_ANIM_DEFS)[currentAnimName] || { length: 1.0, loop: 1 };
     const animLen = def.length || 1.0;
 
-    // Advance time
+    // Advance time with auto-loop support
     if (animIsPlaying) {
       animCurrentTime += dt * animSpeed;
       if (animCurrentTime >= animLen) {
-        if (def.loop) {
+        if (autoLoop || def.loop) {
           animCurrentTime = animCurrentTime % animLen;
         } else {
           animCurrentTime = animLen;
@@ -2753,100 +2851,190 @@ function animRenderLoop(now) {
     const px = rootX + pelvisPos[0] * 1.5;
     const py = rootY + pelvisPos[1] * 1.5;
 
-    // Helper: draw limb sprite or bone
-    function drawPart(boneName, imgName, w, h, ox, oy) {
-      const img = loadedLimbImages[imgName];
-      if (img && img.complete && img.naturalWidth > 0 && !showSkeletonOverlay) {
-        ctx.drawImage(img, -w/2 + ox, -h/2 + oy, w, h);
-      } else {
-        // Stylized glowing bone fallback / skeleton overlay
-        ctx.beginPath();
-        ctx.arc(0, 0, 4.5, 0, Math.PI * 2);
-        ctx.fillStyle = "#d2a8ff";
-        ctx.fill();
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(ox, oy);
-        ctx.lineWidth = 4.5;
-        ctx.strokeStyle = showSkeletonOverlay ? "#58a6ff" : "rgba(88,166,255,0.7)";
-        ctx.lineCap = "round";
-        ctx.stroke();
+    const numLimbs = countLoadedLimbs();
+    const fullImg = loadedLimbImages["_full"];
+    const useFullBody = (renderMode === "full" || numLimbs < 3) && fullImg && fullImg.complete && fullImg.naturalWidth > 0;
+
+    if (useFullBody) {
+      // ---- RENDER ASSEMBLED FULL MODEL (COHESIVE PUPPET) ----
+      const aspect = fullImg.naturalWidth / fullImg.naturalHeight;
+      const targetH = 240;
+      const targetW = targetH * aspect;
+      ctx.save();
+      ctx.translate(px, py + torsoPos[1] * 0.5);
+      ctx.rotate(torsoRot * 0.65);
+
+      // Dynamic squash & stretch depending on action
+      let scaleX = 1.0;
+      let scaleY = 1.0;
+      if (currentAnimName === "crouch" || currentAnimName === "crouch_walk" || currentAnimName === "slide") {
+        scaleY = 0.82; scaleX = 1.12;
+      } else if (currentAnimName === "jump" || currentAnimName === "double_jump" || currentAnimName === "jump_kick") {
+        scaleY = 1.08; scaleX = 0.94;
+      } else if (currentAnimName === "get_hit" || currentAnimName === "death") {
+        scaleX = 0.96;
       }
+      ctx.scale(scaleX, scaleY);
+      ctx.drawImage(fullImg, -targetW / 2, -targetH + 65, targetW, targetH);
+      ctx.restore();
+
+      // Optional skeleton overlay on top of full model
+      if (showSkeletonOverlay) {
+        drawSkeletonBones(ctx, px, py, torsoPos, torsoRot, headRot, armLRot, armLLowRot, armRRot, armRLowRot, legLRot, legLLowRot, legRRot, legRLowRot);
+      }
+    } else {
+      // ---- RENDER SLICED LIMBS RIG (FORWARD KINEMATICS) ----
+      function drawPart(boneName, imgName, targetW, targetH, ox, oy) {
+        const img = loadedLimbImages[imgName] ||
+                    loadedLimbImages[boneName] ||
+                    loadedLimbImages[boneName.toLowerCase()];
+
+        if (img && img.complete && img.naturalWidth > 0) {
+          const aspect = img.naturalWidth / img.naturalHeight;
+          let dw = targetW;
+          let dh = targetH;
+          if (aspect > 1) {
+            dh = targetW / aspect;
+          } else {
+            dw = targetH * aspect;
+          }
+          ctx.drawImage(img, -dw / 2 + ox, -dh / 2 + oy, dw, dh);
+        } else {
+          // If this individual limb isn't loaded yet, draw a subtle bone connection
+          ctx.beginPath();
+          ctx.arc(0, 0, 4, 0, Math.PI * 2);
+          ctx.fillStyle = "#d2a8ff";
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(ox, oy);
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = "rgba(88,166,255,0.7)";
+          ctx.lineCap = "round";
+          ctx.stroke();
+        }
+
+        // If Skeleton Overlay is active, overlay bone joints directly on top of the limb!
+        if (showSkeletonOverlay) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(0, 0, 4, 0, Math.PI * 2);
+          ctx.fillStyle = "#ff7b72";
+          ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(ox, oy);
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = "rgba(121, 192, 255, 0.85)";
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      // 1. Right Arm (Back Layer)
+      ctx.save();
+      ctx.translate(px, py + torsoPos[1]);
+      ctx.rotate(torsoRot);
+      ctx.translate(22, -32);
+      ctx.rotate(armRRot);
+      drawPart("arm_upper_R", "arm_upper_R", 38, 52, 6, 16);
+      ctx.translate(10, 26);
+      ctx.rotate(armRLowRot);
+      drawPart("arm_lower_R", "arm_lower_R", 34, 48, 4, 14);
+      ctx.translate(4, 22);
+      drawPart("hand_R", "hand_R", 26, 26, 0, 0);
+      ctx.restore();
+
+      // 2. Right Leg (Back Layer)
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.translate(14, 4);
+      ctx.rotate(legRRot);
+      drawPart("leg_upper_R", "leg_upper_R", 36, 56, 0, 16);
+      ctx.translate(0, 30);
+      ctx.rotate(legRLowRot);
+      drawPart("leg_lower_R", "leg_lower_R", 32, 52, 0, 16);
+      ctx.translate(2, 28);
+      drawPart("foot_R", "foot_R", 38, 26, 6, 0);
+      ctx.restore();
+
+      // 3. Pelvis & Torso (Core)
+      ctx.save();
+      ctx.translate(px, py);
+      drawPart("pelvis", "pelvis", 52, 38, 0, 0);
+      ctx.translate(torsoPos[0], torsoPos[1]);
+      ctx.rotate(torsoRot);
+      drawPart("torso", "torso", 70, 80, 0, 0);
+
+      // 4. Head
+      ctx.save();
+      ctx.translate(0, -42);
+      ctx.rotate(headRot);
+      drawPart("head", "head", 74, 74, 0, -8);
+      ctx.restore();
+
+      ctx.restore(); // end torso / core
+
+      // 5. Left Leg (Front Layer)
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.translate(-14, 4);
+      ctx.rotate(legLRot);
+      drawPart("leg_upper_L", "leg_upper_L", 36, 56, 0, 16);
+      ctx.translate(0, 30);
+      ctx.rotate(legLLowRot);
+      drawPart("leg_lower_L", "leg_lower_L", 32, 52, 0, 16);
+      ctx.translate(-2, 28);
+      drawPart("foot_L", "foot_L", 38, 26, -6, 0);
+      ctx.restore();
+
+      // 6. Left Arm (Front Layer)
+      ctx.save();
+      ctx.translate(px, py + torsoPos[1]);
+      ctx.rotate(torsoRot);
+      ctx.translate(-22, -32);
+      ctx.rotate(armLRot);
+      drawPart("arm_upper_L", "arm_upper_L", 38, 52, -6, 16);
+      ctx.translate(-10, 26);
+      ctx.rotate(armLLowRot);
+      drawPart("arm_lower_L", "arm_lower_L", 34, 48, -4, 14);
+      ctx.translate(-4, 22);
+      drawPart("hand_L", "hand_L", 26, 26, 0, 0);
+      ctx.restore();
     }
-
-    // 1. Right Arm (Back Layer)
-    ctx.save();
-    ctx.translate(px, py + torsoPos[1]);
-    ctx.rotate(torsoRot);
-    ctx.translate(22, -32);
-    ctx.rotate(armRRot);
-    drawPart("arm_upper_R", "arm_upper_R", 34, 48, 8, 16);
-    ctx.translate(10, 26);
-    ctx.rotate(armRLowRot);
-    drawPart("arm_lower_R", "arm_lower_R", 30, 44, 4, 14);
-    ctx.translate(4, 22);
-    drawPart("hand_R", "hand_R", 24, 24, 0, 0);
-    ctx.restore();
-
-    // 2. Right Leg (Back Layer)
-    ctx.save();
-    ctx.translate(px, py);
-    ctx.translate(14, 4);
-    ctx.rotate(legRRot);
-    drawPart("leg_upper_R", "leg_upper_R", 32, 50, 0, 16);
-    ctx.translate(0, 30);
-    ctx.rotate(legRLowRot);
-    drawPart("leg_lower_R", "leg_lower_R", 28, 48, 0, 16);
-    ctx.translate(2, 28);
-    drawPart("foot_R", "foot_R", 34, 22, 6, 0);
-    ctx.restore();
-
-    // 3. Pelvis & Torso (Core)
-    ctx.save();
-    ctx.translate(px, py);
-    drawPart("pelvis", "pelvis", 46, 32, 0, 0);
-    ctx.translate(torsoPos[0], torsoPos[1]);
-    ctx.rotate(torsoRot);
-    drawPart("torso", "torso", 64, 76, 0, 0);
-
-    // 4. Head
-    ctx.save();
-    ctx.translate(0, -42);
-    ctx.rotate(headRot);
-    drawPart("head", "head", 68, 68, 0, -8);
-    ctx.restore();
-
-    ctx.restore(); // end torso / core
-
-    // 5. Left Leg (Front Layer)
-    ctx.save();
-    ctx.translate(px, py);
-    ctx.translate(-14, 4);
-    ctx.rotate(legLRot);
-    drawPart("leg_upper_L", "leg_upper_L", 32, 50, 0, 16);
-    ctx.translate(0, 30);
-    ctx.rotate(legLLowRot);
-    drawPart("leg_lower_L", "leg_lower_L", 28, 48, 0, 16);
-    ctx.translate(-2, 28);
-    drawPart("foot_L", "foot_L", 34, 22, -6, 0);
-    ctx.restore();
-
-    // 6. Left Arm (Front Layer)
-    ctx.save();
-    ctx.translate(px, py + torsoPos[1]);
-    ctx.rotate(torsoRot);
-    ctx.translate(-22, -32);
-    ctx.rotate(armLRot);
-    drawPart("arm_upper_L", "arm_upper_L", 34, 48, -8, 16);
-    ctx.translate(-10, 26);
-    ctx.rotate(armLLowRot);
-    drawPart("arm_lower_L", "arm_lower_L", 30, 44, -4, 14);
-    ctx.translate(-4, 22);
-    drawPart("hand_L", "hand_L", 24, 24, 0, 0);
-    ctx.restore();
   }
 
   animRafId = requestAnimationFrame(animRenderLoop);
+}
+
+function drawSkeletonBones(ctx, px, py, torsoPos, torsoRot, headRot, armLRot, armLLowRot, armRRot, armRLowRot, legLRot, legLLowRot, legRRot, legRLowRot) {
+  ctx.save();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "rgba(88, 166, 255, 0.75)";
+  ctx.fillStyle = "#d2a8ff";
+
+  function pt(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Pelvis
+  pt(px, py);
+
+  // Torso
+  const tx = px + torsoPos[0];
+  const ty = py + torsoPos[1];
+  ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(tx, ty); ctx.stroke();
+  pt(tx, ty);
+
+  // Head
+  const hx = tx - Math.sin(torsoRot + headRot) * 45;
+  const hy = ty - Math.cos(torsoRot + headRot) * 45;
+  ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(hx, hy); ctx.stroke();
+  pt(hx, hy);
+
+  ctx.restore();
 }
 
 // ---- Batch Re-Rig All Characters ----
