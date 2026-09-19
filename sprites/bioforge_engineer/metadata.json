@@ -1,0 +1,46 @@
+{
+  "character_name": "bioforge_engineer",
+  "display_name": "Gene-Mechanic",
+  "faction_id": "bioforge",
+  "faction_name": "Bio-Forge Legion",
+  "role": "Engineer",
+  "description": "Cultivates living chitinous barricades and bio-organic spore spitters.",
+  "weapon_id": "bioforge_shotgun",
+  "art_style": "anime",
+  "specials": [
+    "special_deploy_turret",
+    "special_nanite_barrier",
+    "special_stim_inject",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

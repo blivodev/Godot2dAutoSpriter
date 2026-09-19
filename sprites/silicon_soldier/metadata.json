@@ -1,0 +1,46 @@
+{
+  "character_name": "silicon_soldier",
+  "display_name": "Combat Android Unit",
+  "faction_id": "silicon",
+  "faction_name": "Silicon Hive",
+  "role": "Soldier",
+  "description": "Mass-produced battle droid operating a high-frequency laser pulse rifle with zero recoil.",
+  "weapon_id": "silicon_assault_rifle",
+  "art_style": "anime",
+  "specials": [
+    "special_heavy_gatling",
+    "special_emp_blast",
+    "special_power_charge",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

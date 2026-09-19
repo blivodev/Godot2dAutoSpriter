@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_specagent",
+  "display_name": "Syndicate Enforcer Agent",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Special Agent",
+  "description": "Brutal underworld hitman carrying a sawed-off scattergun and motorized shock baton.",
+  "weapon_id": "syndicate_shotgun",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_cyber_dash",
+    "special_stim_inject",
+    "special_whirlwind",
+    "special_ground_slam"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    }
+  ]
+}

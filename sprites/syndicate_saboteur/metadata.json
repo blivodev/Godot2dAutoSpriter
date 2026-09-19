@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_saboteur",
+  "display_name": "Shadow Rustler",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Spy / Saboteur",
+  "description": "Infiltrator who cuts power cables, poisons fuel reserves, and vanishes in diesel smoke.",
+  "weapon_id": "syndicate_submachine_gun",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_active_camo",
+    "special_cyber_hack",
+    "special_emp_blast",
+    "special_cyber_dash"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    }
+  ]
+}

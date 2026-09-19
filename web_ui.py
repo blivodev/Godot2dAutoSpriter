@@ -221,6 +221,36 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 self._send_json({"status": "error", "message": str(e)})
             return
 
+        elif path == "/api/special_catalog":
+            try:
+                from scripts.generate_rig_animations import get_special_moves_catalog
+                cat = get_special_moves_catalog()
+                self._send_json({"status": "ok", "count": len(cat), "specials": cat})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)})
+            return
+
+        elif path == "/api/factions":
+            try:
+                roster_path = PROJECT_ROOT / "sprites" / "faction_roster.json"
+                if roster_path.is_file():
+                    with open(roster_path, "r", encoding="utf-8") as f:
+                        self._send_json(json.load(f))
+                else:
+                    self._send_json({"status": "error", "message": "Faction roster not generated yet"})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)})
+            return
+
+        elif path == "/api/weapons":
+            try:
+                import server as srv
+                res_str = srv.list_weapons_and_projectiles()
+                self._send_json(json.loads(res_str))
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)})
+            return
+
         elif path.startswith("/sprites/"):
             rel = urllib.parse.unquote(path[len("/sprites/"):])
             file_path = PROJECT_ROOT / "sprites" / rel
@@ -433,6 +463,70 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
                 self._send_json({"status": "error", "message": str(e)}, 500)
             return
 
+        elif path == "/api/generate/weapon":
+            try:
+                w_name = payload.get("name", "custom_weapon").strip().lower().replace(" ", "_")
+                w_type = payload.get("weapon_type", "assault_rifle")
+                faction = payload.get("faction", "directorate")
+                from scripts.generate_weapon_projectiles import create_weapon
+                res = create_weapon(w_name, w_type, faction)
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, 500)
+            return
+
+        elif path == "/api/generate/projectile":
+            try:
+                p_name = payload.get("name", "custom_projectile").strip().lower().replace(" ", "_")
+                p_type = payload.get("projectile_type", "plasma_bolt")
+                faction = payload.get("faction", "directorate")
+                from scripts.generate_weapon_projectiles import create_projectile
+                res = create_projectile(p_name, p_type, faction)
+                self._send_json(res)
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, 500)
+            return
+
+        elif path == "/api/character/specials":
+            try:
+                char_name = payload.get("character_name", "").strip().lower().replace(" ", "_")
+                specials = payload.get("specials", [])
+                meta_file = PROJECT_ROOT / "sprites" / char_name / "metadata.json"
+                meta = {}
+                if meta_file.is_file():
+                    with open(meta_file, "r", encoding="utf-8") as mf:
+                        meta = json.load(mf)
+                meta["specials"] = specials
+                from scripts.generate_rig_animations import SPECIAL_MOVES_CATALOG
+                meta["special_details"] = [
+                    {
+                        "slot": f"special_{i+1:02d}",
+                        "key": k,
+                        "name": SPECIAL_MOVES_CATALOG.get(k, {}).get("name", k),
+                        "desc": SPECIAL_MOVES_CATALOG.get(k, {}).get("desc", ""),
+                        "category": SPECIAL_MOVES_CATALOG.get(k, {}).get("category", "combat")
+                    }
+                    for i, k in enumerate(specials)
+                ]
+                with open(meta_file, "w", encoding="utf-8") as mf:
+                    json.dump(meta, mf, indent=2)
+                self._send_json({"status": "success", "character": char_name, "specials": specials, "metadata": meta})
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, 500)
+            return
+
+        elif path == "/api/character/equip_weapon":
+            try:
+                char_name = payload.get("character_name", "").strip().lower().replace(" ", "_")
+                weapon_name = payload.get("weapon_name", "").strip()
+                hand = payload.get("hand", "R").strip().upper()
+                import server as srv
+                res_str = srv.equip_character_weapon(char_name, weapon_name, hand)
+                self._send_json(json.loads(res_str))
+            except Exception as e:
+                self._send_json({"status": "error", "message": str(e)}, 500)
+            return
+
         self.send_response(404)
         self.end_headers()
 
@@ -543,6 +637,42 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
         except Exception as e:
             pass
 
+        # Handle custom or randomized Special Moves (4 slots)
+        specials = payload.get("specials")
+        if not specials or not isinstance(specials, list) or len(specials) != 4:
+            from scripts.generate_rig_animations import randomize_character_specials
+            specials = randomize_character_specials(seed if seed >= 0 else None)
+
+        try:
+            from scripts.generate_rig_animations import SPECIAL_MOVES_CATALOG
+            meta_file = sprites_dir / "metadata.json"
+            meta = {}
+            if meta_file.is_file():
+                try:
+                    with open(meta_file, "r", encoding="utf-8") as mf:
+                        meta = json.load(mf)
+                except Exception:
+                    pass
+            meta["character_name"] = char_name
+            meta["archetype"] = archetype
+            meta["rig_type"] = rig_type
+            meta["specials"] = specials
+            meta["special_details"] = [
+                {
+                    "slot": f"special_{idx+1:02d}",
+                    "key": sp,
+                    "name": SPECIAL_MOVES_CATALOG.get(sp, {}).get("name", sp),
+                    "desc": SPECIAL_MOVES_CATALOG.get(sp, {}).get("desc", ""),
+                    "category": SPECIAL_MOVES_CATALOG.get(sp, {}).get("category", "combat")
+                }
+                for idx, sp in enumerate(specials)
+            ]
+            with open(meta_file, "w", encoding="utf-8") as mf:
+                json.dump(meta, mf, indent=2)
+            logs.append(f"[SPECIALS] Configured 4 signature moves: {', '.join([meta['special_details'][i]['name'] for i in range(4)])}")
+        except Exception as e:
+            logs.append(f"[SPECIALS-WARN] {e}")
+
         # Assemble Godot rig
         scene_path = f"res://scenes/{char_name}_character.tscn"
         godot_success = False
@@ -576,6 +706,7 @@ class AutoSpriterHandler(BaseHTTPRequestHandler):
             "sprites_dir": f"res://sprites/{char_name}",
             "godot_rigged": godot_success,
             "comfy_used": comfy_used,
+            "specials": specials,
             "logs": logs
         }
 
@@ -827,6 +958,16 @@ HTML_PAGE = """<!DOCTYPE html>
   .lightbox-close { position: absolute; top: 16px; right: 20px; background: rgba(255,255,255,0.1); border: none; color: var(--text); font-size: 22px; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
   .lightbox-close:hover { background: rgba(255,255,255,0.2); }
 
+  /* Weapons & Projectiles Studio */
+  .arsenal-card { background: #10131b; border: 1px solid var(--border); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: all 0.15s; }
+  .arsenal-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(88,166,255,0.15); }
+  .arsenal-thumb-wrap { width: 100%; height: 95px; background: repeating-conic-gradient(#1a1f2c 0% 25%, #121620 0% 50%) 50% / 12px 12px; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
+  .arsenal-thumb { max-height: 85px; max-width: 90%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6)); transition: transform 0.2s; }
+  .arsenal-thumb:hover { transform: scale(1.08); }
+  .arsenal-card-title { font-size: 11.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .arsenal-tag { font-size: 9.5px; padding: 2px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase; }
+  .role-badge { font-size: 10px; padding: 1px 6px; border-radius: 4px; font-weight: 600; background: rgba(88,166,255,0.12); color: #79b8ff; border: 1px solid rgba(88,166,255,0.25); }
+
   /* Tooltip */
   .tooltip-wrap { position: relative; display: inline-flex; }
   .tooltip-wrap .tip { display: none; position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: #1c2333; border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-size: 11px; color: var(--text-muted); white-space: nowrap; z-index: 100; max-width: 260px; white-space: normal; text-align: center; line-height: 1.4; pointer-events: none; }
@@ -854,6 +995,7 @@ HTML_PAGE = """<!DOCTYPE html>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('generator')" id="tab-btn-generator">🚀 Generator</button>
     <button class="tab-btn" onclick="switchTab('library')" id="tab-btn-library">📦 Asset Library</button>
+    <button class="tab-btn" onclick="switchTab('weapons')" id="tab-btn-weapons">⚔️ Weapons &amp; Projectiles</button>
     <button class="tab-btn" onclick="switchTab('models')" id="tab-btn-models">🤖 AI Models</button>
   </div>
 
@@ -1214,6 +1356,37 @@ HTML_PAGE = """<!DOCTYPE html>
           </div>
         </div>
 
+        <!-- Special & Signature Moves Customizer -->
+        <div class="card" style="margin-top:14px;background:#0d111a;border:1px solid rgba(188,140,255,0.3);padding:14px;border-radius:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="font-weight:600;font-size:13px;color:#d2a8ff;display:flex;align-items:center;gap:6px;">
+              <span>⚡ Special &amp; Signature Moves (4 Slots)</span>
+              <span class="tooltip-wrap"><span class="help-icon">?</span>
+                <span class="tip">Customize or roll 4 tactical abilities from the 22-move catalog. These will be rigged into the character's Godot 4 scene!</span>
+              </span>
+            </div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="randomizeSpecialsInForm()" style="border-color:var(--accent-purple);color:#d2a8ff;">🎲 Randomize 4</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:10.5px;color:var(--text-muted);">Special Slot 1:</label>
+              <select id="spec-slot-1" style="font-size:11.5px;padding:6px 8px;"></select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:10.5px;color:var(--text-muted);">Special Slot 2:</label>
+              <select id="spec-slot-2" style="font-size:11.5px;padding:6px 8px;"></select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:10.5px;color:var(--text-muted);">Special Slot 3:</label>
+              <select id="spec-slot-3" style="font-size:11.5px;padding:6px 8px;"></select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label style="font-size:10.5px;color:var(--text-muted);">Special Slot 4:</label>
+              <select id="spec-slot-4" style="font-size:11.5px;padding:6px 8px;"></select>
+            </div>
+          </div>
+        </div>
+
         <div style="margin-top:18px;display:flex;gap:12px;">
           <button id="btn-generate" class="btn btn-primary" style="flex:1;" onclick="runPipeline('generate')">
             🚀 Generate &amp; Assemble Character
@@ -1296,6 +1469,11 @@ HTML_PAGE = """<!DOCTYPE html>
       <div>
         <div class="roster-filter-bar">
           <button class="filter-chip active" id="chip-filter-all" onclick="setRosterFilter('all')">All (<span id="count-all">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-directorate" onclick="setRosterFilter('directorate')" style="border-color:#58a6ff;">🏛️ Directorate</button>
+          <button class="filter-chip" id="chip-filter-syndicate" onclick="setRosterFilter('syndicate')" style="border-color:#e68c14;">⚙️ Syndicate</button>
+          <button class="filter-chip" id="chip-filter-covenant" onclick="setRosterFilter('covenant')" style="border-color:#bc8cff;">🧠 Covenant</button>
+          <button class="filter-chip" id="chip-filter-bioforge" onclick="setRosterFilter('bioforge')" style="border-color:#2ea043;">🧬 Bio-Forge</button>
+          <button class="filter-chip" id="chip-filter-silicon" onclick="setRosterFilter('silicon')" style="border-color:#f85149;">⚡ Silicon</button>
           <button class="filter-chip" id="chip-filter-scenes" onclick="setRosterFilter('scenes')">🎮 Scenes (<span id="count-scenes">0</span>)</button>
           <button class="filter-chip" id="chip-filter-exploded" onclick="setRosterFilter('exploded')">🖼️ Sheets (<span id="count-exploded">0</span>)</button>
         </div>
@@ -1528,6 +1706,169 @@ HTML_PAGE = """<!DOCTYPE html>
   </div>
 
   <!-- ======================================================= -->
+  <!-- TAB: WEAPONS & PROJECTILES STUDIO                       -->
+  <!-- ======================================================= -->
+  <div class="tab-content" id="tab-weapons">
+    <div class="lib-header">
+      <div>
+        <div class="lib-title">⚔️ Weapons &amp; Projectiles Studio <span id="weapons-count-badge" style="font-size:12px;color:var(--text-muted);font-weight:normal;margin-left:8px;"></span></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+          Procedural Sci-Fi Cyberpunk Arsenals: Static/Animated Weapon Sprites, Multi-Frame Projectiles &amp; Godot 4 .tscn Scenes with Interactive Firing Range.
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="refreshArsenal()">🔄 Refresh Arsenal</button>
+      </div>
+    </div>
+
+    <div class="weapons-grid-layout" style="display:grid;grid-template-columns:360px 1fr;gap:20px;min-height:640px;">
+      <!-- Left Column: Weapon & Projectile Generator -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card">
+          <div class="card-title">
+            <span>Arsenal Creator</span>
+            <span style="font-size:11px;color:var(--primary);">Static &amp; Animated</span>
+          </div>
+
+          <!-- Type Switch -->
+          <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <button type="button" id="btn-arsenal-mode-weapon" class="btn btn-primary btn-sm" style="flex:1;" onclick="setArsenalType('weapon')">🔫 Weapon</button>
+            <button type="button" id="btn-arsenal-mode-proj" class="btn btn-secondary btn-sm" style="flex:1;" onclick="setArsenalType('projectile')">💥 Projectile</button>
+          </div>
+
+          <div class="form-group">
+            <label for="arsenal-item-name">Identifier (Slug):</label>
+            <input type="text" id="arsenal-item-name" value="plasma_carbine" placeholder="e.g. plasma_carbine">
+          </div>
+
+          <!-- Weapon Type Select -->
+          <div class="form-group" id="group-weapon-type">
+            <label for="arsenal-weapon-type">Weapon Class &amp; Archetype:</label>
+            <select id="arsenal-weapon-type">
+              <option value="assault_rifle" selected>Assault Rifle (Full-Auto Kinetic / Laser)</option>
+              <option value="sniper_rifle">Sniper Rifle (High-Velocity Piercing Railgun)</option>
+              <option value="grenade_launcher">Grenade Launcher (Arcing Heavy Shrapnel)</option>
+              <option value="rocket_launcher">Rocket Launcher (Heavy Ordnance Pod)</option>
+              <option value="submachine_gun">Submachine Gun (Rapid Spray PDW)</option>
+              <option value="shotgun">Shotgun (Wide-Spread Buckshot / Flechette)</option>
+              <option value="flamethrower">Flamethrower (Pressurized Caustic Stream)</option>
+              <option value="psi_emitter">Psionic Emitter (Neural Distortion Conduit)</option>
+              <option value="drone_pad">Drone Pad (Wrist UAV Uplink Console)</option>
+              <option value="flak_cannon">Flak Cannon (Heavy Radar-Fused Airburst)</option>
+              <option value="pistol">Pistol (Compact Sidearm Blaster)</option>
+              <option value="melee_blade">Vibro-Blade / Katana (Thermal Edge Melee)</option>
+            </select>
+          </div>
+
+          <!-- Projectile Type Select -->
+          <div class="form-group" id="group-projectile-type" style="display:none;">
+            <label for="arsenal-proj-type">Projectile Dynamics &amp; VFX:</label>
+            <select id="arsenal-proj-type">
+              <option value="plasma_bolt" selected>Plasma Bolt (Animated 4-Frame Pulsing Core)</option>
+              <option value="flame_jet">Flame Jet (Animated 4-Frame Turbulent Stream)</option>
+              <option value="psi_singularity">Psionic Singularity (Animated 6-Frame Warp Orb)</option>
+              <option value="flak_burst">Flak Burst (Animated 4-Frame Shrapnel Detonation)</option>
+              <option value="bullet">High-Velocity Bullet (Static Tracer Round)</option>
+              <option value="sniper_beam">Sniper Beam (Static Piercing Collimated Beam)</option>
+              <option value="grenade">Grenade (Static Cylindrical Canister)</option>
+              <option value="missile">Missile (Static Fin-Stabilized Rocket)</option>
+              <option value="drone">Hunter Drone (Autonomous Mini Quad-Rotor)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="arsenal-faction">Faction Aesthetics &amp; Palette:</label>
+            <select id="arsenal-faction">
+              <option value="directorate" selected>🏛️ Neo-Terra Directorate (Cyan / Carbon Composite)</option>
+              <option value="syndicate">⚙️ Rust Syndicate (Orange / Welded Scrap Iron)</option>
+              <option value="covenant">🧠 Neuro-Covenant (Violet / Psionic Prismatic)</option>
+              <option value="bioforge">🧬 Bio-Forge Legion (Toxic Green / Chitin Organics)</option>
+              <option value="silicon">⚡ Silicon Hive (Crimson / Matte Black Stealth)</option>
+            </select>
+          </div>
+
+          <div class="form-group" id="group-animated-toggle">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;">
+              <input type="checkbox" id="arsenal-animated" checked style="accent-color:var(--primary);width:16px;height:16px;">
+              <span>Include Animated Frames &amp; Strip (.png + .tscn)</span>
+            </label>
+          </div>
+
+          <button id="btn-generate-arsenal" class="btn btn-primary" style="width:100%;margin-top:6px;" onclick="generateArsenalItem()">
+            🚀 Create &amp; Assemble Godot Scene
+          </button>
+        </div>
+
+        <!-- Quick Equip to Active Character -->
+        <div class="card" style="background:#0d111a;border:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;">🔗 Equip to Selected Character</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Select a character in Asset Library, then click "Equip" on any weapon below to bind it to their WeaponSlot marker.</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:6px;">
+            <span style="font-size:12px;color:var(--text-muted);">Active Character:</span>
+            <span id="equip-active-char-name" style="font-size:12px;font-weight:600;color:var(--primary);">None selected</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Firing Range & Arsenal Gallery -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <!-- Interactive Live Firing Range -->
+        <div class="card" style="padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+            <div style="font-size:14px;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;">
+              <span>🎯 Live Cyberpunk Firing Range</span>
+              <span class="lib-badge lib-badge-anim">Real-time Ballistics</span>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <select id="range-select-weapon" style="font-size:11.5px;padding:4px 8px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:5px;" onchange="onRangeWeaponChanged()">
+                <option value="">Load weapon...</option>
+              </select>
+              <select id="range-select-proj" style="font-size:11.5px;padding:4px 8px;background:var(--bg-input);border:1px solid var(--border);color:var(--text);border-radius:5px;" onchange="onRangeProjChanged()">
+                <option value="">Load projectile...</option>
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="fireRangeWeapon()" id="btn-fire-range">🔥 FIRE</button>
+            </div>
+          </div>
+
+          <div class="firing-range-wrap" style="position:relative;background:#080b11;border:1px solid var(--border);border-radius:8px;height:260px;overflow:hidden;cursor:crosshair;" onclick="fireRangeWeaponAt(event)">
+            <canvas id="range-canvas" width="860" height="260" style="width:100%;height:100%;display:block;"></canvas>
+            <div style="position:absolute;bottom:8px;left:12px;font-size:10px;color:rgba(255,255,255,0.4);pointer-events:none;">
+              CLICK ANYWHERE ON RANGE TO TARGET • SPACEBAR TO FIRE
+            </div>
+          </div>
+        </div>
+
+        <!-- Arsenal Gallery -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="filter-chip active" id="chip-arsenal-all" onclick="setArsenalFilter('all')">All (<span id="arsenal-cnt-all">0</span>)</button>
+              <button class="filter-chip" id="chip-arsenal-weapons" onclick="setArsenalFilter('weapons')">🔫 Weapons (<span id="arsenal-cnt-weapons">0</span>)</button>
+              <button class="filter-chip" id="chip-arsenal-projectiles" onclick="setArsenalFilter('projectiles')">💥 Projectiles (<span id="arsenal-cnt-proj">0</span>)</button>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="filter-chip" id="chip-af-dir" onclick="setArsenalFaction('directorate')" style="border-color:#58a6ff;">Directorate</button>
+              <button class="filter-chip" id="chip-af-syn" onclick="setArsenalFaction('syndicate')" style="border-color:#e68c14;">Syndicate</button>
+              <button class="filter-chip" id="chip-af-cov" onclick="setArsenalFaction('covenant')" style="border-color:#bc8cff;">Covenant</button>
+              <button class="filter-chip" id="chip-af-bio" onclick="setArsenalFaction('bioforge')" style="border-color:#2ea043;">Bio-Forge</button>
+              <button class="filter-chip" id="chip-af-sil" onclick="setArsenalFaction('silicon')" style="border-color:#f85149;">Silicon</button>
+              <button class="filter-chip" id="chip-af-clear" onclick="setArsenalFaction('all')">Clear</button>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-bottom:12px;">
+            <input type="text" id="arsenal-search" class="lib-search" placeholder="🔍 Search weapons and projectiles..." oninput="renderArsenalGrid()">
+          </div>
+
+          <div id="arsenal-grid" class="arsenal-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(170px, 1fr));gap:12px;max-height:480px;overflow-y:auto;padding-right:4px;">
+            <div style="text-align:center;color:var(--text-muted);padding:40px 0;grid-column:1/-1;">Loading arsenal...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
   <!-- TAB 3: AI MODELS                                    -->
   <!-- ======================================================= -->
   <div class="tab-content" id="tab-models">
@@ -1605,9 +1946,12 @@ let allLibraryChars = [];
 function switchTab(name) {
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-  document.getElementById('tab-btn-' + name).classList.add('active');
+  const targetContent = document.getElementById('tab-' + name);
+  const targetBtn = document.getElementById('tab-btn-' + name);
+  if (targetContent) targetContent.classList.add('active');
+  if (targetBtn) targetBtn.classList.add('active');
   if (name === 'library') refreshLibrary();
+  if (name === 'weapons') { refreshArsenal(); initFiringRangeCanvas(); }
   if (name === 'models') checkModelStatus();
 }
 
@@ -2021,6 +2365,12 @@ async function runPipeline(actionType) {
         auto_rig: (actionType !== 'sprites_only'),
         custom_colors:   (species === "custom" ? customColors   : null),
         custom_features: (species === "custom" ? customFeatures : null),
+        specials: [
+          document.getElementById("spec-slot-1")?.value || "special_ground_slam",
+          document.getElementById("spec-slot-2")?.value || "special_whirlwind",
+          document.getElementById("spec-slot-3")?.value || "special_power_charge",
+          document.getElementById("spec-slot-4")?.value || "special_victory_flourish"
+        ],
       })
     });
     const res = await r.json();
@@ -2405,7 +2755,7 @@ async function initAnimCatalog() {
 
 function setRosterFilter(f) {
   rosterFilter = f;
-  document.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.roster-filter-bar .filter-chip').forEach(el => el.classList.remove('active'));
   const chip = document.getElementById(`chip-filter-${f}`);
   if (chip) chip.classList.add('active');
   filterRoster();
@@ -2418,9 +2768,17 @@ function filterRoster() {
     filtered = filtered.filter(c => c.has_godot_scene);
   } else if (rosterFilter === "exploded") {
     filtered = filtered.filter(c => c.has_exploded_sheet);
+  } else if (["directorate", "syndicate", "covenant", "bioforge", "silicon"].includes(rosterFilter)) {
+    filtered = filtered.filter(c => (c.faction_id || "").toLowerCase() === rosterFilter);
   }
+
   if (q) {
-    filtered = filtered.filter(c => c.name.toLowerCase().includes(q));
+    filtered = filtered.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      (c.display_name && c.display_name.toLowerCase().includes(q)) ||
+      (c.role && c.role.toLowerCase().includes(q)) ||
+      (c.faction_name && c.faction_name.toLowerCase().includes(q))
+    );
   }
   renderRoster(filtered);
 }
@@ -2482,6 +2840,17 @@ function renderRoster(chars) {
            onerror="this.onerror=null;${fallbackUrl ? `this.src='${fallbackUrl}?t=${Date.now()}';` : `this.style.display='none';`}">
     `;
 
+    const fid = (c.faction_id || '').toLowerCase();
+    const factionColor = fid === 'directorate' ? '#58a6ff' :
+                         fid === 'syndicate'   ? '#e68c14' :
+                         fid === 'covenant'    ? '#bc8cff' :
+                         fid === 'bioforge'    ? '#2ea043' :
+                         fid === 'silicon'     ? '#f85149' : '#8b949e';
+
+    const roleBadge = c.role ? `<span class="role-badge" style="border-color:${factionColor}44;color:${factionColor};background:${factionColor}12;">${c.role}</span>` : '';
+    const factionDot = c.faction_name ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${factionColor};margin-right:4px;" title="${c.faction_name}"></span>` : '';
+    const displayName = c.display_name || c.name.replace(/_/g, ' ');
+
     const sceneBadge = c.has_godot_scene
       ? '<span class="lib-badge lib-badge-scene">🎮 Scene</span>'
       : '<span class="lib-badge lib-badge-no-scene">No Scene</span>';
@@ -2490,8 +2859,9 @@ function renderRoster(chars) {
     item.innerHTML = `
       ${thumbHtml}
       <div class="char-roster-info">
-        <div class="char-roster-name">${c.name.replace(/_/g, ' ')}</div>
+        <div class="char-roster-name" style="display:flex;align-items:center;">${factionDot}${displayName}</div>
         <div class="char-roster-meta">
+          ${roleBadge}
           <span>${c.limb_count} limbs</span>
           ${animBadge}
           ${sceneBadge}
@@ -2527,9 +2897,28 @@ async function viewCharacter(name) {
   document.getElementById("viewer-content").style.display = "block";
 
   const charInfo = allLibraryChars.find(c => c.name === name) || {};
-  document.getElementById("viewer-char-name").textContent = name.replace(/_/g, ' ');
+  const displayName = charInfo.display_name || name.replace(/_/g, ' ');
+  document.getElementById("viewer-char-name").textContent = displayName;
   document.getElementById("viewer-char-meta").textContent =
-    `${charInfo.limb_count || 15} limb cutouts • 23 Skeletal Animations • ${charInfo.has_godot_scene ? 'Godot 4 Scene Ready' : 'Scene Pending'}`;
+    `${charInfo.limb_count || 15} limb cutouts • 23 Skeletal Animations • ${charInfo.has_godot_scene ? 'Godot 4 Scene Ready' : 'Scene Pending'}${charInfo.role ? ' • Role: ' + charInfo.role : ''}${charInfo.faction_name ? ' • Faction: ' + charInfo.faction_name : ''}`;
+
+  const equipActiveEl = document.getElementById("equip-active-char-name");
+  if (equipActiveEl) equipActiveEl.textContent = displayName;
+
+  // Dynamically update the 4 Special & Signature Moves chips in the Animation Player
+  const specials = charInfo.specials || ["special_ground_slam", "special_whirlwind", "special_power_charge", "special_victory_flourish"];
+  const details = charInfo.special_details || [];
+  for (let i = 1; i <= 4; i++) {
+    const chip = document.querySelector(`.anim-chip[data-anim="special_0${i}"]`);
+    if (chip) {
+      const spKey = specials[i-1] || `special_0${i}`;
+      const det = details[i-1] || (specialMovesCatalog && specialMovesCatalog[spKey]) || {};
+      const spName = det.name || spKey.replace(/^special_/, '').replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase());
+      const icon = i === 1 ? '💥' : i === 2 ? '🌪️' : i === 3 ? '⚡' : '👑';
+      chip.textContent = `${icon} special_0${i} (${spName})`;
+      chip.title = det.desc || spKey;
+    }
+  }
 
   // Update full assembled body preview
   const fullImg = document.getElementById("viewer-full-img");
@@ -2708,6 +3097,24 @@ function loadLimbImagesForChar(charName) {
   });
 }
 
+function getEffectiveAnimDef() {
+  let effectiveKey = currentAnimName;
+  if (currentAnimName.startsWith("special_") && viewingChar) {
+    const charInfo = allLibraryChars.find(c => c.name === viewingChar);
+    if (charInfo && charInfo.specials && charInfo.specials.length >= 4) {
+      const idx = parseInt(currentAnimName.split("_")[1]) - 1;
+      const spKey = charInfo.specials[idx];
+      if (spKey && (specialMovesCatalog[spKey] || (animCatalog && animCatalog[spKey]))) {
+        effectiveKey = spKey;
+      }
+    }
+  }
+  return (specialMovesCatalog && specialMovesCatalog[effectiveKey]) ||
+         (animCatalog || FALLBACK_ANIM_DEFS)[effectiveKey] ||
+         (animCatalog || FALLBACK_ANIM_DEFS)[currentAnimName] ||
+         { length: 1.0, loop: 1, tracks: {} };
+}
+
 function selectAnim(name) {
   currentAnimName = name;
   animCurrentTime = 0.0;
@@ -2716,9 +3123,18 @@ function selectAnim(name) {
     if (el.dataset.anim === name) el.classList.add('active');
     else el.classList.remove('active');
   });
-  const def = (animCatalog || FALLBACK_ANIM_DEFS)[name] || FALLBACK_ANIM_DEFS["idle"];
+  const def = getEffectiveAnimDef();
+  const charInfo = allLibraryChars.find(c => c.name === viewingChar);
+  const displayName = charInfo ? (charInfo.display_name || viewingChar.replace(/_/g, ' ')) : 'Character';
+  let moveLabel = name;
+  if (name.startsWith("special_") && charInfo && charInfo.specials) {
+    const idx = parseInt(name.split("_")[1]) - 1;
+    const spKey = charInfo.specials[idx];
+    const spObj = (specialMovesCatalog && specialMovesCatalog[spKey]) || (charInfo.special_details && charInfo.special_details[idx]);
+    if (spObj && spObj.name) moveLabel = `${name} (${spObj.name})`;
+  }
   const titleEl = document.getElementById("anim-overlay-title");
-  if (titleEl) titleEl.textContent = `${viewingChar ? viewingChar.replace(/_/g, ' ') : 'Character'} • ${name}`;
+  if (titleEl) titleEl.textContent = `${displayName} • ${moveLabel}`;
   const descEl = document.getElementById("anim-overlay-desc");
   if (descEl) descEl.textContent = def.desc || "";
   const playBtn = document.getElementById("btn-anim-play");
@@ -2739,8 +3155,8 @@ function restartAnimation() {
 }
 
 function onScrubInput(val) {
-  const def = (animCatalog || FALLBACK_ANIM_DEFS)[currentAnimName] || { length: 1.0 };
-  animCurrentTime = (parseFloat(val) / 100.0) * def.length;
+  const def = getEffectiveAnimDef();
+  animCurrentTime = (parseFloat(val) / 100.0) * (def.length || 1.0);
 }
 
 function evalKeyframes(keyframes, t) {
@@ -2766,7 +3182,7 @@ function evalKeyframes(keyframes, t) {
 }
 
 function getTrackVal(trackPath, defVal) {
-  const def = (animCatalog || FALLBACK_ANIM_DEFS)[currentAnimName];
+  const def = getEffectiveAnimDef();
   if (!def || !def.tracks || !def.tracks[trackPath]) return defVal;
   return evalKeyframes(def.tracks[trackPath], animCurrentTime);
 }
@@ -3087,12 +3503,625 @@ async function deleteChar(name) {
   } catch(e) { log(`[ERROR] Delete failed: ${e}`, "err"); }
 }
 
+// =============================================================================
+// WEAPONS & PROJECTILES STUDIO + LIVE FIRING RANGE ENGINE
+// =============================================================================
+let loadedWeapons = [];
+let loadedProjectiles = [];
+let specialMovesCatalog = {};
+let activeArsenalType = "weapon";
+let activeArsenalFilter = "all";
+let activeArsenalFaction = "all";
+
+// Special Moves Catalog init & randomize
+async function initSpecialCatalog() {
+  try {
+    const r = await fetch('/api/special_catalog');
+    const d = await r.json();
+    if (d.status === 'ok' && d.specials) {
+      specialMovesCatalog = d.specials;
+      populateSpecialDropdowns();
+    }
+  } catch(e) {
+    console.warn("[SPECIALS] Catalog fetch error:", e);
+  }
+}
+
+function populateSpecialDropdowns() {
+  const keys = Object.keys(specialMovesCatalog);
+  if (keys.length === 0) return;
+
+  const defaults = ["special_ground_slam", "special_whirlwind", "special_power_charge", "special_victory_flourish"];
+  for (let slot = 1; slot <= 4; slot++) {
+    const sel = document.getElementById(`spec-slot-${slot}`);
+    if (!sel) continue;
+    sel.innerHTML = keys.map(k => {
+      const item = specialMovesCatalog[k];
+      const isDef = (k === defaults[slot - 1]);
+      return `<option value="${k}" ${isDef ? 'selected' : ''}>${item.name} (${(item.category || 'combat').toUpperCase()})</option>`;
+    }).join('');
+  }
+}
+
+function randomizeSpecialsInForm() {
+  const keys = Object.keys(specialMovesCatalog);
+  if (keys.length < 4) return;
+  const shuffled = [...keys].sort(() => 0.5 - Math.random());
+  for (let slot = 1; slot <= 4; slot++) {
+    const sel = document.getElementById(`spec-slot-${slot}`);
+    if (sel) sel.value = shuffled[slot - 1];
+  }
+  log("[SPECIALS] 🎲 Randomized 4 tactical abilities for character!", "ci");
+}
+
+function setArsenalType(t) {
+  activeArsenalType = t;
+  const btnW = document.getElementById("btn-arsenal-mode-weapon");
+  const btnP = document.getElementById("btn-arsenal-mode-proj");
+  const grpW = document.getElementById("group-weapon-type");
+  const grpP = document.getElementById("group-projectile-type");
+  const nameInput = document.getElementById("arsenal-item-name");
+
+  if (t === "weapon") {
+    if (btnW) btnW.className = "btn btn-primary btn-sm";
+    if (btnP) btnP.className = "btn btn-secondary btn-sm";
+    if (grpW) grpW.style.display = "block";
+    if (grpP) grpP.style.display = "none";
+    if (nameInput && nameInput.value.includes("projectile")) nameInput.value = "custom_rifle";
+  } else {
+    if (btnW) btnW.className = "btn btn-secondary btn-sm";
+    if (btnP) btnP.className = "btn btn-primary btn-sm";
+    if (grpW) grpW.style.display = "none";
+    if (grpP) grpP.style.display = "block";
+    if (nameInput && (nameInput.value.includes("rifle") || nameInput.value.includes("carbine"))) nameInput.value = "custom_bolt";
+  }
+}
+
+function setArsenalFilter(f) {
+  activeArsenalFilter = f;
+  document.querySelectorAll('#tab-weapons .filter-chip').forEach(el => {
+    if (el.id.startsWith('chip-arsenal-')) el.classList.remove('active');
+  });
+  const chip = document.getElementById(`chip-arsenal-${f}`);
+  if (chip) chip.classList.add('active');
+  renderArsenalGrid();
+}
+
+function setArsenalFaction(fac) {
+  activeArsenalFaction = fac;
+  document.querySelectorAll('#tab-weapons .filter-chip').forEach(el => {
+    if (el.id.startsWith('chip-af-')) el.classList.remove('active');
+  });
+  const chipId = fac === 'all' ? 'chip-af-clear' : `chip-af-${fac.substring(0, 3)}`;
+  const chip = document.getElementById(chipId);
+  if (chip) chip.classList.add('active');
+  renderArsenalGrid();
+}
+
+async function refreshArsenal() {
+  try {
+    const r = await fetch('/api/weapons');
+    const d = await r.json();
+    loadedWeapons = d.weapons || [];
+    loadedProjectiles = d.projectiles || [];
+
+    const badge = document.getElementById("weapons-count-badge");
+    if (badge) badge.textContent = `(${loadedWeapons.length} weapons, ${loadedProjectiles.length} projectiles)`;
+
+    const elAll = document.getElementById("arsenal-cnt-all");
+    const elW = document.getElementById("arsenal-cnt-weapons");
+    const elP = document.getElementById("arsenal-cnt-proj");
+    if (elAll) elAll.textContent = loadedWeapons.length + loadedProjectiles.length;
+    if (elW) elW.textContent = loadedWeapons.length;
+    if (elP) elP.textContent = loadedProjectiles.length;
+
+    populateRangeSelects();
+    renderArsenalGrid();
+  } catch(e) {
+    console.error("[ARSENAL] Error refreshing weapons:", e);
+  }
+}
+
+function populateRangeSelects() {
+  const wSel = document.getElementById("range-select-weapon");
+  const pSel = document.getElementById("range-select-proj");
+  if (wSel && loadedWeapons.length > 0) {
+    const curr = wSel.value;
+    wSel.innerHTML = loadedWeapons.map(w => `<option value="${w.name}" ${w.name === curr ? 'selected' : ''}>${w.name.replace(/_/g, ' ')}</option>`).join('');
+    if (!curr && loadedWeapons[0]) wSel.value = loadedWeapons[0].name;
+    onRangeWeaponChanged();
+  }
+  if (pSel && loadedProjectiles.length > 0) {
+    const curr = pSel.value;
+    pSel.innerHTML = loadedProjectiles.map(p => `<option value="${p.name}" ${p.name === curr ? 'selected' : ''}>${p.name.replace(/_/g, ' ')}</option>`).join('');
+    if (!curr && loadedProjectiles[0]) pSel.value = loadedProjectiles[0].name;
+    onRangeProjChanged();
+  }
+}
+
+function renderArsenalGrid() {
+  const grid = document.getElementById("arsenal-grid");
+  const searchQ = (document.getElementById("arsenal-search")?.value || "").toLowerCase().trim();
+  if (!grid) return;
+
+  let items = [];
+  if (activeArsenalFilter === "all" || activeArsenalFilter === "weapons") {
+    items = items.concat(loadedWeapons.map(w => ({ ...w, itemType: "weapon" })));
+  }
+  if (activeArsenalFilter === "all" || activeArsenalFilter === "projectiles") {
+    items = items.concat(loadedProjectiles.map(p => ({ ...p, itemType: "projectile" })));
+  }
+
+  if (activeArsenalFaction !== "all") {
+    items = items.filter(it => it.name.startsWith(activeArsenalFaction + "_"));
+  }
+
+  if (searchQ) {
+    items = items.filter(it => it.name.toLowerCase().includes(searchQ));
+  }
+
+  if (items.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:40px 0;grid-column:1/-1;">No weapons or projectiles match the selected filter.</div>';
+    return;
+  }
+
+  grid.innerHTML = items.map(it => {
+    const isW = it.itemType === "weapon";
+    const tagBg = isW ? "rgba(88,166,255,0.15)" : "rgba(248,81,73,0.15)";
+    const tagCol = isW ? "#79b8ff" : "#ff7b72";
+    const cleanTitle = it.name.replace(/_/g, ' ');
+
+    let facName = "Independent";
+    let facCol = "#8b949e";
+    if (it.name.startsWith("directorate_")) { facName = "Directorate"; facCol = "#58a6ff"; }
+    else if (it.name.startsWith("syndicate_")) { facName = "Syndicate"; facCol = "#e68c14"; }
+    else if (it.name.startsWith("covenant_")) { facName = "Covenant"; facCol = "#bc8cff"; }
+    else if (it.name.startsWith("bioforge_")) { facName = "Bio-Forge"; facCol = "#2ea043"; }
+    else if (it.name.startsWith("silicon_")) { facName = "Silicon"; facCol = "#f85149"; }
+
+    return `
+      <div class="arsenal-card">
+        <div class="arsenal-thumb-wrap" onclick="openLightbox('${it.sprite}', '${cleanTitle}', '${it.scene_path || ''}')">
+          <img class="arsenal-thumb" src="${it.sprite}?t=${Date.now()}" alt="${it.name}" loading="lazy">
+        </div>
+        <div class="arsenal-card-title" title="${cleanTitle}">${cleanTitle}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="arsenal-tag" style="background:${facCol}18;color:${facCol};">${facName}</span>
+          <span class="arsenal-tag" style="background:${tagBg};color:${tagCol};">${isW ? 'WEAPON' : (it.is_strip ? 'ANIM STRIP' : 'PROJECTILE')}</span>
+        </div>
+        <div style="display:flex;gap:4px;margin-top:2px;">
+          <button class="btn btn-secondary btn-sm" style="flex:1;padding:3px 6px;font-size:10px;" onclick="selectRangeItem('${it.itemType}', '${it.name}')">🎯 Test</button>
+          ${isW ? `<button class="btn btn-secondary btn-sm" style="flex:1;padding:3px 6px;font-size:10px;border-color:rgba(46,160,67,0.3);color:#3fb950;" onclick="equipWeaponToCurrent('${it.name}')">🔗 Equip</button>` : ''}
+          <button class="btn btn-secondary btn-sm" style="padding:3px 6px;font-size:10px;" onclick="openLightbox('${it.sprite}', '${cleanTitle}', '${it.scene_path || ''}')">🔍</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function selectRangeItem(itemType, name) {
+  if (itemType === "weapon") {
+    const sel = document.getElementById("range-select-weapon");
+    if (sel) { sel.value = name; onRangeWeaponChanged(); }
+  } else {
+    const sel = document.getElementById("range-select-proj");
+    if (sel) { sel.value = name; onRangeProjChanged(); }
+  }
+  const canvas = document.getElementById("range-canvas");
+  if (canvas) canvas.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function generateArsenalItem() {
+  const btn = document.getElementById("btn-generate-arsenal");
+  const name = document.getElementById("arsenal-item-name").value.trim().toLowerCase().replace(/\\s+/g, '_') || "custom_item";
+  const faction = document.getElementById("arsenal-faction").value;
+
+  btn.disabled = true;
+  const origText = btn.innerHTML;
+  btn.innerHTML = '<span class="spinner"></span> Creating...';
+
+  try {
+    if (activeArsenalType === "weapon") {
+      const weaponType = document.getElementById("arsenal-weapon-type").value;
+      log(`[ARSENAL] Creating weapon '${name}' (${weaponType}, ${faction})...`, "ci");
+      const r = await fetch('/api/generate/weapon', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, weapon_type: weaponType, faction })
+      });
+      const d = await r.json();
+      if (d.status === 'success') {
+        log(`[GODOT] ✓ Weapon scene created -> ${d.scene_path}`, "ok");
+      }
+    } else {
+      const projType = document.getElementById("arsenal-proj-type").value;
+      log(`[ARSENAL] Creating projectile '${name}' (${projType}, ${faction})...`, "ci");
+      const r = await fetch('/api/generate/projectile', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, projectile_type: projType, faction })
+      });
+      const d = await r.json();
+      if (d.status === 'success') {
+        log(`[GODOT] ✓ Projectile scene created -> ${d.scene_path}`, "ok");
+      }
+    }
+    refreshArsenal();
+  } catch(e) {
+    log(`[ERROR] Failed to generate arsenal item: ${e}`, "err");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+}
+
+async function equipWeaponToCurrent(weaponName) {
+  if (!viewingChar) {
+    log("[EQUIP] Please select a character from the Asset Library first!", "warn");
+    alert("Please select a character in the Asset Library tab first!");
+    return;
+  }
+  log(`[EQUIP] Attaching weapon '${weaponName}' to '${viewingChar}'...`, "ci");
+  try {
+    const r = await fetch('/api/character/equip_weapon', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ character_name: viewingChar, weapon_name: weaponName, hand: 'R' })
+    });
+    const d = await r.json();
+    if (d.status === 'equipped' || d.status === 'success') {
+      log(`[GODOT] ✓ Weapon equipped to ${viewingChar}! Scene: ${d.scene_path}`, "ok");
+      refreshLibrary();
+    } else {
+      log(`[WARN] ${d.message || 'Failed to equip.'}`, "warn");
+    }
+  } catch(e) {
+    log(`[ERROR] Equip failed: ${e}`, "err");
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Interactive Live Firing Range Simulation
+// -----------------------------------------------------------------------------
+let rangeCanvasInited = false;
+let rangeCtx = null;
+let rangeWeaponImg = null;
+let rangeProjImg = null;
+let rangeBullets = [];
+let rangeParticles = [];
+let rangeDamageTexts = [];
+let rangeRecoil = 0;
+let rangeMuzzleFlash = 0;
+let rangeTargetShake = 0;
+let rangeTargetHealth = 100;
+let rangeLastTime = performance.now();
+
+function initFiringRangeCanvas() {
+  if (rangeCanvasInited) return;
+  const canvas = document.getElementById("range-canvas");
+  if (!canvas) return;
+  rangeCtx = canvas.getContext("2d");
+  rangeCanvasInited = true;
+  requestAnimationFrame(rangeRenderLoop);
+}
+
+function onRangeWeaponChanged() {
+  const wSel = document.getElementById("range-select-weapon");
+  if (!wSel) return;
+  const wName = wSel.value;
+  const w = loadedWeapons.find(item => item.name === wName);
+  if (w && w.sprite) {
+    const img = new Image();
+    img.src = `${w.sprite}?t=${Date.now()}`;
+    img.onload = () => { rangeWeaponImg = img; };
+  }
+}
+
+function onRangeProjChanged() {
+  const pSel = document.getElementById("range-select-proj");
+  if (!pSel) return;
+  const pName = pSel.value;
+  const p = loadedProjectiles.find(item => item.name === pName);
+  if (p && p.sprite) {
+    const img = new Image();
+    img.src = `${p.sprite}?t=${Date.now()}`;
+    img.onload = () => { rangeProjImg = img; };
+  }
+}
+
+function fireRangeWeaponAt(e) {
+  const canvas = document.getElementById("range-canvas");
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const targetX = (e.clientX - rect.left) * scaleX;
+  const targetY = (e.clientY - rect.top) * scaleY;
+  fireRangeWeapon(targetX, targetY);
+}
+
+function fireRangeWeapon(tx = 720, ty = 130) {
+  const startX = 135;
+  const startY = 130;
+  const dx = tx - startX;
+  const dy = ty - startY;
+  const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+  const speed = 22.0;
+  const vx = (dx / dist) * speed;
+  const vy = (dy / dist) * speed;
+
+  const wSel = document.getElementById("range-select-weapon");
+  const pSel = document.getElementById("range-select-proj");
+  const wName = wSel ? wSel.value : "";
+  const pName = pSel ? pSel.value : "";
+
+  let bulletColor = "#58a6ff";
+  if (wName.includes("syndicate") || pName.includes("flame") || pName.includes("napalm")) bulletColor = "#ff9800";
+  else if (wName.includes("covenant") || pName.includes("psi")) bulletColor = "#bc8cff";
+  else if (wName.includes("bioforge") || pName.includes("acid")) bulletColor = "#39d353";
+  else if (wName.includes("silicon") || pName.includes("missile")) bulletColor = "#ff3b30";
+
+  rangeBullets.push({
+    x: startX,
+    y: startY,
+    vx: vx,
+    vy: vy,
+    targetX: tx,
+    targetY: ty,
+    color: bulletColor,
+    life: 0,
+    maxLife: 70
+  });
+
+  rangeRecoil = 14;
+  rangeMuzzleFlash = 5;
+
+  // Muzzle particles
+  for (let i = 0; i < 8; i++) {
+    rangeParticles.push({
+      x: startX + 10,
+      y: startY,
+      vx: (Math.random() * 4 - 1),
+      vy: (Math.random() * 4 - 2),
+      color: bulletColor,
+      size: Math.random() * 3 + 2,
+      alpha: 1.0,
+      decay: 0.12
+    });
+  }
+}
+
+function rangeRenderLoop(now) {
+  const dt = Math.min((now - rangeLastTime) / 1000, 0.1);
+  rangeLastTime = now;
+
+  const canvas = document.getElementById("range-canvas");
+  if (canvas && rangeCtx) {
+    const ctx = rangeCtx;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Range Grid Background
+    ctx.fillStyle = "#080b11";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "rgba(88, 166, 255, 0.08)";
+    ctx.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // Distance Yard Markers
+    ctx.fillStyle = "rgba(255, 255, 255, 0.25)";
+    ctx.font = "9px monospace";
+    [150, 300, 450, 600, 720].forEach((dx, i) => {
+      ctx.fillText(`${(i + 1) * 10}M`, dx, 24);
+      ctx.beginPath(); ctx.moveTo(dx, 0); ctx.lineTo(dx, 10); ctx.strokeStyle = "rgba(255,255,255,0.2)"; ctx.stroke();
+    });
+
+    // Aiming Laser Beam
+    ctx.save();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = "rgba(88, 166, 255, 0.35)";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(140, 130);
+    ctx.lineTo(720, 130);
+    ctx.stroke();
+    ctx.restore();
+
+    // Target Dummy on the Right
+    const targetX = 720 + (rangeTargetShake > 0 ? (Math.random() * 8 - 4) : 0);
+    const targetY = 130 + (rangeTargetShake > 0 ? (Math.random() * 6 - 3) : 0);
+    if (rangeTargetShake > 0) rangeTargetShake--;
+
+    // Target Drone Silhouette
+    ctx.save();
+    ctx.translate(targetX, targetY);
+    ctx.fillStyle = "rgba(255, 60, 60, 0.2)";
+    ctx.strokeStyle = "#ff4d4d";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, 28, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+
+    // Inner Bullseye Rings
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+    ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = "#ff4d4d";
+    ctx.beginPath(); ctx.arc(0, 0, 3, 0, Math.PI * 2); ctx.fill();
+
+    // Floating Drone Wings
+    ctx.fillStyle = "#333b4d";
+    ctx.fillRect(-38, -6, 12, 12);
+    ctx.fillRect(26, -6, 12, 12);
+    ctx.restore();
+
+    // Weapon on the Left with Recoil
+    const recoilOffset = rangeRecoil;
+    if (rangeRecoil > 0) rangeRecoil = Math.max(0, rangeRecoil - 1.2);
+
+    ctx.save();
+    ctx.translate(85 - recoilOffset, 130);
+    if (rangeWeaponImg && rangeWeaponImg.complete && rangeWeaponImg.naturalWidth > 0) {
+      const aspect = rangeWeaponImg.naturalWidth / rangeWeaponImg.naturalHeight;
+      const w = 110;
+      const h = w / aspect;
+      ctx.drawImage(rangeWeaponImg, -w / 2, -h / 2, w, h);
+    } else {
+      // Clean Procedural Weapon Silhouette
+      ctx.fillStyle = "#58a6ff";
+      ctx.fillRect(-40, -8, 80, 16);
+      ctx.fillStyle = "#1e2638";
+      ctx.fillRect(-30, 8, 16, 24);
+    }
+
+    // Muzzle Flash
+    if (rangeMuzzleFlash > 0) {
+      rangeMuzzleFlash--;
+      ctx.beginPath();
+      ctx.arc(60, 0, 16 + Math.random() * 6, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(60, 0, 26 + Math.random() * 8, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(88, 166, 255, 0.5)";
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Update & Draw Bullets
+    for (let i = rangeBullets.length - 1; i >= 0; i--) {
+      const b = rangeBullets[i];
+      b.x += b.vx;
+      b.y += b.vy;
+      b.life++;
+
+      // Projectile Trail Particle
+      rangeParticles.push({
+        x: b.x,
+        y: b.y,
+        vx: (Math.random() * 1.5 - 0.75),
+        vy: (Math.random() * 1.5 - 0.75),
+        color: b.color,
+        size: Math.random() * 3 + 2,
+        alpha: 0.8,
+        decay: 0.08
+      });
+
+      // Draw Bullet
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.shadowColor = b.color;
+      ctx.shadowBlur = 12;
+      ctx.fill();
+      ctx.restore();
+
+      // Check hit on target dummy
+      const hitDist = Math.hypot(b.x - targetX, b.y - targetY);
+      if (hitDist < 34 || b.x >= targetX || b.life >= b.maxLife) {
+        // Hit explosion
+        rangeTargetShake = 8;
+        for (let p = 0; p < 22; p++) {
+          const angle = Math.random() * Math.PI * 2;
+          const spd = Math.random() * 6 + 2;
+          rangeParticles.push({
+            x: targetX,
+            y: targetY,
+            vx: Math.cos(angle) * spd,
+            vy: Math.sin(angle) * spd,
+            color: b.color,
+            size: Math.random() * 4 + 2,
+            alpha: 1.0,
+            decay: 0.045
+          });
+        }
+
+        // Damage Number
+        const dmg = Math.floor(Math.random() * 1800 + 1200);
+        const isCrit = Math.random() > 0.45;
+        rangeDamageTexts.push({
+          x: targetX + (Math.random() * 30 - 15),
+          y: targetY - 20,
+          text: isCrit ? `CRIT! ${dmg.toLocaleString()}` : `${dmg.toLocaleString()}`,
+          color: isCrit ? "#ffc107" : "#fff",
+          alpha: 1.0,
+          vy: -1.2
+        });
+
+        rangeBullets.splice(i, 1);
+      }
+    }
+
+    // Update & Draw Particles
+    for (let i = rangeParticles.length - 1; i >= 0; i--) {
+      const p = rangeParticles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.alpha -= p.decay;
+      if (p.alpha <= 0) {
+        rangeParticles.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Update & Draw Damage Texts
+    for (let i = rangeDamageTexts.length - 1; i >= 0; i--) {
+      const dt = rangeDamageTexts[i];
+      dt.y += dt.vy;
+      dt.alpha -= 0.025;
+      if (dt.alpha <= 0) {
+        rangeDamageTexts.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.globalAlpha = dt.alpha;
+      ctx.fillStyle = dt.color;
+      ctx.font = "bold 13px -apple-system, sans-serif";
+      ctx.shadowColor = "rgba(0,0,0,0.8)";
+      ctx.shadowBlur = 4;
+      ctx.fillText(dt.text, dt.x, dt.y);
+      ctx.restore();
+    }
+  }
+
+  requestAnimationFrame(rangeRenderLoop);
+}
+
+// Spacebar listener to fire weapon when on Weapons tab
+document.addEventListener("keydown", e => {
+  if (e.code === "Space") {
+    const weaponsTab = document.getElementById("tab-weapons");
+    if (weaponsTab && weaponsTab.classList.contains("active")) {
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
+      if (tag !== "input" && tag !== "textarea" && tag !== "select") {
+        e.preventDefault();
+        fireRangeWeapon();
+      }
+    }
+  }
+});
+
 // ---- Init ----
 initAnimCatalog();
+initSpecialCatalog();
 setActivePill('pill-cyber_alien');
 checkStatus();
 checkModelStatus();
 refreshGallery();
+refreshArsenal();
 pollQueue();
 setInterval(checkStatus, 7000);
 setInterval(checkModelStatus, 12000);

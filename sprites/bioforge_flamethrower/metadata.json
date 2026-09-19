@@ -1,0 +1,46 @@
+{
+  "character_name": "bioforge_flamethrower",
+  "display_name": "Caustic Chem-Spitter",
+  "faction_id": "bioforge",
+  "faction_name": "Bio-Forge Legion",
+  "role": "Flame Trooper",
+  "description": "Spews boiling caustic acid streams from an enlarged pressurized venom gland.",
+  "weapon_id": "bioforge_flamethrower",
+  "art_style": "anime",
+  "specials": [
+    "special_flame_inferno",
+    "special_ground_slam",
+    "special_napalm_toss",
+    "special_power_charge"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    }
+  ]
+}

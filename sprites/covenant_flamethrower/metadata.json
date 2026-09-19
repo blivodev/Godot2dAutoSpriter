@@ -1,0 +1,46 @@
+{
+  "character_name": "covenant_flamethrower",
+  "display_name": "Soul-Fire Cleanser",
+  "faction_id": "covenant",
+  "faction_name": "Neuro-Covenant",
+  "role": "Flame Trooper",
+  "description": "Wields a warp-fire projector bathing enemy ranks in violet entropic fire.",
+  "weapon_id": "covenant_flamethrower",
+  "art_style": "anime",
+  "specials": [
+    "special_flame_inferno",
+    "special_whirlwind",
+    "special_power_charge",
+    "special_ground_slam"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    }
+  ]
+}

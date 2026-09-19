@@ -39,7 +39,7 @@ if sys.stdout and hasattr(sys.stdout, "reconfigure"):
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-ANIMATION_DEFS: Dict[str, Dict[str, Any]] = {
+CORE_ANIMATION_DEFS: Dict[str, Dict[str, Any]] = {
     "idle": {
         "length": 1.8,
         "loop": 1,
@@ -306,11 +306,20 @@ ANIMATION_DEFS: Dict[str, Dict[str, Any]] = {
             "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.25, 0.0), (0.5, 0.38), (0.75, 0.38), (1.0, 0.0)],
             "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.5, 0.08), (1.0, 0.0)],
         }
-    },
-    "special_01": {
+    }
+}
+
+# ==============================================================================
+# SPECIAL & SIGNATURE MOVES CATALOG (22 Unique Combat & Tactical Abilities)
+# ==============================================================================
+
+SPECIAL_MOVES_CATALOG: Dict[str, Dict[str, Any]] = {
+    "special_ground_slam": {
+        "name": "Ground Slam",
+        "category": "combat",
         "length": 0.8,
         "loop": 0,
-        "desc": "Ground Slam: high airborne leap with dual overhead strike down to ground",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
         "tracks": {
             "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.2, (0, -25)), (0.45, (0, 16)), (0.8, (0, 0))],
             "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.2, 0.3), (0.45, -0.35), (0.8, 0.0)],
@@ -322,10 +331,12 @@ ANIMATION_DEFS: Dict[str, Dict[str, Any]] = {
             "Skeleton2D/pelvis/leg_upper_R/leg_lower_R:rotation": [(0, 0.0), (0.2, 1.0), (0.45, 1.3), (0.8, 0.0)],
         }
     },
-    "special_02": {
+    "special_whirlwind": {
+        "name": "Whirlwind Spin",
+        "category": "combat",
         "length": 0.6,
         "loop": 1,
-        "desc": "Whirlwind Spin: rapid 360-degree blade spin with outstretched arms",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
         "tracks": {
             "Skeleton2D/pelvis:position": [(0, (0, -2)), (0.3, (0, -4)), (0.6, (0, -2))],
             "Skeleton2D/pelvis/torso:rotation": [(0, -0.05), (0.15, 0.05), (0.3, -0.05), (0.45, 0.05), (0.6, -0.05)],
@@ -337,10 +348,12 @@ ANIMATION_DEFS: Dict[str, Dict[str, Any]] = {
             "Skeleton2D/pelvis/leg_upper_R:rotation": [(0, 0.3), (0.3, -0.3), (0.6, 0.3)],
         }
     },
-    "special_03": {
+    "special_power_charge": {
+        "name": "Overload Power Charge",
+        "category": "signature",
         "length": 1.2,
         "loop": 1,
-        "desc": "Arcane Power Charge: chest arched, head back, vibrating with surge of energy",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
         "tracks": {
             "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.3, (0, 4)), (0.6, (0, -1)), (0.9, (0, 4)), (1.2, (0, 0))],
             "Skeleton2D/pelvis/torso:position": [(0, (0, -40)), (0.3, (0, -38)), (0.6, (0, -42)), (0.9, (0, -38)), (1.2, (0, -40))],
@@ -352,10 +365,12 @@ ANIMATION_DEFS: Dict[str, Dict[str, Any]] = {
             "Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation": [(0, 0.0), (0.3, -1.25), (0.6, -1.35), (0.9, -1.25), (1.2, 0.0)],
         }
     },
-    "special_04": {
+    "special_victory_flourish": {
+        "name": "Victory Flourish",
+        "category": "tactical",
         "length": 1.1,
         "loop": 0,
-        "desc": "Heroic Victory Flourish: spin weapon, crisp hip sheath, noble victory salute",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
         "tracks": {
             "Skeleton2D/pelvis/torso:position": [(0, (0, -40)), (0.4, (0, -40)), (0.7, (0, -43)), (1.1, (0, -42))],
             "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.4, -0.1), (0.7, -0.05), (1.1, -0.05)],
@@ -364,8 +379,311 @@ ANIMATION_DEFS: Dict[str, Dict[str, Any]] = {
             "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.3, -0.3), (0.6, -0.8), (0.85, -0.5), (1.1, -0.3)],
             "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.4, 0.2), (0.7, -0.4), (1.1, -0.3)],
         }
+    },
+    "special_orbital_strike": {
+        "name": "Orbital Air Strike",
+        "category": "signature",
+        "length": 1.0,
+        "loop": 0,
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.2, (0, 6)), (0.5, (0, -4)), (1.0, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.2, 0.2), (0.5, -0.15), (1.0, -0.05)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.2, 0.1), (0.5, -0.35), (1.0, -0.4)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.2, 0.6), (0.45, -1.9), (0.7, -0.4), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.2, -0.8), (0.45, 0.0), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.5, 0.35), (1.0, 0.2)],
+        }
+    },
+    "special_psi_overload": {
+        "name": "Psionic Mind Pulse",
+        "category": "signature",
+        "length": 1.2,
+        "loop": 1,
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.3, (0, -8)), (0.6, (0, -12)), (0.9, (0, -8)), (1.2, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.3, 0.1), (0.6, -0.1), (0.9, 0.05), (1.2, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.3, 0.25), (0.6, 0.35), (0.9, 0.1), (1.2, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.4, -1.65), (0.8, -1.8), (1.2, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.4, -1.4), (0.8, -0.2), (1.2, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.4, 1.65), (0.8, 1.8), (1.2, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation": [(0, 0.0), (0.4, -1.4), (0.8, -0.2), (1.2, 0.0)],
+        }
+    },
+    "special_stim_inject": {
+        "name": "Combat Stim Overclock",
+        "category": "tactical",
+        "length": 0.8,
+        "loop": 0,
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.25, (0, 4)), (0.5, (0, -6)), (0.8, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.25, -0.18), (0.5, 0.15), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.25, 0.22), (0.5, -0.15), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.25, -1.45), (0.45, -1.6), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.25, -1.6), (0.45, -1.7), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.25, 0.4), (0.5, -0.3), (0.8, 0.0)],
+        }
+    },
+    "special_deploy_turret": {
+        "name": "Deploy Sentry Turret",
+        "category": "tactical",
+        "length": 0.9,
+        "loop": 0,
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.3, (0, 22)), (0.6, (0, 24)), (0.9, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.3, -0.3), (0.6, -0.35), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.3, -0.2), (0.6, -0.2), (0.9, 0.0)],
+            "Skeleton2D/pelvis/leg_upper_L:rotation": [(0, 0.0), (0.3, -0.9), (0.6, -0.9), (0.9, 0.0)],
+            "Skeleton2D/pelvis/leg_upper_L/leg_lower_L:rotation": [(0, 0.0), (0.3, 1.4), (0.6, 1.4), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.3, 0.7), (0.6, 0.9), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation": [(0, 0.0), (0.3, 1.1), (0.6, 1.3), (0.9, 0.0)],
+        }
+    },
+    "special_nanite_barrier": {
+        "name": "Nanite Energy Shield",
+        "category": "defense",
+        "length": 1.0,
+        "loop": 1,
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 6)), (0.5, (0, 4)), (1.0, (0, 6))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.12), (0.5, 0.08), (1.0, 0.12)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, -1.4), (0.5, -1.45), (1.0, -1.4)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, -0.4), (0.5, -0.45), (1.0, -0.4)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.3), (0.5, 0.35), (1.0, 0.3)],
+            "Skeleton2D/pelvis/leg_upper_L:rotation": [(0, -0.4), (0.5, -0.4), (1.0, -0.4)],
+            "Skeleton2D/pelvis/leg_upper_R:rotation": [(0, 0.4), (0.5, 0.4), (1.0, 0.4)],
+        }
+    },
+    "special_active_camo": {
+        "name": "Active Camo Cloak",
+        "category": "tactical",
+        "length": 1.0,
+        "loop": 0,
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.35, (0, 18)), (0.7, (0, 20)), (1.0, (0, 16))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.35, -0.2), (0.7, -0.22), (1.0, -0.15)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.35, 0.15), (0.7, -0.15), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.35, -0.7), (0.7, -0.75), (1.0, -0.5)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.35, -1.2), (0.7, -1.25), (1.0, -0.8)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.35, 0.5), (0.7, 0.4), (1.0, 0.2)],
+        }
+    },
+    "special_railgun_snipe": {
+        "name": "Overcharged Railgun Snipe",
+        "category": "combat",
+        "length": 1.1,
+        "loop": 0,
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.3, (0, 16)), (0.6, (-14, 12)), (1.1, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.3, -0.1), (0.6, 0.35), (1.1, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.3, -0.05), (0.6, 0.25), (1.1, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.3, -1.35), (0.6, -1.9), (1.1, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.3, -0.6), (0.6, -0.2), (1.1, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.3, -1.3), (0.6, -1.8), (1.1, 0.0)],
+        }
+    },
+    "special_mortar_barrage": {
+        "name": "Heavy Mortar Barrage",
+        "category": "combat",
+        "length": 1.0,
+        "loop": 0,
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.2, (0, 4)), (0.45, (0, 14)), (1.0, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.2, 0.22), (0.45, -0.15), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.2, -1.8), (0.45, -1.3), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.2, -0.5), (0.45, -0.3), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.2, -1.7), (0.45, -1.2), (1.0, 0.0)],
+        }
+    },
+    "special_flame_inferno": {
+        "name": "Sweeping Flame Inferno",
+        "category": "combat",
+        "length": 1.2,
+        "loop": 1,
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 2)), (0.3, (0, 0)), (0.6, (0, 3)), (0.9, (0, 0)), (1.2, (0, 2))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, -0.3), (0.3, 0.0), (0.6, 0.3), (0.9, 0.0), (1.2, -0.3)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, -1.25), (0.6, -1.35), (1.2, -1.25)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, -0.4), (0.6, -0.45), (1.2, -0.4)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, -1.1), (0.6, -1.2), (1.2, -1.1)],
+        }
+    },
+    "special_drone_swarm": {
+        "name": "Drone Swarm Launch",
+        "category": "tactical",
+        "length": 0.9,
+        "loop": 0,
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.3, (0, -3)), (0.6, (0, -2)), (0.9, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.3, -0.15), (0.6, 0.1), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.3, -0.25), (0.6, 0.15), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.3, -1.3), (0.6, -1.3), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.3, -1.45), (0.6, -1.45), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.3, 0.2), (0.6, 1.2), (0.9, 0.0)],
+        }
+    },
+    "special_emp_blast": {
+        "name": "EMP Disruptor Blast",
+        "category": "tactical",
+        "length": 0.8,
+        "loop": 0,
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.2, (0, 4)), (0.45, (0, 10)), (0.8, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.2, 0.25), (0.45, -0.2), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.2, 0.1), (0.45, -0.3), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.2, 0.8), (0.4, -1.8), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.3, 0.0), (0.45, -1.5), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.3, 0.0), (0.45, -1.4), (0.8, 0.0)],
+        }
+    },
+    "special_cyber_dash": {
+        "name": "Cyber Blade Dash",
+        "category": "combat",
+        "length": 0.6,
+        "loop": 0,
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.2, (-25, 14)), (0.45, (10, 8)), (0.6, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.2, -0.45), (0.45, 0.3), (0.6, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.2, -1.8), (0.45, 1.4), (0.6, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.2, 1.8), (0.45, -1.4), (0.6, 0.0)],
+            "Skeleton2D/pelvis/leg_upper_L:rotation": [(0, 0.0), (0.2, -1.1), (0.45, 0.4), (0.6, 0.0)],
+            "Skeleton2D/pelvis/leg_upper_R:rotation": [(0, 0.0), (0.2, 0.9), (0.45, -0.8), (0.6, 0.0)],
+        }
+    },
+    "special_heavy_gatling": {
+        "name": "Suppressive Gatling Rumble",
+        "category": "combat",
+        "length": 1.0,
+        "loop": 1,
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 4)), (0.25, (0, 2)), (0.5, (0, 5)), (0.75, (0, 2)), (1.0, (0, 4))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.1), (0.25, 0.08), (0.5, 0.12), (0.75, 0.08), (1.0, 0.1)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, -0.85), (0.5, -0.9), (1.0, -0.85)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, -0.9), (0.5, -0.95), (1.0, -0.9)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, -0.8), (0.5, -0.85), (1.0, -0.8)],
+            "Skeleton2D/pelvis/leg_upper_L:rotation": [(0, -0.3), (0.5, -0.3), (1.0, -0.3)],
+            "Skeleton2D/pelvis/leg_upper_R:rotation": [(0, 0.3), (0.5, 0.3), (1.0, 0.3)],
+        }
+    },
+    "special_cyber_hack": {
+        "name": "Data-Spike Cyber Hack",
+        "category": "tactical",
+        "length": 1.0,
+        "loop": 1,
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "tracks": {
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.5, -0.08), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, -0.15), (0.5, -0.2), (1.0, -0.15)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, -1.35), (0.5, -1.4), (1.0, -1.35)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, -0.7), (0.5, -0.75), (1.0, -0.7)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, -1.1), (0.25, -1.25), (0.5, -1.05), (0.75, -1.25), (1.0, -1.1)],
+            "Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation": [(0, -1.1), (0.25, -0.9), (0.5, -1.1), (0.75, -0.9), (1.0, -1.1)],
+        }
+    },
+    "special_flak_barrage": {
+        "name": "Skyward Flak Barrage",
+        "category": "combat",
+        "length": 0.9,
+        "loop": 0,
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.25, (0, 8)), (0.55, (0, 12)), (0.9, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.25, 0.3), (0.55, 0.35), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.25, 0.45), (0.55, 0.5), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.25, -2.15), (0.55, -2.25), (0.9, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.25, -2.05), (0.55, -2.15), (0.9, 0.0)],
+        }
+    },
+    "special_defib_revive": {
+        "name": "Combat Defibrillator",
+        "category": "tactical",
+        "length": 1.0,
+        "loop": 0,
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.3, (0, 20)), (0.55, (0, 24)), (1.0, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.3, -0.3), (0.55, -0.45), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.3, -0.2), (0.55, -0.25), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.3, -0.9), (0.55, -0.4), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L/arm_lower_L:rotation": [(0, 0.0), (0.3, -1.2), (0.55, -0.6), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.3, 0.9), (0.55, 0.4), (1.0, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation": [(0, 0.0), (0.3, 1.2), (0.55, 0.6), (1.0, 0.0)],
+        }
+    },
+    "special_sonic_screech": {
+        "name": "Concussive Sonic Roar",
+        "category": "combat",
+        "length": 0.8,
+        "loop": 0,
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.25, (0, -6)), (0.5, (0, 6)), (0.8, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.25, 0.35), (0.5, -0.4), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/head:rotation": [(0, 0.0), (0.25, 0.45), (0.5, -0.35), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_L:rotation": [(0, 0.0), (0.25, -0.6), (0.5, 1.2), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.25, 0.6), (0.5, -1.2), (0.8, 0.0)],
+        }
+    },
+    "special_napalm_toss": {
+        "name": "Incendiary Napalm Toss",
+        "category": "combat",
+        "length": 0.8,
+        "loop": 0,
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "tracks": {
+            "Skeleton2D/pelvis:position": [(0, (0, 0)), (0.2, (0, 4)), (0.45, (0, -2)), (0.8, (0, 0))],
+            "Skeleton2D/pelvis/torso:rotation": [(0, 0.0), (0.2, 0.3), (0.45, -0.3), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R:rotation": [(0, 0.0), (0.2, 0.9), (0.45, -2.1), (0.8, 0.0)],
+            "Skeleton2D/pelvis/torso/arm_upper_R/arm_lower_R:rotation": [(0, 0.0), (0.2, -0.8), (0.45, 0.1), (0.8, 0.0)],
+        }
     }
 }
+
+def get_special_moves_catalog() -> Dict[str, Dict[str, Any]]:
+    """Returns the full dictionary of all 22 signature special moves."""
+    return SPECIAL_MOVES_CATALOG
+
+def randomize_character_specials(seed_val: int = None) -> List[str]:
+    """Selects 4 distinct signature special move IDs from the catalog."""
+    import random
+    rng = random.Random(seed_val) if seed_val is not None else random.Random()
+    all_keys = list(SPECIAL_MOVES_CATALOG.keys())
+    return rng.sample(all_keys, 4)
+
+def build_character_animations(specials_list: List[str] = None) -> Dict[str, Dict[str, Any]]:
+    """
+    Returns full 23-animation dictionary for a character:
+    19 standard animations + 4 assigned or randomized signature special moves.
+    """
+    if not specials_list or len(specials_list) < 4:
+        specials_list = ["special_ground_slam", "special_whirlwind", "special_power_charge", "special_victory_flourish"]
+    
+    anims = dict(CORE_ANIMATION_DEFS)
+    for idx, sp_key in enumerate(specials_list[:4]):
+        slot_name = f"special_{idx+1:02d}"
+        if sp_key in SPECIAL_MOVES_CATALOG:
+            move_data = dict(SPECIAL_MOVES_CATALOG[sp_key])
+            move_data["catalog_key"] = sp_key
+            anims[slot_name] = move_data
+        else:
+            # Fallback
+            anims[slot_name] = SPECIAL_MOVES_CATALOG["special_ground_slam"]
+    return anims
+
+# Backward compatibility alias
+ANIMATION_DEFS: Dict[str, Dict[str, Any]] = build_character_animations()
 
 
 def build_tscn_animation_text(anim_name: str, anim_data: Dict[str, Any]) -> str:

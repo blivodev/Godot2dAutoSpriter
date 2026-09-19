@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_engineer",
+  "display_name": "Scav Tinkerer",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Engineer",
+  "description": "Scrap artisan who bolts together motorized junk barricades and scrap turrets.",
+  "weapon_id": "syndicate_shotgun",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_deploy_turret",
+    "special_cyber_hack",
+    "special_emp_blast",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

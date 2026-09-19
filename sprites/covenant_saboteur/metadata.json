@@ -1,0 +1,46 @@
+{
+  "character_name": "covenant_saboteur",
+  "display_name": "Phantom Spectre",
+  "faction_id": "covenant",
+  "faction_name": "Neuro-Covenant",
+  "role": "Spy / Saboteur",
+  "description": "Phase-shifting operative who infiltrates security networks by mind-hijacking sentries.",
+  "weapon_id": "covenant_submachine_gun",
+  "art_style": "anime",
+  "specials": [
+    "special_active_camo",
+    "special_cyber_hack",
+    "special_psi_overload",
+    "special_cyber_dash"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "character_name": "silicon_specagent",
+  "display_name": "Cyber Recon Operative",
+  "faction_id": "silicon",
+  "faction_name": "Silicon Hive",
+  "role": "Special Agent",
+  "description": "Silent assassin chassis fitted with thermal sensor baffles and monomolecular vibrating blade.",
+  "weapon_id": "silicon_submachine_gun",
+  "art_style": "anime",
+  "specials": [
+    "special_active_camo",
+    "special_cyber_dash",
+    "special_cyber_hack",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}

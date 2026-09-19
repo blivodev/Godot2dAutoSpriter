@@ -1,0 +1,46 @@
+{
+  "character_name": "covenant_soldier",
+  "display_name": "Covenant Zealot",
+  "faction_id": "covenant",
+  "faction_name": "Neuro-Covenant",
+  "role": "Soldier",
+  "description": "Devoted warrior firing condensed psionic beam energy from a conduit carbine.",
+  "weapon_id": "covenant_assault_rifle",
+  "art_style": "anime",
+  "specials": [
+    "special_psi_overload",
+    "special_power_charge",
+    "special_cyber_dash",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

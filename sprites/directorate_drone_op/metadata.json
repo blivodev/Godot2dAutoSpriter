@@ -1,0 +1,46 @@
+{
+  "character_name": "directorate_drone_op",
+  "display_name": "Hunter Drone Commander",
+  "faction_id": "directorate",
+  "faction_name": "Neo-Terra Directorate",
+  "role": "Drone Operator",
+  "description": "Tactical officer with holographic wrist comms commanding autonomous hunter drones.",
+  "weapon_id": "directorate_drone_pad",
+  "art_style": "anime",
+  "specials": [
+    "special_drone_swarm",
+    "special_deploy_turret",
+    "special_orbital_strike",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

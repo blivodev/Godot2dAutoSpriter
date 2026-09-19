@@ -1,0 +1,46 @@
+{
+  "character_name": "bioforge_drone_op",
+  "display_name": "Spore-Wasp Handler",
+  "faction_id": "bioforge",
+  "faction_name": "Bio-Forge Legion",
+  "role": "Drone Operator",
+  "description": "Releases swarms of bio-engineered armor-piercing wasps with lethal neurotoxin stingers.",
+  "weapon_id": "bioforge_drone_pad",
+  "art_style": "anime",
+  "specials": [
+    "special_drone_swarm",
+    "special_deploy_turret",
+    "special_stim_inject",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "character_name": "covenant_sniper",
+  "display_name": "Void Eye Gazer",
+  "faction_id": "covenant",
+  "faction_name": "Neuro-Covenant",
+  "role": "Sniper",
+  "description": "Psionic sniper projecting clairvoyant rail-lances through physical cover.",
+  "weapon_id": "covenant_sniper_rifle",
+  "art_style": "anime",
+  "specials": [
+    "special_railgun_snipe",
+    "special_active_camo",
+    "special_psi_overload",
+    "special_power_charge"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    }
+  ]
+}

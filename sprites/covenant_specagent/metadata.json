@@ -1,0 +1,46 @@
+{
+  "character_name": "covenant_specagent",
+  "display_name": "Covenant Archon",
+  "faction_id": "covenant",
+  "faction_name": "Neuro-Covenant",
+  "role": "Special Agent",
+  "description": "Teleporting void assassin cutting targets down with dual psychokinetic blades.",
+  "weapon_id": "covenant_submachine_gun",
+  "art_style": "anime",
+  "specials": [
+    "special_cyber_dash",
+    "special_active_camo",
+    "special_whirlwind",
+    "special_psi_overload"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    }
+  ]
+}

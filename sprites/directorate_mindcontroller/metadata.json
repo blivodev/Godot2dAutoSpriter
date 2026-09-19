@@ -1,0 +1,46 @@
+{
+  "character_name": "directorate_mindcontroller",
+  "display_name": "Neural Taskmaster",
+  "faction_id": "directorate",
+  "faction_name": "Neo-Terra Directorate",
+  "role": "Mind Controller",
+  "description": "Cybernetic psionic officer using neural override frequencies to hijack enemy minds.",
+  "weapon_id": "directorate_psi_emitter",
+  "art_style": "anime",
+  "specials": [
+    "special_psi_overload",
+    "special_power_charge",
+    "special_sonic_screech",
+    "special_orbital_strike"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    }
+  ]
+}

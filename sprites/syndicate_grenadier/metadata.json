@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_grenadier",
+  "display_name": "Bomb Lobber",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Grenadier",
+  "description": "Crazed demolitionist carrying bandoliers of pipe bombs and volatile shrapnel.",
+  "weapon_id": "syndicate_grenade_launcher",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_napalm_toss",
+    "special_emp_blast",
+    "special_ground_slam",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_flamethrower",
+  "display_name": "Scorcher Fiend",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Flame Trooper",
+  "description": "Incendiary maniac spraying superheated crude petroleum across the battlefield.",
+  "weapon_id": "syndicate_flamethrower",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_flame_inferno",
+    "special_napalm_toss",
+    "special_ground_slam",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

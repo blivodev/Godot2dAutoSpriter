@@ -1,0 +1,46 @@
+{
+  "character_name": "silicon_medic",
+  "display_name": "Nanite Repair Solder-Unit",
+  "faction_id": "silicon",
+  "faction_name": "Silicon Hive",
+  "role": "Medic",
+  "description": "Mobile maintenance unit deploying solder-lasers and nanite swarms to repair friendly frames.",
+  "weapon_id": "silicon_submachine_gun",
+  "art_style": "anime",
+  "specials": [
+    "special_defib_revive",
+    "special_nanite_barrier",
+    "special_power_charge",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}

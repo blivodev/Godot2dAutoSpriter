@@ -1,0 +1,46 @@
+{
+  "character_name": "directorate_saboteur",
+  "display_name": "Covert Interceptor",
+  "faction_id": "directorate",
+  "faction_name": "Neo-Terra Directorate",
+  "role": "Spy / Saboteur",
+  "description": "Electronic warfare operative who infiltrates enemy grids with dataspike injects.",
+  "weapon_id": "directorate_submachine_gun",
+  "art_style": "anime",
+  "specials": [
+    "special_cyber_hack",
+    "special_active_camo",
+    "special_emp_blast",
+    "special_cyber_dash"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    }
+  ]
+}

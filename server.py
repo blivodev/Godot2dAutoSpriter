@@ -1281,7 +1281,7 @@ def list_generated_characters() -> str:
 
     if sprites_root.is_dir():
         for char_dir in sorted(sprites_root.iterdir()):
-            if not char_dir.is_dir():
+            if not char_dir.is_dir() or char_dir.name in ["weapons", "projectiles"]:
                 continue
             seen_names.add(char_dir.name)
             limb_files = sorted(char_dir.glob("*.png"))
@@ -1308,8 +1308,26 @@ def list_generated_characters() -> str:
                 except Exception:
                     pass
 
+            meta_data = {}
+            meta_path = char_dir / "metadata.json"
+            if meta_path.is_file():
+                try:
+                    with open(meta_path, "r", encoding="utf-8") as mf:
+                        meta_data = json.load(mf)
+                except Exception:
+                    pass
+
             characters.append({
                 "name": char_dir.name,
+                "display_name": meta_data.get("display_name", char_dir.name.replace("_", " ").title()),
+                "faction_id": meta_data.get("faction_id", "custom"),
+                "faction_name": meta_data.get("faction_name", "Independent"),
+                "role": meta_data.get("role", "Warrior"),
+                "description": meta_data.get("description", ""),
+                "weapon_id": meta_data.get("weapon_id", ""),
+                "equipped_weapon": meta_data.get("equipped_weapon", meta_data.get("weapon_id", "")),
+                "specials": meta_data.get("specials", ["special_ground_slam", "special_whirlwind", "special_power_charge", "special_victory_flourish"]),
+                "special_details": meta_data.get("special_details", []),
                 "limb_count": len(actual_limbs),
                 "has_exploded_sheet": has_exploded,
                 "exploded_url": f"/sprites/{char_dir.name}/{char_dir.name}_exploded.png" if has_exploded else None,
@@ -1608,6 +1626,218 @@ def batch_rerig_characters(character_names: List[str] = None) -> str:
                 "re_rigged_count": len(results),
                 "results": results
             }, indent=2)
+    except Exception as e:
+        return json.dumps({"status": "error", "message": str(e)}, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 14: list_special_moves_catalog
+# ==============================================================================
+@mcp.tool()
+def list_special_moves_catalog() -> str:
+    """Returns the comprehensive catalog of 22 signature special combat abilities.
+
+    Returns:
+        JSON string containing the special moves with name, category, description, and length.
+    """
+    try:
+        from scripts.generate_rig_animations import get_special_moves_catalog
+        cat = get_special_moves_catalog()
+        return json.dumps({
+            "status": "ok",
+            "total_specials": len(cat),
+            "catalog": [
+                {
+                    "key": k,
+                    "name": v.get("name", k),
+                    "category": v.get("category", "combat"),
+                    "description": v.get("desc", ""),
+                    "length": v.get("length", 1.0),
+                    "loop": bool(v.get("loop", 0))
+                }
+                for k, v in cat.items()
+            ]
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({"status": "error", "message": str(e)}, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 15: generate_weapon
+# ==============================================================================
+@mcp.tool()
+def generate_weapon(
+    name: str,
+    weapon_type: str = "assault_rifle",
+    faction: str = "directorate"
+) -> str:
+    """Generates a 2D sci-fi cyberpunk weapon sprite and Godot 4 scene.
+
+    Args:
+        name: Unique weapon identifier (e.g. 'plasma_carbine', 'scrap_shotgun').
+        weapon_type: Weapon archetype ('assault_rifle', 'sniper_rifle', 'rocket_launcher',
+                     'grenade_launcher', 'flamethrower', 'psi_emitter', 'flak_cannon',
+                     'submachine_gun', 'shotgun', 'drone_pad', 'bio_spitter', 'rotary_gatling').
+        faction: Visual theme ('directorate', 'syndicate', 'covenant', 'bioforge', 'silicon').
+
+    Returns:
+        JSON string with paths to generated .png sprite and .tscn Godot scene.
+    """
+    try:
+        from scripts.generate_weapon_projectiles import create_weapon
+        res = create_weapon(name, weapon_type, faction)
+        return json.dumps(res, indent=2)
+    except Exception as e:
+        return json.dumps({"status": "error", "message": str(e)}, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 16: generate_projectile
+# ==============================================================================
+@mcp.tool()
+def generate_projectile(
+    name: str,
+    projectile_type: str = "plasma_bolt",
+    faction: str = "directorate"
+) -> str:
+    """Generates a static or animated projectile sprite sheet, frames, and Godot 4 Area2D scene.
+
+    Args:
+        name: Unique projectile identifier (e.g. 'plasma_orb', 'rail_streak', 'fire_jet').
+        projectile_type: Type of projectile ('kinetic_bullet', 'sniper_beam', 'rocket_missile',
+                         'grenade_canister', 'plasma_bolt', 'flame_jet', 'psionic_orb',
+                         'flak_burst', 'acid_globule').
+        faction: Visual color theme ('directorate', 'syndicate', 'covenant', 'bioforge', 'silicon').
+
+    Returns:
+        JSON string with paths to generated sprite/frames, strip, and Godot 4 .tscn scene.
+    """
+    try:
+        from scripts.generate_weapon_projectiles import create_projectile
+        res = create_projectile(name, projectile_type, faction)
+        return json.dumps(res, indent=2)
+    except Exception as e:
+        return json.dumps({"status": "error", "message": str(e)}, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 17: list_weapons_and_projectiles
+# ==============================================================================
+@mcp.tool()
+def list_weapons_and_projectiles() -> str:
+    """Lists all available weapons and projectiles in the asset library.
+
+    Returns:
+        JSON string detailing all generated weapons and projectiles.
+    """
+    try:
+        w_dir = PROJECT_ROOT / "sprites" / "weapons"
+        p_dir = PROJECT_ROOT / "sprites" / "projectiles"
+        scenes_w = PROJECT_ROOT / "scenes" / "weapons"
+        scenes_p = PROJECT_ROOT / "scenes" / "projectiles"
+
+        weapons = []
+        if w_dir.is_dir():
+            for f in sorted(w_dir.glob("*.png")):
+                w_name = f.stem
+                sc = scenes_w / f"{w_name}.tscn"
+                weapons.append({
+                    "name": w_name,
+                    "sprite": f"/sprites/weapons/{f.name}",
+                    "has_scene": sc.is_file(),
+                    "scene_path": f"res://scenes/weapons/{f.stem}.tscn" if sc.is_file() else None
+                })
+
+        projectiles = []
+        if p_dir.is_dir():
+            for f in sorted(p_dir.glob("*.png")):
+                if "_f" in f.name:
+                    continue
+                p_name = f.stem.replace("_strip", "")
+                sc = scenes_p / f"{p_name}.tscn"
+                projectiles.append({
+                    "name": p_name,
+                    "sprite": f"/sprites/projectiles/{f.name}",
+                    "is_strip": "_strip" in f.name,
+                    "has_scene": sc.is_file(),
+                    "scene_path": f"res://scenes/projectiles/{p_name}.tscn" if sc.is_file() else None
+                })
+
+        return json.dumps({
+            "status": "ok",
+            "weapons_count": len(weapons),
+            "projectiles_count": len(projectiles),
+            "weapons": weapons,
+            "projectiles": projectiles
+        }, indent=2)
+    except Exception as e:
+        return json.dumps({"status": "error", "message": str(e)}, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 18: equip_character_weapon
+# ==============================================================================
+@mcp.tool()
+def equip_character_weapon(
+    character_name: str,
+    weapon_name: str,
+    hand: str = "R"
+) -> str:
+    """Attaches an equipped weapon to a character's hand weapon slot in metadata and rig.
+
+    Args:
+        character_name: Target character name.
+        weapon_name: Name of the weapon in sprites/weapons/ (e.g. 'directorate_assault_rifle').
+        hand: Hand slot ('R' for Right Hand or 'L' for Left Hand).
+
+    Returns:
+        JSON string reporting equipment status.
+    """
+    clean_name = character_name.strip().lower().replace(" ", "_")
+    clean_hand = hand.strip().upper()
+    if clean_hand not in ["R", "L"]:
+        clean_hand = "R"
+
+    meta_file = PROJECT_ROOT / "sprites" / clean_name / "metadata.json"
+    meta = {}
+    if meta_file.is_file():
+        try:
+            with open(meta_file, "r", encoding="utf-8") as f:
+                meta = json.load(f)
+        except Exception:
+            pass
+
+    meta["equipped_weapon"] = weapon_name
+    meta["equipped_hand"] = clean_hand
+    meta_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(meta_file, "w", encoding="utf-8") as f:
+        json.dump(meta, f, indent=2)
+
+    return json.dumps({
+        "status": "success",
+        "character": clean_name,
+        "equipped_weapon": weapon_name,
+        "slot": f"WeaponSlot_{clean_hand}",
+        "message": f"Successfully equipped '{weapon_name}' to {clean_name}'s {clean_hand} hand."
+    }, indent=2)
+
+
+# ==============================================================================
+# MCP TOOL 19: list_factions_and_roster
+# ==============================================================================
+@mcp.tool()
+def list_factions_and_roster() -> str:
+    """Lists the 5 Cyberpunk Post-Apocalyptic RTS factions and all 60 characters in the roster.
+
+    Returns:
+        JSON string containing faction details and all 60 units.
+    """
+    try:
+        roster_path = PROJECT_ROOT / "sprites" / "faction_roster.json"
+        if roster_path.is_file():
+            with open(roster_path, "r", encoding="utf-8") as f:
+                return f.read()
+        return json.dumps({"status": "error", "message": "Faction roster not yet generated. Run scripts/generate_faction_roster.py first."}, indent=2)
     except Exception as e:
         return json.dumps({"status": "error", "message": str(e)}, indent=2)
 

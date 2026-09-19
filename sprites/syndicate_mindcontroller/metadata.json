@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_mindcontroller",
+  "display_name": "Brain-Melter Hermit",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Mind Controller",
+  "description": "Radiation-scarred psyker with a cobbled radio-amplified hypno-crown.",
+  "weapon_id": "syndicate_psi_emitter",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_psi_overload",
+    "special_sonic_screech",
+    "special_power_charge",
+    "special_emp_blast"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    }
+  ]
+}

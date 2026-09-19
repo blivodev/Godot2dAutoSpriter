@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_rocket",
+  "display_name": "Rust-Rocket Demolitionist",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Rocket Trooper",
+  "description": "Heavy raider wielding a jury-rigged triple-barrel scrap iron rocket launcher.",
+  "weapon_id": "syndicate_rocket_launcher",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_mortar_barrage",
+    "special_orbital_strike",
+    "special_ground_slam",
+    "special_power_charge"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "character_name": "silicon_mindcontroller",
+  "display_name": "Logic Corruptor Unit",
+  "faction_id": "silicon",
+  "faction_name": "Silicon Hive",
+  "role": "Mind Controller",
+  "description": "Emits electromagnetic override pulses that hijack organic cyberware and electronic systems.",
+  "weapon_id": "silicon_psi_emitter",
+  "art_style": "anime",
+  "specials": [
+    "special_psi_overload",
+    "special_cyber_hack",
+    "special_orbital_strike",
+    "special_sonic_screech"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    }
+  ]
+}

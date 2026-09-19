@@ -1,0 +1,46 @@
+{
+  "character_name": "syndicate_soldier",
+  "display_name": "Scrap Marauder",
+  "faction_id": "syndicate",
+  "faction_name": "Rust Syndicate",
+  "role": "Soldier",
+  "description": "Gunslinger soldier with a cobbled autogun welded from vehicle parts.",
+  "weapon_id": "syndicate_assault_rifle",
+  "art_style": "dark_fantasy",
+  "specials": [
+    "special_heavy_gatling",
+    "special_napalm_toss",
+    "special_ground_slam",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

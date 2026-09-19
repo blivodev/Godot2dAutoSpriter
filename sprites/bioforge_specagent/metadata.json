@@ -1,0 +1,46 @@
+{
+  "character_name": "bioforge_specagent",
+  "display_name": "Apex Predator Agent",
+  "faction_id": "bioforge",
+  "faction_name": "Bio-Forge Legion",
+  "role": "Special Agent",
+  "description": "Gene-spliced hunter with chameleon skin, heightened reflexes, and razor bone talons.",
+  "weapon_id": "bioforge_submachine_gun",
+  "art_style": "anime",
+  "specials": [
+    "special_active_camo",
+    "special_cyber_dash",
+    "special_stim_inject",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

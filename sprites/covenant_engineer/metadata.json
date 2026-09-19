@@ -1,0 +1,46 @@
+{
+  "character_name": "covenant_engineer",
+  "display_name": "Chrono-Architect",
+  "faction_id": "covenant",
+  "faction_name": "Neuro-Covenant",
+  "role": "Engineer",
+  "description": "Synthesizes hard-light shielding arrays and temporal distortion anchors.",
+  "weapon_id": "covenant_shotgun",
+  "art_style": "anime",
+  "specials": [
+    "special_nanite_barrier",
+    "special_deploy_turret",
+    "special_cyber_hack",
+    "special_power_charge"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    }
+  ]
+}
