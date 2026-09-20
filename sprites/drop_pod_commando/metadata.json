@@ -1,0 +1,49 @@
+{
+  "character_name": "drop_pod_commando",
+  "display_name": "Drop-Pod Commando",
+  "faction_id": "orbital",
+  "faction_name": "Orbital Black-Ops Legion",
+  "sector": "Orbital Black-Ops Legion",
+  "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+  "model_key": "dreamshaper_8",
+  "theme_color": "#2ecc71",
+  "role": "Rocket Trooper",
+  "weapon_id": "missile_launcher",
+  "art_style": "anime",
+  "specials": [
+    "special_ground_slam",
+    "special_defib_revive",
+    "special_sonic_screech",
+    "special_active_camo"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "character_name": "soul_core_adept",
+  "display_name": "Soul-Core Adept",
+  "faction_id": "aetherium",
+  "faction_name": "Aetherium Psionic Syndicate",
+  "sector": "Aetherium Psionic Syndicate",
+  "model_engine": "RPG Remix (Ornate Psionic Occult)",
+  "model_key": "rpg_remix",
+  "theme_color": "#9b59b6",
+  "role": "Medic",
+  "weapon_id": "aether_orb",
+  "art_style": "anime",
+  "specials": [
+    "special_flame_inferno",
+    "special_nanite_barrier",
+    "special_cyber_hack",
+    "special_active_camo"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    }
+  ]
+}

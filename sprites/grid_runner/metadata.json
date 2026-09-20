@@ -1,0 +1,49 @@
+{
+  "character_name": "grid_runner",
+  "display_name": "Grid Runner",
+  "faction_id": "neonglitch",
+  "faction_name": "Neon Glitch Underground",
+  "sector": "Neon Glitch Underground",
+  "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+  "model_key": "pixel_anime_hybrid",
+  "theme_color": "#ff007f",
+  "role": "Medic",
+  "weapon_id": "stim_dispenser",
+  "art_style": "anime",
+  "specials": [
+    "special_deploy_turret",
+    "special_sonic_screech",
+    "special_nanite_barrier",
+    "special_defib_revive"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "character_name": "tachyon_striker",
+  "display_name": "Tachyon Striker",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Soldier",
+  "weapon_id": "plasma_rifle",
+  "art_style": "anime",
+  "specials": [
+    "special_flame_inferno",
+    "special_sonic_screech",
+    "special_defib_revive",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

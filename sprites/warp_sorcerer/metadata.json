@@ -1,0 +1,49 @@
+{
+  "character_name": "warp_sorcerer",
+  "display_name": "Warp Sorcerer",
+  "faction_id": "aetherium",
+  "faction_name": "Aetherium Psionic Syndicate",
+  "sector": "Aetherium Psionic Syndicate",
+  "model_engine": "RPG Remix (Ornate Psionic Occult)",
+  "model_key": "rpg_remix",
+  "theme_color": "#9b59b6",
+  "role": "Flamethrower",
+  "weapon_id": "soul_fire_caster",
+  "art_style": "anime",
+  "specials": [
+    "special_psi_overload",
+    "special_flak_barrage",
+    "special_napalm_toss",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}

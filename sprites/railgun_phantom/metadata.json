@@ -1,0 +1,49 @@
+{
+  "character_name": "railgun_phantom",
+  "display_name": "Railgun Phantom",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Sniper",
+  "weapon_id": "sniper_railgun",
+  "art_style": "anime",
+  "specials": [
+    "special_heavy_gatling",
+    "special_ground_slam",
+    "special_victory_flourish",
+    "special_cyber_dash"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    }
+  ]
+}

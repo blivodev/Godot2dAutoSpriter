@@ -1,0 +1,49 @@
+{
+  "character_name": "glitch_operator",
+  "display_name": "Glitch Operator",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Drone Operator",
+  "weapon_id": "drone_pad",
+  "art_style": "anime",
+  "specials": [
+    "special_ground_slam",
+    "special_flak_barrage",
+    "special_railgun_snipe",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}

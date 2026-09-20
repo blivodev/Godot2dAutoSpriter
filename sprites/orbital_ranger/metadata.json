@@ -1,0 +1,49 @@
+{
+  "character_name": "orbital_ranger",
+  "display_name": "Orbital Ranger",
+  "faction_id": "orbital",
+  "faction_name": "Orbital Black-Ops Legion",
+  "sector": "Orbital Black-Ops Legion",
+  "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+  "model_key": "dreamshaper_8",
+  "theme_color": "#2ecc71",
+  "role": "Soldier",
+  "weapon_id": "carbine_mk4",
+  "art_style": "anime",
+  "specials": [
+    "special_nanite_barrier",
+    "special_power_charge",
+    "special_cyber_dash",
+    "special_cyber_hack"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    }
+  ]
+}

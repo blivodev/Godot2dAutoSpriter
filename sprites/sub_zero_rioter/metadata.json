@@ -1,0 +1,49 @@
+{
+  "character_name": "sub_zero_rioter",
+  "display_name": "Sub-Zero Rioter",
+  "faction_id": "neonglitch",
+  "faction_name": "Neon Glitch Underground",
+  "sector": "Neon Glitch Underground",
+  "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+  "model_key": "pixel_anime_hybrid",
+  "theme_color": "#ff007f",
+  "role": "Juggernaut",
+  "weapon_id": "cryo_bat",
+  "art_style": "anime",
+  "specials": [
+    "special_nanite_barrier",
+    "special_stim_inject",
+    "special_drone_swarm",
+    "special_heavy_gatling"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "character_name": "scrap_gunner",
+  "display_name": "Scrap Gunner",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Soldier",
+  "weapon_id": "pipe_minigun",
+  "art_style": "anime",
+  "specials": [
+    "special_cyber_dash",
+    "special_power_charge",
+    "special_psi_overload",
+    "special_heavy_gatling"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    }
+  ]
+}

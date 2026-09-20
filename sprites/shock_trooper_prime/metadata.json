@@ -1,0 +1,49 @@
+{
+  "character_name": "shock_trooper_prime",
+  "display_name": "Shock Trooper Prime",
+  "faction_id": "orbital",
+  "faction_name": "Orbital Black-Ops Legion",
+  "sector": "Orbital Black-Ops Legion",
+  "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+  "model_key": "dreamshaper_8",
+  "theme_color": "#2ecc71",
+  "role": "Soldier",
+  "weapon_id": "shock_carbine",
+  "art_style": "anime",
+  "specials": [
+    "special_orbital_strike",
+    "special_stim_inject",
+    "special_flak_barrage",
+    "special_psi_overload"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    }
+  ]
+}

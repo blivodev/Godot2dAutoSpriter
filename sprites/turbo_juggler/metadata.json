@@ -1,0 +1,49 @@
+{
+  "character_name": "turbo_juggler",
+  "display_name": "Turbo Juggler",
+  "faction_id": "neonglitch",
+  "faction_name": "Neon Glitch Underground",
+  "sector": "Neon Glitch Underground",
+  "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+  "model_key": "pixel_anime_hybrid",
+  "theme_color": "#ff007f",
+  "role": "Sniper",
+  "weapon_id": "photon_rifle",
+  "art_style": "anime",
+  "specials": [
+    "special_victory_flourish",
+    "special_mortar_barrage",
+    "special_emp_blast",
+    "special_sonic_screech"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "character_name": "diesel_titan",
+  "display_name": "Diesel Titan",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Heavy Ordinance",
+  "weapon_id": "diesel_cannon",
+  "art_style": "anime",
+  "specials": [
+    "special_emp_blast",
+    "special_flak_barrage",
+    "special_defib_revive",
+    "special_flame_inferno"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    }
+  ]
+}

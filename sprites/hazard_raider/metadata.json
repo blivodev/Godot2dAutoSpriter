@@ -1,0 +1,49 @@
+{
+  "character_name": "hazard_raider",
+  "display_name": "Hazard Raider",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Rocket Trooper",
+  "weapon_id": "junk_rpg",
+  "art_style": "anime",
+  "specials": [
+    "special_nanite_barrier",
+    "special_flak_barrage",
+    "special_mortar_barrage",
+    "special_victory_flourish"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    }
+  ]
+}

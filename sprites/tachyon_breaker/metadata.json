@@ -1,0 +1,49 @@
+{
+  "character_name": "tachyon_breaker",
+  "display_name": "Tachyon Breaker",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Flak Trooper",
+  "weapon_id": "flak_cannon",
+  "art_style": "anime",
+  "specials": [
+    "special_defib_revive",
+    "special_drone_swarm",
+    "special_heavy_gatling",
+    "special_ground_slam"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    }
+  ]
+}

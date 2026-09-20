@@ -1,0 +1,49 @@
+{
+  "character_name": "apex_infiltrator",
+  "display_name": "Apex Infiltrator",
+  "faction_id": "orbital",
+  "faction_name": "Orbital Black-Ops Legion",
+  "sector": "Orbital Black-Ops Legion",
+  "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+  "model_key": "dreamshaper_8",
+  "theme_color": "#2ecc71",
+  "role": "Infiltrator",
+  "weapon_id": "silenced_pdw",
+  "art_style": "anime",
+  "specials": [
+    "special_sonic_screech",
+    "special_emp_blast",
+    "special_stim_inject",
+    "special_railgun_snipe"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "character_name": "laser_skater",
+  "display_name": "Laser Skater",
+  "faction_id": "neonglitch",
+  "faction_name": "Neon Glitch Underground",
+  "sector": "Neon Glitch Underground",
+  "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+  "model_key": "pixel_anime_hybrid",
+  "theme_color": "#ff007f",
+  "role": "Soldier",
+  "weapon_id": "light_smg",
+  "art_style": "anime",
+  "specials": [
+    "special_napalm_toss",
+    "special_active_camo",
+    "special_psi_overload",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

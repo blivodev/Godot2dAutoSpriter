@@ -1,0 +1,49 @@
+{
+  "character_name": "rad_waste_hunter",
+  "display_name": "Rad-Waste Hunter",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Infiltrator",
+  "weapon_id": "rad_crossbow",
+  "art_style": "anime",
+  "specials": [
+    "special_flak_barrage",
+    "special_nanite_barrier",
+    "special_ground_slam",
+    "special_cyber_dash"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    }
+  ]
+}

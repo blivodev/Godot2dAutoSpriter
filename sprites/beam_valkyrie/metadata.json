@@ -1,0 +1,49 @@
+{
+  "character_name": "beam_valkyrie",
+  "display_name": "Beam Valkyrie",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Medic",
+  "weapon_id": "beam_injector",
+  "art_style": "anime",
+  "specials": [
+    "special_ground_slam",
+    "special_nanite_barrier",
+    "special_cyber_dash",
+    "special_drone_swarm"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    }
+  ]
+}

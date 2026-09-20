@@ -1,0 +1,49 @@
+{
+  "character_name": "cyber_punkette",
+  "display_name": "Cyber Punkette",
+  "faction_id": "neonglitch",
+  "faction_name": "Neon Glitch Underground",
+  "sector": "Neon Glitch Underground",
+  "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+  "model_key": "pixel_anime_hybrid",
+  "theme_color": "#ff007f",
+  "role": "Infiltrator",
+  "weapon_id": "twin_subguns",
+  "art_style": "anime",
+  "specials": [
+    "special_sonic_screech",
+    "special_heavy_gatling",
+    "special_flame_inferno",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}

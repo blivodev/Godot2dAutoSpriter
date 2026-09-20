@@ -1,0 +1,49 @@
+{
+  "character_name": "bastion_frame",
+  "display_name": "Bastion Frame",
+  "faction_id": "orbital",
+  "faction_name": "Orbital Black-Ops Legion",
+  "sector": "Orbital Black-Ops Legion",
+  "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+  "model_key": "dreamshaper_8",
+  "theme_color": "#2ecc71",
+  "role": "Engineer",
+  "weapon_id": "deployable_shield",
+  "art_style": "anime",
+  "specials": [
+    "special_sonic_screech",
+    "special_cyber_dash",
+    "special_heavy_gatling",
+    "special_deploy_turret"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    }
+  ]
+}

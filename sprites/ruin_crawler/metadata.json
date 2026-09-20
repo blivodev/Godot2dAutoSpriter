@@ -1,0 +1,49 @@
+{
+  "character_name": "ruin_crawler",
+  "display_name": "Ruin Crawler",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Infiltrator",
+  "weapon_id": "suppressed_smg",
+  "art_style": "anime",
+  "specials": [
+    "special_ground_slam",
+    "special_defib_revive",
+    "special_railgun_snipe",
+    "special_active_camo"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "character_name": "toxic_desperado",
+  "display_name": "Toxic Desperado",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Special Agent",
+  "weapon_id": "dual_sluggers",
+  "art_style": "anime",
+  "specials": [
+    "special_whirlwind",
+    "special_napalm_toss",
+    "special_sonic_screech",
+    "special_nanite_barrier"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    }
+  ]
+}

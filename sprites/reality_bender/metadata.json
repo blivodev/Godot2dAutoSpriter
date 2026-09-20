@@ -1,0 +1,49 @@
+{
+  "character_name": "reality_bender",
+  "display_name": "Reality Bender",
+  "faction_id": "aetherium",
+  "faction_name": "Aetherium Psionic Syndicate",
+  "sector": "Aetherium Psionic Syndicate",
+  "model_engine": "RPG Remix (Ornate Psionic Occult)",
+  "model_key": "rpg_remix",
+  "theme_color": "#9b59b6",
+  "role": "Rocket Trooper",
+  "weapon_id": "spatial_mortar",
+  "art_style": "anime",
+  "specials": [
+    "special_psi_overload",
+    "special_heavy_gatling",
+    "special_railgun_snipe",
+    "special_napalm_toss"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_heavy_gatling",
+      "name": "Suppressive Gatling Rumble",
+      "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    }
+  ]
+}

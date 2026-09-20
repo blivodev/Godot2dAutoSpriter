@@ -1,0 +1,49 @@
+{
+  "character_name": "ash_valkyrie",
+  "display_name": "Ash Valkyrie",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Sniper",
+  "weapon_id": "junk_rifle",
+  "art_style": "anime",
+  "specials": [
+    "special_orbital_strike",
+    "special_flak_barrage",
+    "special_active_camo",
+    "special_railgun_snipe"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    }
+  ]
+}

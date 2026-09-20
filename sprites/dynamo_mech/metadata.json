@@ -1,0 +1,49 @@
+{
+  "character_name": "dynamo_mech",
+  "display_name": "Dynamo Mech",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Juggernaut",
+  "weapon_id": "dynamo_fist",
+  "art_style": "anime",
+  "specials": [
+    "special_power_charge",
+    "special_drone_swarm",
+    "special_stim_inject",
+    "special_nanite_barrier"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    }
+  ]
+}

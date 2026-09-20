@@ -1,0 +1,49 @@
+{
+  "character_name": "plasma_buster",
+  "display_name": "Plasma Buster",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Rocket Trooper",
+  "weapon_id": "plasma_cannon",
+  "art_style": "anime",
+  "specials": [
+    "special_cyber_hack",
+    "special_power_charge",
+    "special_mortar_barrage",
+    "special_nanite_barrier"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    }
+  ]
+}

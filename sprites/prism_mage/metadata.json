@@ -1,0 +1,49 @@
+{
+  "character_name": "prism_mage",
+  "display_name": "Prism Mage",
+  "faction_id": "aetherium",
+  "faction_name": "Aetherium Psionic Syndicate",
+  "sector": "Aetherium Psionic Syndicate",
+  "model_engine": "RPG Remix (Ornate Psionic Occult)",
+  "model_key": "rpg_remix",
+  "theme_color": "#9b59b6",
+  "role": "Soldier",
+  "weapon_id": "prism_wand",
+  "art_style": "anime",
+  "specials": [
+    "special_sonic_screech",
+    "special_emp_blast",
+    "special_napalm_toss",
+    "special_active_camo"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    }
+  ]
+}

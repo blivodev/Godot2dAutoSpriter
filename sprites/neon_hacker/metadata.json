@@ -1,0 +1,49 @@
+{
+  "character_name": "neon_hacker",
+  "display_name": "Neon Hacker",
+  "faction_id": "neonglitch",
+  "faction_name": "Neon Glitch Underground",
+  "sector": "Neon Glitch Underground",
+  "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+  "model_key": "pixel_anime_hybrid",
+  "theme_color": "#ff007f",
+  "role": "Saboteur",
+  "weapon_id": "cyberdeck",
+  "art_style": "anime",
+  "specials": [
+    "special_defib_revive",
+    "special_flak_barrage",
+    "special_psi_overload",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

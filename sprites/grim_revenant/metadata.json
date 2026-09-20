@@ -1,0 +1,49 @@
+{
+  "character_name": "grim_revenant",
+  "display_name": "Grim Revenant",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Saboteur",
+  "weapon_id": "corrosive_blade",
+  "art_style": "anime",
+  "specials": [
+    "special_whirlwind",
+    "special_active_camo",
+    "special_psi_overload",
+    "special_mortar_barrage"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_psi_overload",
+      "name": "Psionic Mind Pulse",
+      "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+      "category": "signature"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    }
+  ]
+}

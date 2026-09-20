@@ -1,0 +1,49 @@
+{
+  "character_name": "telekinesis_master",
+  "display_name": "Telekinesis Master",
+  "faction_id": "aetherium",
+  "faction_name": "Aetherium Psionic Syndicate",
+  "sector": "Aetherium Psionic Syndicate",
+  "model_engine": "RPG Remix (Ornate Psionic Occult)",
+  "model_key": "rpg_remix",
+  "theme_color": "#9b59b6",
+  "role": "Mind Controller",
+  "weapon_id": "kinetic_focus",
+  "art_style": "anime",
+  "specials": [
+    "special_cyber_dash",
+    "special_active_camo",
+    "special_nanite_barrier",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_dash",
+      "name": "Cyber Blade Dash",
+      "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

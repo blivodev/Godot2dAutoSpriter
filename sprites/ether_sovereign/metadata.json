@@ -1,0 +1,49 @@
+{
+  "character_name": "ether_sovereign",
+  "display_name": "Ether Sovereign",
+  "faction_id": "aetherium",
+  "faction_name": "Aetherium Psionic Syndicate",
+  "sector": "Aetherium Psionic Syndicate",
+  "model_engine": "RPG Remix (Ornate Psionic Occult)",
+  "model_key": "rpg_remix",
+  "theme_color": "#9b59b6",
+  "role": "Special Agent",
+  "weapon_id": "psionic_crown",
+  "art_style": "anime",
+  "specials": [
+    "special_mortar_barrage",
+    "special_orbital_strike",
+    "special_stim_inject",
+    "special_railgun_snipe"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_mortar_barrage",
+      "name": "Heavy Mortar Barrage",
+      "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    }
+  ]
+}

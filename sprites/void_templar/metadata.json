@@ -1,0 +1,49 @@
+{
+  "character_name": "void_templar",
+  "display_name": "Void Templar",
+  "faction_id": "aetherium",
+  "faction_name": "Aetherium Psionic Syndicate",
+  "sector": "Aetherium Psionic Syndicate",
+  "model_engine": "RPG Remix (Ornate Psionic Occult)",
+  "model_key": "rpg_remix",
+  "theme_color": "#9b59b6",
+  "role": "Juggernaut",
+  "weapon_id": "crystal_greatsword",
+  "art_style": "anime",
+  "specials": [
+    "special_cyber_hack",
+    "special_flame_inferno",
+    "special_drone_swarm",
+    "special_emp_blast"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_emp_blast",
+      "name": "EMP Disruptor Blast",
+      "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+      "category": "tactical"
+    }
+  ]
+}

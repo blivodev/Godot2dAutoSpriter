@@ -1,0 +1,49 @@
+{
+  "character_name": "graviton_blade",
+  "display_name": "Graviton Blade",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Special Agent",
+  "weapon_id": "graviton_saber",
+  "art_style": "anime",
+  "specials": [
+    "special_orbital_strike",
+    "special_railgun_snipe",
+    "special_flak_barrage",
+    "special_whirlwind"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_orbital_strike",
+      "name": "Orbital Air Strike",
+      "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+      "category": "signature"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    }
+  ]
+}

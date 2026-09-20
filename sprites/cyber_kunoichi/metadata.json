@@ -1,0 +1,49 @@
+{
+  "character_name": "cyber_kunoichi",
+  "display_name": "Cyber Kunoichi",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Infiltrator",
+  "weapon_id": "needle_darts",
+  "art_style": "anime",
+  "specials": [
+    "special_active_camo",
+    "special_drone_swarm",
+    "special_flame_inferno",
+    "special_nanite_barrier"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_nanite_barrier",
+      "name": "Nanite Energy Shield",
+      "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+      "category": "defense"
+    }
+  ]
+}

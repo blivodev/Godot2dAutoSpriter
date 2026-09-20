@@ -1,0 +1,49 @@
+{
+  "character_name": "arc_disrupter",
+  "display_name": "Arc-Disrupter",
+  "faction_id": "neonglitch",
+  "faction_name": "Neon Glitch Underground",
+  "sector": "Neon Glitch Underground",
+  "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+  "model_key": "pixel_anime_hybrid",
+  "theme_color": "#ff007f",
+  "role": "Rocket Trooper",
+  "weapon_id": "emp_rpg",
+  "art_style": "anime",
+  "specials": [
+    "special_active_camo",
+    "special_railgun_snipe",
+    "special_cyber_hack",
+    "special_sonic_screech"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_active_camo",
+      "name": "Active Camo Cloak",
+      "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_railgun_snipe",
+      "name": "Overcharged Railgun Snipe",
+      "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_sonic_screech",
+      "name": "Concussive Sonic Roar",
+      "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+      "category": "combat"
+    }
+  ]
+}

@@ -1,0 +1,4902 @@
+[
+  {
+    "character_name": "tachyon_striker",
+    "display_name": "Tachyon Striker",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Soldier",
+    "weapon_id": "plasma_rifle",
+    "art_style": "anime",
+    "specials": [
+      "special_flame_inferno",
+      "special_sonic_screech",
+      "special_defib_revive",
+      "special_victory_flourish"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "railgun_phantom",
+    "display_name": "Railgun Phantom",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Sniper",
+    "weapon_id": "sniper_railgun",
+    "art_style": "anime",
+    "specials": [
+      "special_heavy_gatling",
+      "special_ground_slam",
+      "special_victory_flourish",
+      "special_cyber_dash"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "orbital_lance",
+    "display_name": "Orbital Lance",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Special Agent",
+    "weapon_id": "pulse_pistol",
+    "art_style": "anime",
+    "specials": [
+      "special_ground_slam",
+      "special_orbital_strike",
+      "special_napalm_toss",
+      "special_power_charge"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "pulse_dragoon",
+    "display_name": "Pulse Dragoon",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Juggernaut",
+    "weapon_id": "heavy_repeater",
+    "art_style": "anime",
+    "specials": [
+      "special_deploy_turret",
+      "special_ground_slam",
+      "special_emp_blast",
+      "special_power_charge"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "nanite_ronin",
+    "display_name": "Nanite Ronin",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Assassin",
+    "weapon_id": "plasma_blade",
+    "art_style": "anime",
+    "specials": [
+      "special_whirlwind",
+      "special_mortar_barrage",
+      "special_flak_barrage",
+      "special_power_charge"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "graviton_blade",
+    "display_name": "Graviton Blade",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Special Agent",
+    "weapon_id": "graviton_saber",
+    "art_style": "anime",
+    "specials": [
+      "special_orbital_strike",
+      "special_railgun_snipe",
+      "special_flak_barrage",
+      "special_whirlwind"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "hyper_scythe",
+    "display_name": "Hyper-Scythe",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Saboteur",
+    "weapon_id": "hyper_scythe",
+    "art_style": "anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_whirlwind",
+      "special_flame_inferno",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "void_shinobi",
+    "display_name": "Void Shinobi",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Infiltrator",
+    "weapon_id": "void_daggers",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_cyber_hack",
+      "special_power_charge",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "cyber_kunoichi",
+    "display_name": "Cyber Kunoichi",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Infiltrator",
+    "weapon_id": "needle_darts",
+    "art_style": "anime",
+    "specials": [
+      "special_active_camo",
+      "special_drone_swarm",
+      "special_flame_inferno",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "plasma_buster",
+    "display_name": "Plasma Buster",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Rocket Trooper",
+    "weapon_id": "plasma_cannon",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_hack",
+      "special_power_charge",
+      "special_mortar_barrage",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "aegis_sentinel",
+    "display_name": "Aegis Sentinel",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Engineer",
+    "weapon_id": "barrier_shield",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_hack",
+      "special_deploy_turret",
+      "special_ground_slam",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "tachyon_breaker",
+    "display_name": "Tachyon Breaker",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Flak Trooper",
+    "weapon_id": "flak_cannon",
+    "art_style": "anime",
+    "specials": [
+      "special_defib_revive",
+      "special_drone_swarm",
+      "special_heavy_gatling",
+      "special_ground_slam"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "beam_valkyrie",
+    "display_name": "Beam Valkyrie",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Medic",
+    "weapon_id": "beam_injector",
+    "art_style": "anime",
+    "specials": [
+      "special_ground_slam",
+      "special_nanite_barrier",
+      "special_cyber_dash",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "emp_commando",
+    "display_name": "EMP Commando",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Saboteur",
+    "weapon_id": "emp_disrupter",
+    "art_style": "anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_railgun_snipe",
+      "special_cyber_hack",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "dynamo_mech",
+    "display_name": "Dynamo Mech",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Juggernaut",
+    "weapon_id": "dynamo_fist",
+    "art_style": "anime",
+    "specials": [
+      "special_power_charge",
+      "special_drone_swarm",
+      "special_stim_inject",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "kinetic_hunter",
+    "display_name": "Kinetic Hunter",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Soldier",
+    "weapon_id": "kinetic_carbine",
+    "art_style": "anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_whirlwind",
+      "special_victory_flourish",
+      "special_defib_revive"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "solar_flare_trooper",
+    "display_name": "Solar Flare Trooper",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Flamethrower",
+    "weapon_id": "solar_caster",
+    "art_style": "anime",
+    "specials": [
+      "special_orbital_strike",
+      "special_cyber_dash",
+      "special_sonic_screech",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "warp_vanguard",
+    "display_name": "Warp Vanguard",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Special Agent",
+    "weapon_id": "warp_rifle",
+    "art_style": "anime",
+    "specials": [
+      "special_whirlwind",
+      "special_power_charge",
+      "special_flame_inferno",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "glitch_operator",
+    "display_name": "Glitch Operator",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Drone Operator",
+    "weapon_id": "drone_pad",
+    "art_style": "anime",
+    "specials": [
+      "special_ground_slam",
+      "special_flak_barrage",
+      "special_railgun_snipe",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "zero_point_warden",
+    "display_name": "Zero-Point Warden",
+    "faction_id": "neotokyo",
+    "faction_name": "Neo-Tokyo Cyber-Corps",
+    "sector": "Neo-Tokyo Cyber-Corps",
+    "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+    "model_key": "animagine_xl",
+    "theme_color": "#00f0ff",
+    "role": "Mind Controller",
+    "weapon_id": "zero_staff",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_hack",
+      "special_cyber_dash",
+      "special_sonic_screech",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "rust_marauder",
+    "display_name": "Rust Marauder",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Soldier",
+    "weapon_id": "scrap_autogun",
+    "art_style": "anime",
+    "specials": [
+      "special_nanite_barrier",
+      "special_power_charge",
+      "special_whirlwind",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "scrap_reaver",
+    "display_name": "Scrap Reaver",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Juggernaut",
+    "weapon_id": "rebar_hammer",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_nanite_barrier",
+      "special_flak_barrage",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "ash_valkyrie",
+    "display_name": "Ash Valkyrie",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Sniper",
+    "weapon_id": "junk_rifle",
+    "art_style": "anime",
+    "specials": [
+      "special_orbital_strike",
+      "special_flak_barrage",
+      "special_active_camo",
+      "special_railgun_snipe"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "toxic_desperado",
+    "display_name": "Toxic Desperado",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Special Agent",
+    "weapon_id": "dual_sluggers",
+    "art_style": "anime",
+    "specials": [
+      "special_whirlwind",
+      "special_napalm_toss",
+      "special_sonic_screech",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "grim_revenant",
+    "display_name": "Grim Revenant",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Saboteur",
+    "weapon_id": "corrosive_blade",
+    "art_style": "anime",
+    "specials": [
+      "special_whirlwind",
+      "special_active_camo",
+      "special_psi_overload",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "rad_waste_hunter",
+    "display_name": "Rad-Waste Hunter",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Infiltrator",
+    "weapon_id": "rad_crossbow",
+    "art_style": "anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_nanite_barrier",
+      "special_ground_slam",
+      "special_cyber_dash"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "bone_stalker",
+    "display_name": "Bone Stalker",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Assassin",
+    "weapon_id": "serrated_scythe",
+    "art_style": "anime",
+    "specials": [
+      "special_defib_revive",
+      "special_flak_barrage",
+      "special_psi_overload",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "slag_berserker",
+    "display_name": "Slag Berserker",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Juggernaut",
+    "weapon_id": "molten_flail",
+    "art_style": "anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_victory_flourish",
+      "special_napalm_toss",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "diesel_titan",
+    "display_name": "Diesel Titan",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Heavy Ordinance",
+    "weapon_id": "diesel_cannon",
+    "art_style": "anime",
+    "specials": [
+      "special_emp_blast",
+      "special_flak_barrage",
+      "special_defib_revive",
+      "special_flame_inferno"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "scrap_gunner",
+    "display_name": "Scrap Gunner",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Soldier",
+    "weapon_id": "pipe_minigun",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_power_charge",
+      "special_psi_overload",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "dust_shaman",
+    "display_name": "Dust Shaman",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Mind Controller",
+    "weapon_id": "totem_staff",
+    "art_style": "anime",
+    "specials": [
+      "special_active_camo",
+      "special_nanite_barrier",
+      "special_deploy_turret",
+      "special_sonic_screech"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "sewer_stalker",
+    "display_name": "Sewer Stalker",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Saboteur",
+    "weapon_id": "toxin_dart_gun",
+    "art_style": "anime",
+    "specials": [
+      "special_emp_blast",
+      "special_active_camo",
+      "special_railgun_snipe",
+      "special_orbital_strike"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "iron_nomad",
+    "display_name": "Iron Nomad",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Soldier",
+    "weapon_id": "lever_carbine",
+    "art_style": "anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_sonic_screech",
+      "special_heavy_gatling",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "hazard_raider",
+    "display_name": "Hazard Raider",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Rocket Trooper",
+    "weapon_id": "junk_rpg",
+    "art_style": "anime",
+    "specials": [
+      "special_nanite_barrier",
+      "special_flak_barrage",
+      "special_mortar_barrage",
+      "special_victory_flourish"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "smog_alchemist",
+    "display_name": "Smog Alchemist",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Medic",
+    "weapon_id": "chem_injector",
+    "art_style": "anime",
+    "specials": [
+      "special_nanite_barrier",
+      "special_cyber_dash",
+      "special_drone_swarm",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "lead_spitter",
+    "display_name": "Lead-Spitter",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Flak Trooper",
+    "weapon_id": "quad_shredder",
+    "art_style": "anime",
+    "specials": [
+      "special_heavy_gatling",
+      "special_defib_revive",
+      "special_drone_swarm",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "chain_ripper",
+    "display_name": "Chain Ripper",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Engineer",
+    "weapon_id": "chainsaw_cutter",
+    "art_style": "anime",
+    "specials": [
+      "special_victory_flourish",
+      "special_orbital_strike",
+      "special_psi_overload",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "rust_zealot",
+    "display_name": "Rust Zealot",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Flamethrower",
+    "weapon_id": "napalm_spewer",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_nanite_barrier",
+      "special_stim_inject",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "acid_vulture",
+    "display_name": "Acid Vulture",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Drone Operator",
+    "weapon_id": "drone_controller",
+    "art_style": "anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_napalm_toss",
+      "special_power_charge",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "ruin_crawler",
+    "display_name": "Ruin Crawler",
+    "faction_id": "abyssal",
+    "faction_name": "Abyssal Sector Outcasts",
+    "sector": "Abyssal Sector Outcasts",
+    "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+    "model_key": "counterfeit_v3",
+    "theme_color": "#e67e22",
+    "role": "Infiltrator",
+    "weapon_id": "suppressed_smg",
+    "art_style": "anime",
+    "specials": [
+      "special_ground_slam",
+      "special_defib_revive",
+      "special_railgun_snipe",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "orbital_ranger",
+    "display_name": "Orbital Ranger",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Soldier",
+    "weapon_id": "carbine_mk4",
+    "art_style": "anime",
+    "specials": [
+      "special_nanite_barrier",
+      "special_power_charge",
+      "special_cyber_dash",
+      "special_cyber_hack"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "apex_infiltrator",
+    "display_name": "Apex Infiltrator",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Infiltrator",
+    "weapon_id": "silenced_pdw",
+    "art_style": "anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_emp_blast",
+      "special_stim_inject",
+      "special_railgun_snipe"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "stealth_recon_alpha",
+    "display_name": "Stealth Recon Alpha",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Sniper",
+    "weapon_id": "dmr_50cal",
+    "art_style": "anime",
+    "specials": [
+      "special_mortar_barrage",
+      "special_deploy_turret",
+      "special_cyber_dash",
+      "special_sonic_screech"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "ghost_recon_delta",
+    "display_name": "Ghost Recon Delta",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Special Agent",
+    "weapon_id": "holo_carbine",
+    "art_style": "anime",
+    "specials": [
+      "special_whirlwind",
+      "special_ground_slam",
+      "special_power_charge",
+      "special_cyber_hack"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "heavy_exo_breacher",
+    "display_name": "Heavy Exo-Breacher",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Juggernaut",
+    "weapon_id": "breaching_shotgun",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_victory_flourish",
+      "special_sonic_screech",
+      "special_psi_overload"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "tactical_juggernaut",
+    "display_name": "Tactical Juggernaut",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Heavy Ordinance",
+    "weapon_id": "rotary_cannon",
+    "art_style": "anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_heavy_gatling",
+      "special_nanite_barrier",
+      "special_ground_slam"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "null_g_marine",
+    "display_name": "Null-G Marine",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Soldier",
+    "weapon_id": "magnetic_rifle",
+    "art_style": "anime",
+    "specials": [
+      "special_ground_slam",
+      "special_flame_inferno",
+      "special_flak_barrage",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "drop_pod_commando",
+    "display_name": "Drop-Pod Commando",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Rocket Trooper",
+    "weapon_id": "missile_launcher",
+    "art_style": "anime",
+    "specials": [
+      "special_ground_slam",
+      "special_defib_revive",
+      "special_sonic_screech",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "sub_orbital_spotter",
+    "display_name": "Sub-Orbital Spotter",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Sniper",
+    "weapon_id": "target_designator",
+    "art_style": "anime",
+    "specials": [
+      "special_defib_revive",
+      "special_napalm_toss",
+      "special_whirlwind",
+      "special_victory_flourish"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "thermal_predator",
+    "display_name": "Thermal Predator",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Assassin",
+    "weapon_id": "thermal_blade",
+    "art_style": "anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_drone_swarm",
+      "special_deploy_turret",
+      "special_flame_inferno"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "shock_trooper_prime",
+    "display_name": "Shock Trooper Prime",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Soldier",
+    "weapon_id": "shock_carbine",
+    "art_style": "anime",
+    "specials": [
+      "special_orbital_strike",
+      "special_stim_inject",
+      "special_flak_barrage",
+      "special_psi_overload"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "cryo_infiltrator",
+    "display_name": "Cryo-Infiltrator",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Saboteur",
+    "weapon_id": "cryo_pistol",
+    "art_style": "anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_cyber_hack",
+      "special_mortar_barrage",
+      "special_flame_inferno"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "magneto_gunner",
+    "display_name": "Magneto-Gunner",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Flak Trooper",
+    "weapon_id": "mag_flak",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_hack",
+      "special_psi_overload",
+      "special_power_charge",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "void_commando",
+    "display_name": "Void Commando",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Special Agent",
+    "weapon_id": "assault_rifle_ex",
+    "art_style": "anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_stim_inject",
+      "special_heavy_gatling",
+      "special_power_charge"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "bastion_frame",
+    "display_name": "Bastion Frame",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Engineer",
+    "weapon_id": "deployable_shield",
+    "art_style": "anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_cyber_dash",
+      "special_heavy_gatling",
+      "special_deploy_turret"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "cerberus_operative",
+    "display_name": "Cerberus Operative",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Saboteur",
+    "weapon_id": "combat_shotgun",
+    "art_style": "anime",
+    "specials": [
+      "special_flame_inferno",
+      "special_defib_revive",
+      "special_psi_overload",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "nightfall_sentry",
+    "display_name": "Nightfall Sentry",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Flamethrower",
+    "weapon_id": "pyro_cannon",
+    "art_style": "anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_mortar_barrage",
+      "special_active_camo",
+      "special_power_charge"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "horizon_vanguard",
+    "display_name": "Horizon Vanguard",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Medic",
+    "weapon_id": "med_applicator",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_power_charge",
+      "special_whirlwind",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "quantum_scout",
+    "display_name": "Quantum Scout",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Drone Operator",
+    "weapon_id": "drone_terminal",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_napalm_toss",
+      "special_defib_revive",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "zenith_enforcer",
+    "display_name": "Zenith Enforcer",
+    "faction_id": "orbital",
+    "faction_name": "Orbital Black-Ops Legion",
+    "sector": "Orbital Black-Ops Legion",
+    "model_engine": "DreamShaper 8 (Military Spec-Ops Sci-Fi)",
+    "model_key": "dreamshaper_8",
+    "theme_color": "#2ecc71",
+    "role": "Mind Controller",
+    "weapon_id": "neural_disrupter",
+    "art_style": "anime",
+    "specials": [
+      "special_drone_swarm",
+      "special_victory_flourish",
+      "special_psi_overload",
+      "special_emp_blast"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "astral_psion",
+    "display_name": "Astral Psion",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Mind Controller",
+    "weapon_id": "psi_staff",
+    "art_style": "anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_napalm_toss",
+      "special_flame_inferno",
+      "special_victory_flourish"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "chrono_mystic",
+    "display_name": "Chrono Mystic",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Special Agent",
+    "weapon_id": "time_scepter",
+    "art_style": "anime",
+    "specials": [
+      "special_psi_overload",
+      "special_heavy_gatling",
+      "special_drone_swarm",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "warp_weaver",
+    "display_name": "Warp Weaver",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Saboteur",
+    "weapon_id": "dimensional_dagger",
+    "art_style": "anime",
+    "specials": [
+      "special_power_charge",
+      "special_cyber_dash",
+      "special_drone_swarm",
+      "special_cyber_hack"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "soul_core_adept",
+    "display_name": "Soul-Core Adept",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Medic",
+    "weapon_id": "aether_orb",
+    "art_style": "anime",
+    "specials": [
+      "special_flame_inferno",
+      "special_nanite_barrier",
+      "special_cyber_hack",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "mind_flare_archon",
+    "display_name": "Mind-Flare Archon",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Mind Controller",
+    "weapon_id": "telepathic_rod",
+    "art_style": "anime",
+    "specials": [
+      "special_napalm_toss",
+      "special_ground_slam",
+      "special_victory_flourish",
+      "special_orbital_strike"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "void_templar",
+    "display_name": "Void Templar",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Juggernaut",
+    "weapon_id": "crystal_greatsword",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_hack",
+      "special_flame_inferno",
+      "special_drone_swarm",
+      "special_emp_blast"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "ether_sovereign",
+    "display_name": "Ether Sovereign",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Special Agent",
+    "weapon_id": "psionic_crown",
+    "art_style": "anime",
+    "specials": [
+      "special_mortar_barrage",
+      "special_orbital_strike",
+      "special_stim_inject",
+      "special_railgun_snipe"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "graviton_oracle",
+    "display_name": "Graviton Oracle",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Sniper",
+    "weapon_id": "singularity_bow",
+    "art_style": "anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_nanite_barrier",
+      "special_napalm_toss",
+      "special_cyber_hack"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "prism_mage",
+    "display_name": "Prism Mage",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Soldier",
+    "weapon_id": "prism_wand",
+    "art_style": "anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_emp_blast",
+      "special_napalm_toss",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "rift_stalker",
+    "display_name": "Rift Stalker",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Infiltrator",
+    "weapon_id": "phase_claws",
+    "art_style": "anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_defib_revive",
+      "special_whirlwind",
+      "special_cyber_hack"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "telekinesis_master",
+    "display_name": "Telekinesis Master",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Mind Controller",
+    "weapon_id": "kinetic_focus",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_active_camo",
+      "special_nanite_barrier",
+      "special_whirlwind"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "crystalline_golem",
+    "display_name": "Crystalline Golem",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Juggernaut",
+    "weapon_id": "crystal_fists",
+    "art_style": "anime",
+    "specials": [
+      "special_psi_overload",
+      "special_nanite_barrier",
+      "special_emp_blast",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "spectral_assassin",
+    "display_name": "Spectral Assassin",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Assassin",
+    "weapon_id": "astral_blade",
+    "art_style": "anime",
+    "specials": [
+      "special_flame_inferno",
+      "special_drone_swarm",
+      "special_cyber_hack",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "nullifier_monk",
+    "display_name": "Nullifier Monk",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Engineer",
+    "weapon_id": "null_ward",
+    "art_style": "anime",
+    "specials": [
+      "special_emp_blast",
+      "special_cyber_dash",
+      "special_orbital_strike",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "astral_ward",
+    "display_name": "Astral Ward",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Flak Trooper",
+    "weapon_id": "shard_burst",
+    "art_style": "anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_mortar_barrage",
+      "special_nanite_barrier",
+      "special_defib_revive"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "psionic_inquisitor",
+    "display_name": "Psionic Inquisitor",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Soldier",
+    "weapon_id": "psi_revolver",
+    "art_style": "anime",
+    "specials": [
+      "special_defib_revive",
+      "special_cyber_dash",
+      "special_stim_inject",
+      "special_power_charge"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      }
+    ]
+  },
+  {
+    "character_name": "warp_sorcerer",
+    "display_name": "Warp Sorcerer",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Flamethrower",
+    "weapon_id": "soul_fire_caster",
+    "art_style": "anime",
+    "specials": [
+      "special_psi_overload",
+      "special_flak_barrage",
+      "special_napalm_toss",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "reality_bender",
+    "display_name": "Reality Bender",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Rocket Trooper",
+    "weapon_id": "spatial_mortar",
+    "art_style": "anime",
+    "specials": [
+      "special_psi_overload",
+      "special_heavy_gatling",
+      "special_railgun_snipe",
+      "special_napalm_toss"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "cosmic_harbinger",
+    "display_name": "Cosmic Harbinger",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Drone Operator",
+    "weapon_id": "familiar_beacon",
+    "art_style": "anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_orbital_strike",
+      "special_heavy_gatling",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "eclipse_zealot",
+    "display_name": "Eclipse Zealot",
+    "faction_id": "aetherium",
+    "faction_name": "Aetherium Psionic Syndicate",
+    "sector": "Aetherium Psionic Syndicate",
+    "model_engine": "RPG Remix (Ornate Psionic Occult)",
+    "model_key": "rpg_remix",
+    "theme_color": "#9b59b6",
+    "role": "Soldier",
+    "weapon_id": "dark_matter_rifle",
+    "art_style": "anime",
+    "specials": [
+      "special_active_camo",
+      "special_power_charge",
+      "special_heavy_gatling",
+      "special_deploy_turret"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "neon_hacker",
+    "display_name": "Neon Hacker",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Saboteur",
+    "weapon_id": "cyberdeck",
+    "art_style": "anime",
+    "specials": [
+      "special_defib_revive",
+      "special_flak_barrage",
+      "special_psi_overload",
+      "special_whirlwind"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "holo_vandal",
+    "display_name": "Holo-Vandal",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Special Agent",
+    "weapon_id": "spray_laser",
+    "art_style": "anime",
+    "specials": [
+      "special_stim_inject",
+      "special_ground_slam",
+      "special_defib_revive",
+      "special_sonic_screech"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "synth_blade_rebel",
+    "display_name": "Synth-Blade Rebel",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Assassin",
+    "weapon_id": "neon_katana",
+    "art_style": "anime",
+    "specials": [
+      "special_orbital_strike",
+      "special_ground_slam",
+      "special_mortar_barrage",
+      "special_nanite_barrier"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      }
+    ]
+  },
+  {
+    "character_name": "cyber_punkette",
+    "display_name": "Cyber Punkette",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Infiltrator",
+    "weapon_id": "twin_subguns",
+    "art_style": "anime",
+    "specials": [
+      "special_sonic_screech",
+      "special_heavy_gatling",
+      "special_flame_inferno",
+      "special_stim_inject"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "street_ronin",
+    "display_name": "Street Ronin",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Soldier",
+    "weapon_id": "high_freq_blade",
+    "art_style": "anime",
+    "specials": [
+      "special_psi_overload",
+      "special_railgun_snipe",
+      "special_ground_slam",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_ground_slam",
+        "name": "Ground Slam",
+        "desc": "High airborne leap with dual overhead strike slamming down to ground",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "wire_tap_infiltrator",
+    "display_name": "Wire-Tap Infiltrator",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Infiltrator",
+    "weapon_id": "data_tether",
+    "art_style": "anime",
+    "specials": [
+      "special_napalm_toss",
+      "special_sonic_screech",
+      "special_emp_blast",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "glitch_witch",
+    "display_name": "Glitch Witch",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Mind Controller",
+    "weapon_id": "signal_jammer",
+    "art_style": "anime",
+    "specials": [
+      "special_cyber_dash",
+      "special_deploy_turret",
+      "special_flak_barrage",
+      "special_active_camo"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "bass_cannon_heavy",
+    "display_name": "Bass-Cannon Heavy",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Heavy Ordinance",
+    "weapon_id": "sonic_subwoofer",
+    "art_style": "anime",
+    "specials": [
+      "special_whirlwind",
+      "special_psi_overload",
+      "special_napalm_toss",
+      "special_drone_swarm"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "data_courier",
+    "display_name": "Data-Courier",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Special Agent",
+    "weapon_id": "flash_pistol",
+    "art_style": "anime",
+    "specials": [
+      "special_power_charge",
+      "special_railgun_snipe",
+      "special_mortar_barrage",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "sub_zero_rioter",
+    "display_name": "Sub-Zero Rioter",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Juggernaut",
+    "weapon_id": "cryo_bat",
+    "art_style": "anime",
+    "specials": [
+      "special_nanite_barrier",
+      "special_stim_inject",
+      "special_drone_swarm",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_stim_inject",
+        "name": "Combat Stim Overclock",
+        "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_drone_swarm",
+        "name": "Drone Swarm Launch",
+        "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "laser_skater",
+    "display_name": "Laser Skater",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Soldier",
+    "weapon_id": "light_smg",
+    "art_style": "anime",
+    "specials": [
+      "special_napalm_toss",
+      "special_active_camo",
+      "special_psi_overload",
+      "special_whirlwind"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_napalm_toss",
+        "name": "Incendiary Napalm Toss",
+        "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "arc_disrupter",
+    "display_name": "Arc-Disrupter",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Rocket Trooper",
+    "weapon_id": "emp_rpg",
+    "art_style": "anime",
+    "specials": [
+      "special_active_camo",
+      "special_railgun_snipe",
+      "special_cyber_hack",
+      "special_sonic_screech"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_active_camo",
+        "name": "Active Camo Cloak",
+        "desc": "Slips into deep stealth crouch, engages optical refractive cloak, surveys area",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_hack",
+        "name": "Data-Spike Cyber Hack",
+        "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "turbo_juggler",
+    "display_name": "Turbo Juggler",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Sniper",
+    "weapon_id": "photon_rifle",
+    "art_style": "anime",
+    "specials": [
+      "special_victory_flourish",
+      "special_mortar_barrage",
+      "special_emp_blast",
+      "special_sonic_screech"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_emp_blast",
+        "name": "EMP Disruptor Blast",
+        "desc": "Hurls EMP charge, ducks eyes behind forearm to protect optical sensors against electromagnetic flash",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "monomolecular_whip",
+    "display_name": "Monomolecular Whip",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Assassin",
+    "weapon_id": "mono_whip",
+    "art_style": "anime",
+    "specials": [
+      "special_flak_barrage",
+      "special_heavy_gatling",
+      "special_nanite_barrier",
+      "special_whirlwind"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "spark_duelist",
+    "display_name": "Spark Duelist",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Soldier",
+    "weapon_id": "plasma_rapier",
+    "art_style": "anime",
+    "specials": [
+      "special_victory_flourish",
+      "special_sonic_screech",
+      "special_power_charge",
+      "special_heavy_gatling"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "grid_runner",
+    "display_name": "Grid Runner",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Medic",
+    "weapon_id": "stim_dispenser",
+    "art_style": "anime",
+    "specials": [
+      "special_deploy_turret",
+      "special_sonic_screech",
+      "special_nanite_barrier",
+      "special_defib_revive"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_deploy_turret",
+        "name": "Deploy Sentry Turret",
+        "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_defib_revive",
+        "name": "Combat Defibrillator",
+        "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+        "category": "tactical"
+      }
+    ]
+  },
+  {
+    "character_name": "overclocked_punk",
+    "display_name": "Overclocked Punk",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Flamethrower",
+    "weapon_id": "neon_flamethrower",
+    "art_style": "anime",
+    "specials": [
+      "special_victory_flourish",
+      "special_flame_inferno",
+      "special_heavy_gatling",
+      "special_mortar_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_victory_flourish",
+        "name": "Victory Flourish",
+        "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+        "category": "tactical"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_heavy_gatling",
+        "name": "Suppressive Gatling Rumble",
+        "desc": "Hip-fired heavy cannon posture, sustained high-frequency rotary rumble shaking whole body",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "sonic_disruptor",
+    "display_name": "Sonic Disruptor",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Flak Trooper",
+    "weapon_id": "soundwave_mortar",
+    "art_style": "anime",
+    "specials": [
+      "special_mortar_barrage",
+      "special_sonic_screech",
+      "special_psi_overload",
+      "special_whirlwind"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_mortar_barrage",
+        "name": "Heavy Mortar Barrage",
+        "desc": "Braces heavy launcher at high ballistic arc, explosive recoil sends shockwave through rig",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_sonic_screech",
+        "name": "Concussive Sonic Roar",
+        "desc": "Deep arch backwards gathering bio-acoustic charge, violent thrust releasing soundwave",
+        "category": "combat"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_psi_overload",
+        "name": "Psionic Mind Pulse",
+        "desc": "Hands raised to temples, psychic surge vibration, explosive telepathic shockwave",
+        "category": "signature"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "neon_brawler",
+    "display_name": "Neon Brawler",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Juggernaut",
+    "weapon_id": "power_knuckles",
+    "art_style": "anime",
+    "specials": [
+      "special_flame_inferno",
+      "special_nanite_barrier",
+      "special_whirlwind",
+      "special_flak_barrage"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_flame_inferno",
+        "name": "Sweeping Flame Inferno",
+        "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_nanite_barrier",
+        "name": "Nanite Energy Shield",
+        "desc": "Braces in heavy tactical stance, projects hexagonal forcefield barrier from arm",
+        "category": "defense"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_whirlwind",
+        "name": "Whirlwind Spin",
+        "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_flak_barrage",
+        "name": "Skyward Flak Barrage",
+        "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+        "category": "combat"
+      }
+    ]
+  },
+  {
+    "character_name": "matrix_phantom",
+    "display_name": "Matrix Phantom",
+    "faction_id": "neonglitch",
+    "faction_name": "Neon Glitch Underground",
+    "sector": "Neon Glitch Underground",
+    "model_engine": "Pixel/Anime Hybrid Multi-Diffusion",
+    "model_key": "pixel_anime_hybrid",
+    "theme_color": "#ff007f",
+    "role": "Drone Operator",
+    "weapon_id": "holo_drone",
+    "art_style": "anime",
+    "specials": [
+      "special_railgun_snipe",
+      "special_power_charge",
+      "special_cyber_dash",
+      "special_orbital_strike"
+    ],
+    "special_details": [
+      {
+        "slot": "special_01",
+        "key": "special_railgun_snipe",
+        "name": "Overcharged Railgun Snipe",
+        "desc": "Drop to knee, precise two-handed optical lock, devastating heavy kinetic recoil",
+        "category": "combat"
+      },
+      {
+        "slot": "special_02",
+        "key": "special_power_charge",
+        "name": "Overload Power Charge",
+        "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+        "category": "signature"
+      },
+      {
+        "slot": "special_03",
+        "key": "special_cyber_dash",
+        "name": "Cyber Blade Dash",
+        "desc": "Ultra-low hyperspeed streak, explosive dual cross-slash, balanced recovery stance",
+        "category": "combat"
+      },
+      {
+        "slot": "special_04",
+        "key": "special_orbital_strike",
+        "name": "Orbital Air Strike",
+        "desc": "Throws target beacon forward, braces upright, tracks incoming skyward strike",
+        "category": "signature"
+      }
+    ]
+  }
+]

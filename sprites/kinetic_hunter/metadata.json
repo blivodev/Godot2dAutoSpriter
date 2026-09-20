@@ -1,0 +1,49 @@
+{
+  "character_name": "kinetic_hunter",
+  "display_name": "Kinetic Hunter",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Soldier",
+  "weapon_id": "kinetic_carbine",
+  "art_style": "anime",
+  "specials": [
+    "special_drone_swarm",
+    "special_whirlwind",
+    "special_victory_flourish",
+    "special_defib_revive"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_defib_revive",
+      "name": "Combat Defibrillator",
+      "desc": "Kneels beside ally, charges high-voltage nanite paddles, delivers reviving bio-shock",
+      "category": "tactical"
+    }
+  ]
+}

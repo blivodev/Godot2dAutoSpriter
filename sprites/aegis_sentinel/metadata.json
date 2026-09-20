@@ -1,0 +1,49 @@
+{
+  "character_name": "aegis_sentinel",
+  "display_name": "Aegis Sentinel",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Engineer",
+  "weapon_id": "barrier_shield",
+  "art_style": "anime",
+  "specials": [
+    "special_cyber_hack",
+    "special_deploy_turret",
+    "special_ground_slam",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_cyber_hack",
+      "name": "Data-Spike Cyber Hack",
+      "desc": "Extends dataspike probe, rapid virtual finger keystrokes injecting malicious logic",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_deploy_turret",
+      "name": "Deploy Sentry Turret",
+      "desc": "Kneels to ground, deploys automated micro-turret / sensor mine, stands armed",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_ground_slam",
+      "name": "Ground Slam",
+      "desc": "High airborne leap with dual overhead strike slamming down to ground",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}

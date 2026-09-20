@@ -1,0 +1,49 @@
+{
+  "character_name": "slag_berserker",
+  "display_name": "Slag Berserker",
+  "faction_id": "abyssal",
+  "faction_name": "Abyssal Sector Outcasts",
+  "sector": "Abyssal Sector Outcasts",
+  "model_engine": "Counterfeit V3.0 (Painterly Grimdark)",
+  "model_key": "counterfeit_v3",
+  "theme_color": "#e67e22",
+  "role": "Juggernaut",
+  "weapon_id": "molten_flail",
+  "art_style": "anime",
+  "specials": [
+    "special_flak_barrage",
+    "special_victory_flourish",
+    "special_napalm_toss",
+    "special_drone_swarm"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_flak_barrage",
+      "name": "Skyward Flak Barrage",
+      "desc": "Tracks aerial targets pointing barrel straight up, double high-impact flak burst",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_victory_flourish",
+      "name": "Victory Flourish",
+      "desc": "Spin weapon, crisp hip sheath, noble tactical salute",
+      "category": "tactical"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_napalm_toss",
+      "name": "Incendiary Napalm Toss",
+      "desc": "High windup throwing canister in high ballistic trajectory, watching combustion",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_drone_swarm",
+      "name": "Drone Swarm Launch",
+      "desc": "Forearm raised to tactical wrist comms, gestures forward commanding drone swarm strike",
+      "category": "tactical"
+    }
+  ]
+}

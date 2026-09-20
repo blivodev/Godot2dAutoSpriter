@@ -1471,7 +1471,12 @@ HTML_PAGE = """<!DOCTYPE html>
       <div>
         <div class="roster-filter-bar">
           <button class="filter-chip active" id="chip-filter-all" onclick="setRosterFilter('all')">All (<span id="count-all">0</span>)</button>
-          <button class="filter-chip" id="chip-filter-pixel_anime" onclick="setRosterFilter('pixel_anime')" style="border-color:#ff007f;color:#ff66b2;font-weight:600;">✨ Pixel/Anime (50)</button>
+          <button class="filter-chip" id="chip-filter-neotokyo" onclick="setRosterFilter('neotokyo')" style="border-color:#00f0ff;color:#00f0ff;font-weight:600;">🎌 Neo-Tokyo (<span id="count-neotokyo">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-abyssal" onclick="setRosterFilter('abyssal')" style="border-color:#e67e22;color:#e67e22;font-weight:600;">☣️ Abyssal (<span id="count-abyssal">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-orbital" onclick="setRosterFilter('orbital')" style="border-color:#2ecc71;color:#2ecc71;font-weight:600;">🛰️ Orbital Ops (<span id="count-orbital">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-aetherium" onclick="setRosterFilter('aetherium')" style="border-color:#9b59b6;color:#d2a8ff;font-weight:600;">🔮 Aetherium (<span id="count-aetherium">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-neonglitch" onclick="setRosterFilter('neonglitch')" style="border-color:#ff007f;color:#ff79c6;font-weight:600;">⚡ Neon Glitch (<span id="count-neonglitch">0</span>)</button>
+          <button class="filter-chip" id="chip-filter-pixel_anime" onclick="setRosterFilter('pixel_anime')" style="border-color:#ff78cb;color:#ff9cd6;font-weight:600;">✨ Pixel/Anime (50)</button>
           <button class="filter-chip" id="chip-filter-directorate" onclick="setRosterFilter('directorate')" style="border-color:#58a6ff;">🏛️ Directorate</button>
           <button class="filter-chip" id="chip-filter-syndicate" onclick="setRosterFilter('syndicate')" style="border-color:#e68c14;">⚙️ Syndicate</button>
           <button class="filter-chip" id="chip-filter-covenant" onclick="setRosterFilter('covenant')" style="border-color:#bc8cff;">🧠 Covenant</button>
@@ -2772,13 +2777,18 @@ function setRosterFilter(f) {
 function filterRoster() {
   const q = (document.getElementById("lib-search")?.value || "").toLowerCase().trim();
   let filtered = allLibraryChars;
+  const knownFactions = [
+    "neotokyo", "abyssal", "orbital", "aetherium", "neonglitch",
+    "directorate", "syndicate", "covenant", "bioforge", "silicon",
+    "ghost_protocol", "iron_valkyrie", "neon_outcasts", "apex_transhumans", "synth_corp"
+  ];
   if (rosterFilter === "scenes") {
     filtered = filtered.filter(c => c.has_godot_scene);
   } else if (rosterFilter === "exploded") {
     filtered = filtered.filter(c => c.has_exploded_sheet);
   } else if (rosterFilter === "pixel_anime") {
-    filtered = filtered.filter(c => (c.art_style || "").toLowerCase() === "pixel_anime" || ["ghost_protocol", "iron_valkyrie", "neon_outcasts", "apex_transhumans", "synth_corp"].includes((c.faction_id || "").toLowerCase()));
-  } else if (["directorate", "syndicate", "covenant", "bioforge", "silicon", "ghost_protocol", "iron_valkyrie", "neon_outcasts", "apex_transhumans", "synth_corp"].includes(rosterFilter)) {
+    filtered = filtered.filter(c => (c.art_style || "").toLowerCase() === "pixel_anime" || ["ghost_protocol", "iron_valkyrie", "neon_outcasts", "apex_transhumans", "synth_corp", "neonglitch"].includes((c.faction_id || "").toLowerCase()));
+  } else if (knownFactions.includes(rosterFilter)) {
     filtered = filtered.filter(c => (c.faction_id || "").toLowerCase() === rosterFilter);
   }
 
@@ -2787,7 +2797,8 @@ function filterRoster() {
       c.name.toLowerCase().includes(q) ||
       (c.display_name && c.display_name.toLowerCase().includes(q)) ||
       (c.role && c.role.toLowerCase().includes(q)) ||
-      (c.faction_name && c.faction_name.toLowerCase().includes(q))
+      (c.faction_name && c.faction_name.toLowerCase().includes(q)) ||
+      (c.model_engine && c.model_engine.toLowerCase().includes(q))
     );
   }
   renderRoster(filtered);
@@ -2810,6 +2821,11 @@ async function refreshLibrary() {
     const elAll = document.getElementById("count-all"); if (elAll) elAll.textContent = cntAll;
     const elSc = document.getElementById("count-scenes"); if (elSc) elSc.textContent = cntScenes;
     const elEx = document.getElementById("count-exploded"); if (elEx) elEx.textContent = cntExploded;
+
+    ['neotokyo', 'abyssal', 'orbital', 'aetherium', 'neonglitch'].forEach(k => {
+      const el = document.getElementById(`count-${k}`);
+      if (el) el.textContent = allLibraryChars.filter(c => (c.faction_id || '').toLowerCase() === k).length;
+    });
 
     filterRoster();
 
@@ -2835,6 +2851,7 @@ function renderRoster(chars) {
   chars.forEach(c => {
     const item = document.createElement("div");
     item.className = "char-roster-item" + (c.name === viewingChar ? " selected" : "");
+    item.dataset.name = c.name;
     item.onclick = () => viewCharacter(c.name);
 
     const fullUrl = c.full_preview_url || `/sprites/${c.name}/${c.name}_full.png`;
@@ -2851,13 +2868,24 @@ function renderRoster(chars) {
     `;
 
     const fid = (c.faction_id || '').toLowerCase();
-    const factionColor = fid === 'directorate' ? '#58a6ff' :
-                         fid === 'syndicate'   ? '#e68c14' :
-                         fid === 'covenant'    ? '#bc8cff' :
-                         fid === 'bioforge'    ? '#2ea043' :
-                         fid === 'silicon'     ? '#f85149' : '#8b949e';
+    const factionColor = fid === 'neotokyo'         ? '#00f0ff' :
+                         fid === 'abyssal'          ? '#e67e22' :
+                         fid === 'orbital'          ? '#2ecc71' :
+                         fid === 'aetherium'        ? '#9b59b6' :
+                         fid === 'neonglitch'       ? '#ff007f' :
+                         fid === 'directorate'      ? '#58a6ff' :
+                         fid === 'syndicate'        ? '#e68c14' :
+                         fid === 'covenant'         ? '#bc8cff' :
+                         fid === 'bioforge'         ? '#2ea043' :
+                         fid === 'silicon'          ? '#f85149' :
+                         fid === 'ghost_protocol'   ? '#39c5bb' :
+                         fid === 'iron_valkyrie'    ? '#d29922' :
+                         fid === 'neon_outcasts'    ? '#f778ba' :
+                         fid === 'apex_transhumans' ? '#a371f7' :
+                         fid === 'synth_corp'       ? '#ff7b72' : '#8b949e';
 
     const roleBadge = c.role ? `<span class="role-badge" style="border-color:${factionColor}44;color:${factionColor};background:${factionColor}12;">${c.role}</span>` : '';
+    const modelBadge = c.model_key ? `<span class="role-badge" style="border-color:#388bfd44;color:#79c0ff;background:#388bfd12;">${c.model_key.replace('_', ' ')}</span>` : '';
     const factionDot = c.faction_name ? `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${factionColor};margin-right:4px;" title="${c.faction_name}"></span>` : '';
     const displayName = c.display_name || c.name.replace(/_/g, ' ');
 
@@ -2872,6 +2900,7 @@ function renderRoster(chars) {
         <div class="char-roster-name" style="display:flex;align-items:center;">${factionDot}${displayName}</div>
         <div class="char-roster-meta">
           ${roleBadge}
+          ${modelBadge}
           <span>${c.limb_count} limbs</span>
           ${animBadge}
           ${sceneBadge}
@@ -2898,7 +2927,7 @@ async function viewCharacter(name) {
   // Highlight selected in roster
   document.querySelectorAll('.char-roster-item').forEach(el => el.classList.remove('selected'));
   document.querySelectorAll('.char-roster-item').forEach(el => {
-    if (el.querySelector('.char-roster-name')?.textContent === name.replace(/_/g, ' ')) {
+    if (el.dataset.name === name || el.querySelector('.char-roster-name')?.textContent.includes(name.replace(/_/g, ' '))) {
       el.classList.add('selected');
     }
   });
@@ -2910,7 +2939,7 @@ async function viewCharacter(name) {
   const displayName = charInfo.display_name || name.replace(/_/g, ' ');
   document.getElementById("viewer-char-name").textContent = displayName;
   document.getElementById("viewer-char-meta").textContent =
-    `${charInfo.limb_count || 15} limb cutouts • 23 Skeletal Animations • ${charInfo.has_godot_scene ? 'Godot 4 Scene Ready' : 'Scene Pending'}${charInfo.role ? ' • Role: ' + charInfo.role : ''}${charInfo.faction_name ? ' • Faction: ' + charInfo.faction_name : ''}`;
+    `${charInfo.limb_count || 15} limb cutouts • 23 Skeletal Animations • ${charInfo.has_godot_scene ? 'Godot 4 Scene Ready' : 'Scene Pending'}${charInfo.role ? ' • Role: ' + charInfo.role : ''}${charInfo.faction_name ? ' • Faction: ' + charInfo.faction_name : ''}${charInfo.model_engine ? ' • Model: ' + charInfo.model_engine : ''}`;
 
   const equipActiveEl = document.getElementById("equip-active-char-name");
   if (equipActiveEl) equipActiveEl.textContent = displayName;

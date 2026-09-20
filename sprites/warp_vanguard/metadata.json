@@ -1,0 +1,49 @@
+{
+  "character_name": "warp_vanguard",
+  "display_name": "Warp Vanguard",
+  "faction_id": "neotokyo",
+  "faction_name": "Neo-Tokyo Cyber-Corps",
+  "sector": "Neo-Tokyo Cyber-Corps",
+  "model_engine": "Animagine XL 3.1 (SDXL Premier Anime)",
+  "model_key": "animagine_xl",
+  "theme_color": "#00f0ff",
+  "role": "Special Agent",
+  "weapon_id": "warp_rifle",
+  "art_style": "anime",
+  "specials": [
+    "special_whirlwind",
+    "special_power_charge",
+    "special_flame_inferno",
+    "special_stim_inject"
+  ],
+  "special_details": [
+    {
+      "slot": "special_01",
+      "key": "special_whirlwind",
+      "name": "Whirlwind Spin",
+      "desc": "Rapid 360-degree blade spin with outstretched arms and slicing momentum",
+      "category": "combat"
+    },
+    {
+      "slot": "special_02",
+      "key": "special_power_charge",
+      "name": "Overload Power Charge",
+      "desc": "Chest arched, head back, vibrating with surge of cybernetic/psionic power",
+      "category": "signature"
+    },
+    {
+      "slot": "special_03",
+      "key": "special_flame_inferno",
+      "name": "Sweeping Flame Inferno",
+      "desc": "Continuous dual-hand flamethrower spray sweeping in a wide incendiary arc",
+      "category": "combat"
+    },
+    {
+      "slot": "special_04",
+      "key": "special_stim_inject",
+      "name": "Combat Stim Overclock",
+      "desc": "Injects adrenal stim into neck, snaps upright with hyper-accelerated reflex boost",
+      "category": "tactical"
+    }
+  ]
+}
