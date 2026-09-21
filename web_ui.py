@@ -1967,6 +1967,7 @@ HTML_PAGE = """<!DOCTYPE html>
         <button class="btn btn-primary btn-sm" id="btn-arena-start" onclick="startArenaBattle()">⚔️ Start Skirmish</button>
         <button class="btn btn-secondary btn-sm" id="btn-arena-pause" onclick="toggleArenaPause()">⏸️ Pause</button>
         <button class="btn btn-secondary btn-sm" onclick="resetArenaBattle()">🔄 Reset Arena</button>
+        <button class="btn btn-secondary btn-sm" id="btn-arena-audio" onclick="toggleArenaAudio()" style="border-color:rgba(0,240,255,0.4);color:#00f0ff;">🔊 SFX: ON</button>
         <button class="btn btn-secondary btn-sm" onclick="launchGodotMainScene()" style="border-color:rgba(88,166,255,0.4);color:#79c0ff;">🎮 Play in Godot 4</button>
       </div>
     </div>
@@ -2083,12 +2084,33 @@ HTML_PAGE = """<!DOCTYPE html>
           </div>
 
           <div style="position:relative;background:#090d14;border:1px solid var(--border);border-radius:8px;height:440px;overflow:hidden;">
-            <canvas id="arena-canvas" width="880" height="440" style="width:100%;height:100%;display:block;cursor:crosshair;" onclick="onArenaCanvasClick(event)"></canvas>
+            <canvas id="arena-canvas" width="880" height="440" style="width:100%;height:100%;display:block;cursor:crosshair;" onclick="onArenaCanvasClick(event)" oncontextmenu="onArenaCanvasContextMenu(event)"></canvas>
             <div id="arena-banner" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,14,22,0.92);border:2px solid #00f0ff;border-radius:10px;padding:16px 32px;text-align:center;box-shadow:0 8px 32px rgba(0,240,255,0.3);z-index:10;">
               <div id="arena-banner-title" style="font-size:22px;font-weight:800;color:#00f0ff;text-transform:uppercase;">VICTORY</div>
               <div id="arena-banner-subtitle" style="font-size:12px;color:var(--text-muted);margin-top:4px;">All opposing forces eliminated</div>
               <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="resetArenaBattle()">Play Next Round</button>
             </div>
+          </div>
+        </div>
+
+        <!-- Selected Unit Tactical Command Bar -->
+        <div class="card" id="arena-unit-command-bar" style="display:none;padding:10px 14px;border-left:4px solid #00f0ff;background:rgba(13,20,32,0.85);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span id="cmd-unit-title" style="font-size:13px;font-weight:700;color:#00f0ff;">Selected Unit: Kinetic Hunter</span>
+              <span id="cmd-unit-role" class="lib-badge lib-badge-anim" style="font-size:10px;padding:2px 6px;">Soldier</span>
+              <span id="cmd-unit-hp-text" style="font-size:11px;color:var(--text-muted);">HP: 140/140</span>
+            </div>
+            <div style="font-size:10px;color:#79c0ff;letter-spacing:0.5px;">
+              CLICK CANVAS (RIGHT-CLICK) TO MOVE / TARGET
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:600;color:var(--text-muted);">Unleash Special Move:</span>
+            <button class="btn btn-secondary btn-sm" id="cmd-move-0" onclick="triggerManualSpecialMove(0)" style="font-size:10px;padding:2px 7px;border-color:rgba(0,240,255,0.4);color:#00f0ff;">⚡ Overload Burst</button>
+            <button class="btn btn-secondary btn-sm" id="cmd-move-1" onclick="triggerManualSpecialMove(1)" style="font-size:10px;padding:2px 7px;border-color:rgba(255,0,127,0.4);color:#ff007f;">🎯 Hyper-Focus Crit</button>
+            <button class="btn btn-secondary btn-sm" id="cmd-move-2" onclick="triggerManualSpecialMove(2)" style="font-size:10px;padding:2px 7px;border-color:rgba(255,195,0,0.4);color:#ffc300;">💥 Orbital Shell</button>
+            <button class="btn btn-secondary btn-sm" id="cmd-move-3" onclick="triggerManualSpecialMove(3)" style="font-size:10px;padding:2px 7px;border-color:rgba(46,204,113,0.4);color:#2ecc71;">🛡️ Kinetic Surge</button>
           </div>
         </div>
 
@@ -4379,6 +4401,7 @@ let arenaUnits = [];
 let arenaProjectiles = [];
 let arenaParticles = [];
 let arenaDamageTexts = [];
+let arenaWaypoints = [];
 let arenaInitialized = false;
 let arenaRunning = false;
 let arenaPaused = false;
@@ -4387,6 +4410,186 @@ let arenaSelectedUnitId = null;
 let arenaAnimReq = null;
 let arenaLoadedImages = {};
 let arenaScore = { blue: 0, red: 0 };
+
+// Audio Synthesis State
+let arenaAudioCtx = null;
+let arenaAudioEnabled = true;
+
+function getAudioContext() {
+  if (!arenaAudioCtx) {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) arenaAudioCtx = new AudioContext();
+  }
+  if (arenaAudioCtx && arenaAudioCtx.state === 'suspended') {
+    arenaAudioCtx.resume();
+  }
+  return arenaAudioCtx;
+}
+
+function toggleArenaAudio() {
+  arenaAudioEnabled = !arenaAudioEnabled;
+  const btn = document.getElementById('btn-arena-audio');
+  if (btn) {
+    btn.textContent = arenaAudioEnabled ? '🔊 SFX: ON' : '🔇 SFX: OFF';
+    btn.style.color = arenaAudioEnabled ? '#00f0ff' : 'var(--text-muted)';
+  }
+  logArena(arenaAudioEnabled ? "[AUDIO] Battlefield audio synthesized SFX enabled." : "[AUDIO] SFX muted.", "#79c0ff");
+}
+
+function playSfxLaser(isSpecial = false) {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = isSpecial ? 'sawtooth' : 'sine';
+    osc.frequency.setValueAtTime(isSpecial ? 1200 : 880, now);
+    osc.frequency.exponentialRampToValueAtTime(isSpecial ? 150 : 120, now + 0.12);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.13);
+  } catch (_) {}
+}
+
+function playSfxPlasma() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(650, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.16);
+    gain.gain.setValueAtTime(0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.17);
+  } catch (_) {}
+}
+
+function playSfxRailgun() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(1800, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.28);
+    gain.gain.setValueAtTime(0.26, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.29);
+  } catch (_) {}
+}
+
+function playSfxExplosion(heavy = false) {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const dur = heavy ? 0.45 : 0.25;
+    const bufferSize = Math.floor(ctx.sampleRate * dur);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * (heavy ? 0.18 : 0.09)));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(heavy ? 350 : 600, now);
+    filter.frequency.exponentialRampToValueAtTime(40, now + dur);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(heavy ? 0.35 : 0.2, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    noise.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    noise.start(now);
+  } catch (_) {}
+}
+
+function playSfxSpecialMove() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const notes = [440, 554.37, 659.25, 880];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const t = now + idx * 0.05;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.16, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.2);
+    });
+  } catch (_) {}
+}
+
+function playSfxVictory() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const t = now + idx * 0.12;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.24, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.42);
+    });
+  } catch (_) {}
+}
+
+function playSfxWaypoint() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(900, now);
+    osc.frequency.exponentialRampToValueAtTime(1400, now + 0.08);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.09);
+  } catch (_) {}
+}
 
 const ARENA_ROLES = {
   soldier: {
@@ -4563,6 +4766,9 @@ function deployArenaUnit(team, roleKey, logDeploy = true) {
     faction: faction,
     x: x,
     y: y,
+    moveTargetX: null,
+    moveTargetY: null,
+    targetEnemyId: null,
     maxHp: role.hp,
     hp: role.hp,
     speed: role.speed * 1.3,
@@ -4593,6 +4799,7 @@ function deployArenaUnit(team, roleKey, logDeploy = true) {
 }
 
 function startArenaBattle() {
+  getAudioContext(); // Initialize Web Audio on user gesture
   const blueCount = arenaUnits.filter(u => u.team === 'blue' && u.alive).length;
   const redCount = arenaUnits.filter(u => u.team === 'red' && u.alive).length;
 
@@ -4623,9 +4830,13 @@ function resetArenaBattle(clearFeed = false) {
   arenaProjectiles = [];
   arenaParticles = [];
   arenaDamageTexts = [];
+  arenaWaypoints = [];
   arenaRunning = false;
   arenaPaused = false;
+  arenaSelectedUnitId = null;
   hideArenaBanner();
+  const cmdBar = document.getElementById('arena-unit-command-bar');
+  if (cmdBar) cmdBar.style.display = 'none';
   const pBtn = document.getElementById('btn-arena-pause');
   if (pBtn) pBtn.textContent = '⏸️ Pause';
   updateArenaStatusBadge("(Ready)", "var(--text-muted)");
@@ -4667,6 +4878,7 @@ async function launchGodotMainScene() {
 }
 
 function onArenaCanvasClick(event) {
+  getAudioContext();
   const canvas = document.getElementById('arena-canvas');
   if (!canvas) return;
   const rect = canvas.getBoundingClientRect();
@@ -4686,13 +4898,104 @@ function onArenaCanvasClick(event) {
     }
   }
 
+  const cmdBar = document.getElementById('arena-unit-command-bar');
   if (clicked) {
     arenaSelectedUnitId = clicked.id;
     const teamColor = clicked.team === 'blue' ? '#00f0ff' : '#e67e22';
     logArena(`[INSPECT] Selected: ${clicked.name} (${clicked.roleTitle}) | HP: ${Math.round(clicked.hp)}/${clicked.maxHp} | Weapon: ${clicked.weaponType} | Faction: ${clicked.faction}`, teamColor);
+
+    if (cmdBar) {
+      cmdBar.style.display = 'block';
+      cmdBar.style.borderLeftColor = teamColor;
+      const title = document.getElementById('cmd-unit-title');
+      const role = document.getElementById('cmd-unit-role');
+      const hp = document.getElementById('cmd-unit-hp-text');
+      if (title) {
+        title.textContent = `Selected: ${clicked.name}`;
+        title.style.color = teamColor;
+      }
+      if (role) role.textContent = clicked.roleTitle;
+      if (hp) hp.textContent = `HP: ${Math.round(clicked.hp)}/${clicked.maxHp} | Weapon: ${clicked.weaponType}`;
+    }
   } else {
     arenaSelectedUnitId = null;
+    if (cmdBar) cmdBar.style.display = 'none';
   }
+}
+
+function onArenaCanvasContextMenu(event) {
+  event.preventDefault();
+  getAudioContext();
+  const canvas = document.getElementById('arena-canvas');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (event.clientX - rect.left) * scaleX;
+  const my = (event.clientY - rect.top) * scaleY;
+
+  const selUnit = arenaUnits.find(u => u.id === arenaSelectedUnitId && u.alive);
+  if (!selUnit) return;
+
+  let clickedEnemy = null;
+  let minDist = 30;
+  for (const other of arenaUnits) {
+    if (other.team !== selUnit.team && other.alive) {
+      const d = Math.hypot(mx - other.x, my - other.y);
+      if (d < minDist) {
+        minDist = d;
+        clickedEnemy = other;
+      }
+    }
+  }
+
+  if (clickedEnemy) {
+    selUnit.targetEnemyId = clickedEnemy.id;
+    selUnit.cooldown = 0;
+    logArena(`[FOCUS TARGET] ${selUnit.name} targeting ${clickedEnemy.name}!`, "#ff007f");
+    playSfxSpecialMove();
+    arenaWaypoints.push({ x: clickedEnemy.x, y: clickedEnemy.y, radius: 26, alpha: 1.0, color: '#ff007f' });
+  } else {
+    selUnit.moveTargetX = mx;
+    selUnit.moveTargetY = my;
+    selUnit.state = 'march';
+    logArena(`[MOVE ORDER] ${selUnit.name} advancing to (${Math.round(mx)}, ${Math.round(my)})`, "#00f0ff");
+    playSfxWaypoint();
+    arenaWaypoints.push({ x: mx, y: my, radius: 24, alpha: 1.0, color: '#00f0ff' });
+  }
+}
+
+function triggerManualSpecialMove(moveIndex) {
+  getAudioContext();
+  const selUnit = arenaUnits.find(u => u.id === arenaSelectedUnitId && u.alive);
+  if (!selUnit) {
+    logArena("[ORDER] Select an active unit first to unleash signature moves!", "#f1c40f");
+    return;
+  }
+
+  let nearest = null;
+  let minDist = 99999;
+  for (const other of arenaUnits) {
+    if (other.team !== selUnit.team && other.alive) {
+      const d = Math.hypot(other.x - selUnit.x, other.y - selUnit.y);
+      if (d < minDist) {
+        minDist = d;
+        nearest = other;
+      }
+    }
+  }
+
+  if (!nearest) {
+    logArena("[ORDER] No opposing units remaining in range.", "var(--text-muted)");
+    return;
+  }
+
+  const sp = ARENA_SPECIAL_MOVES[moveIndex % ARENA_SPECIAL_MOVES.length];
+  selUnit.cooldown = 0;
+  selUnit.facing = nearest.x >= selUnit.x ? 1 : -1;
+  unitAttackTarget(selUnit, nearest, sp);
+  logArena(`[SIGNATURE UNLEASHED] ${selUnit.name} activated ${sp.name}!`, sp.color);
+  playSfxSpecialMove();
 }
 
 function updateArenaBadges() {
@@ -4707,6 +5010,15 @@ function updateArenaBadges() {
 
   const scoreDisplay = document.getElementById('arena-score-display');
   if (scoreDisplay) scoreDisplay.textContent = `Blue: ${arenaScore.blue} (${blueAlive} alive)  |  Red: ${arenaScore.red} (${redAlive} alive)`;
+
+  // Update command bar HP text if selected unit is living
+  if (arenaSelectedUnitId) {
+    const selUnit = arenaUnits.find(u => u.id === arenaSelectedUnitId);
+    const hpText = document.getElementById('cmd-unit-hp-text');
+    if (selUnit && hpText) {
+      hpText.textContent = `HP: ${Math.round(selUnit.hp)}/${selUnit.maxHp} | Weapon: ${selUnit.weaponType}`;
+    }
+  }
 }
 
 function updateArenaStatusBadge(text, color) {
@@ -4763,17 +5075,20 @@ function checkArenaVictory() {
       showArenaBanner("RED SYNDICATE VICTORY", "All opposing alliance forces eliminated", "#e67e22");
       updateArenaStatusBadge("(Red Syndicate Won)", "#e67e22");
       logArena("[VICTORY] Red Syndicate has dominated the arena battlefield!", "#e67e22");
+      playSfxVictory();
     } else if (redAlive === 0 && blueAlive > 0) {
       arenaRunning = false;
       arenaScore.blue++;
       showArenaBanner("BLUE ALLIANCE VICTORY", "All opposing syndicate forces eliminated", "#00f0ff");
       updateArenaStatusBadge("(Blue Alliance Won)", "#00f0ff");
       logArena("[VICTORY] Blue Alliance has secured total battlefield victory!", "#00f0ff");
+      playSfxVictory();
     } else if (blueAlive === 0 && redAlive === 0) {
       arenaRunning = false;
       showArenaBanner("MUTUAL ANNIHILATION", "Both squads were neutralized in combat", "#ffc300");
       updateArenaStatusBadge("(Stalemate)", "#ffc300");
       logArena("[STALEMATE] Mutual destruction across both factions.", "#ffc300");
+      playSfxExplosion(true);
     }
   }
 }
@@ -4793,7 +5108,26 @@ function arenaRenderLoop() {
     // 2. Draw Defensive Obstacle Barriers
     drawArenaBarriers(ctx);
 
-    // 3. Update Combat Simulation
+    // 3. Render Waypoints
+    for (let i = arenaWaypoints.length - 1; i >= 0; i--) {
+      const wp = arenaWaypoints[i];
+      wp.radius -= 0.3 * arenaSimSpeed;
+      wp.alpha -= 0.02 * arenaSimSpeed;
+      if (wp.alpha <= 0 || wp.radius <= 3) {
+        arenaWaypoints.splice(i, 1);
+        continue;
+      }
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(wp.x, wp.y, wp.radius, 0, Math.PI * 2);
+      ctx.strokeStyle = wp.color;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = Math.max(0, wp.alpha);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 4. Update Combat Simulation
     if (arenaRunning && !arenaPaused) {
       // Update Units
       for (const u of arenaUnits) {
@@ -4802,30 +5136,54 @@ function arenaRenderLoop() {
         if (u.recoil > 0) u.recoil = Math.max(0, u.recoil - 0.8 * arenaSimSpeed);
         if (u.cooldown > 0) u.cooldown = Math.max(0, u.cooldown - arenaSimSpeed);
 
+        // Check if unit has manual destination waypoint
+        if (u.moveTargetX != null && u.moveTargetY != null) {
+          const tdx = u.moveTargetX - u.x;
+          const tdy = u.moveTargetY - u.y;
+          const tdist = Math.hypot(tdx, tdy);
+          if (tdist < 10) {
+            u.moveTargetX = null;
+            u.moveTargetY = null;
+            u.state = 'idle';
+          } else {
+            u.state = 'march';
+            u.walkFrame += 0.25 * arenaSimSpeed;
+            u.facing = tdx >= 0 ? 1 : -1;
+            u.x += (tdx / tdist) * u.speed * 1.3 * arenaSimSpeed;
+            u.y += (tdy / tdist) * u.speed * 1.3 * arenaSimSpeed;
+          }
+        }
+
         // Find nearest living enemy
         let nearestEnemy = null;
-        let minDist = 99999;
-        for (const other of arenaUnits) {
-          if (other.team !== u.team && other.alive) {
-            const d = Math.hypot(other.x - u.x, other.y - u.y);
-            if (d < minDist) {
-              minDist = d;
-              nearestEnemy = other;
+        if (u.targetEnemyId) {
+          nearestEnemy = arenaUnits.find(other => other.id === u.targetEnemyId && other.alive);
+          if (!nearestEnemy) u.targetEnemyId = null;
+        }
+        if (!nearestEnemy) {
+          let minDist = 99999;
+          for (const other of arenaUnits) {
+            if (other.team !== u.team && other.alive) {
+              const d = Math.hypot(other.x - u.x, other.y - u.y);
+              if (d < minDist) {
+                minDist = d;
+                nearestEnemy = other;
+              }
             }
           }
         }
 
         if (nearestEnemy) {
           u.facing = nearestEnemy.x >= u.x ? 1 : -1;
+          const edist = Math.hypot(nearestEnemy.x - u.x, nearestEnemy.y - u.y);
 
-          if (minDist <= u.attackRange) {
-            // In range: Attack
+          if (edist <= u.attackRange) {
             u.state = 'attack';
             if (u.cooldown <= 0) {
               unitAttackTarget(u, nearestEnemy);
             }
-          } else {
-            // Out of range: March towards enemy with obstacle avoidance
+          } else if (u.moveTargetX == null) {
+            // March towards enemy with obstacle avoidance
             u.state = 'march';
             u.walkFrame += 0.2 * arenaSimSpeed;
 
@@ -4836,11 +5194,9 @@ function arenaRenderLoop() {
             let moveVx = (dx / dist) * u.speed * arenaSimSpeed;
             let moveVy = (dy / dist) * u.speed * arenaSimSpeed;
 
-            // Barrier avoidance
             for (const b of ARENA_BARRIERS) {
               if (u.x + moveVx >= b.x - 18 && u.x + moveVx <= b.x + b.w + 18 &&
                   u.y + moveVy >= b.y - 18 && u.y + moveVy <= b.y + b.h + 18) {
-                // Steer vertically away from barrier center
                 moveVx *= 0.1;
                 moveVy = (u.y < b.y + b.h / 2 ? -1 : 1) * u.speed * 1.2 * arenaSimSpeed;
               }
@@ -4849,7 +5205,7 @@ function arenaRenderLoop() {
             u.x = Math.max(25, Math.min(w - 25, u.x + moveVx));
             u.y = Math.max(30, Math.min(h - 40, u.y + moveVy));
           }
-        } else {
+        } else if (u.moveTargetX == null) {
           u.state = 'idle';
         }
       }
@@ -4881,6 +5237,7 @@ function arenaRenderLoop() {
           if (d <= target.radius + p.radius + 6) {
             hit = true;
             target.hp -= p.damage;
+            playSfxLaser();
 
             arenaDamageTexts.push({
               text: (p.isSpecial ? "💥 " : "-") + p.damage + (p.isSpecial ? " CRIT!" : ""),
@@ -4912,6 +5269,7 @@ function arenaRenderLoop() {
             if (target.hp <= 0) {
               target.hp = 0;
               target.alive = false;
+              playSfxExplosion(true);
               logArena(`[KILL] ${target.name} (${target.team === 'blue' ? 'Blue' : 'Red'}) was eliminated!`, target.team === 'blue' ? '#ff4d4d' : '#2ecc71');
 
               for (let d = 0; d < 22; d++) {
@@ -4957,12 +5315,12 @@ function arenaRenderLoop() {
       }
     }
 
-    // 4. Render Living Units
+    // 5. Render Living Units
     for (const u of arenaUnits) {
       if (u.alive) drawArenaUnit(ctx, u);
     }
 
-    // 5. Render Projectiles
+    // 6. Render Projectiles
     for (const p of arenaProjectiles) {
       ctx.save();
       ctx.beginPath();
@@ -4974,7 +5332,7 @@ function arenaRenderLoop() {
       ctx.restore();
     }
 
-    // 6. Render Particles
+    // 7. Render Particles
     for (const p of arenaParticles) {
       ctx.save();
       ctx.globalAlpha = Math.max(0, p.alpha);
@@ -4985,7 +5343,7 @@ function arenaRenderLoop() {
       ctx.restore();
     }
 
-    // 7. Render Damage Texts
+    // 8. Render Damage Texts
     for (const dt of arenaDamageTexts) {
       ctx.save();
       ctx.globalAlpha = Math.max(0, dt.alpha);
@@ -5002,17 +5360,17 @@ function arenaRenderLoop() {
   requestAnimationFrame(arenaRenderLoop);
 }
 
-function unitAttackTarget(attacker, target) {
+function unitAttackTarget(attacker, target, manualSpecial = null) {
   attacker.cooldown = attacker.cooldownMax;
   attacker.recoil = 8;
   attacker.state = 'attack';
   attacker.facing = target.x >= attacker.x ? 1 : -1;
 
-  const isSpecial = Math.random() < 0.18;
+  const isSpecial = manualSpecial != null || Math.random() < 0.18;
   let dmg = attacker.damage + (Math.random() * 6 - 3);
 
   if (isSpecial) {
-    const sp = ARENA_SPECIAL_MOVES[Math.floor(Math.random() * ARENA_SPECIAL_MOVES.length)];
+    const sp = manualSpecial || ARENA_SPECIAL_MOVES[Math.floor(Math.random() * ARENA_SPECIAL_MOVES.length)];
     dmg *= sp.multiplier;
     arenaDamageTexts.push({
       text: sp.name,
@@ -5038,6 +5396,13 @@ function unitAttackTarget(attacker, target) {
         decay: 0.04
       });
     }
+    playSfxSpecialMove();
+  } else {
+    // Standard weapon sound based on archetype
+    if (attacker.roleKey === 'sniper') playSfxRailgun();
+    else if (attacker.roleKey === 'rocket') playSfxExplosion(false);
+    else if (attacker.roleKey === 'flame') playSfxPlasma();
+    else playSfxLaser(false);
   }
 
   const dx = target.x - attacker.x;
