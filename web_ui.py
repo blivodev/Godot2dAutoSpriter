@@ -998,6 +998,7 @@ HTML_PAGE = """<!DOCTYPE html>
     <button class="tab-btn active" onclick="switchTab('generator')" id="tab-btn-generator">🚀 Generator</button>
     <button class="tab-btn" onclick="switchTab('library')" id="tab-btn-library">📦 Asset Library</button>
     <button class="tab-btn" onclick="switchTab('weapons')" id="tab-btn-weapons">⚔️ Weapons &amp; Projectiles</button>
+    <button class="tab-btn" onclick="switchTab('arena')" id="tab-btn-arena">🎯 RTS Arena</button>
     <button class="tab-btn" onclick="switchTab('models')" id="tab-btn-models">🤖 AI Models</button>
   </div>
 
@@ -1950,6 +1951,160 @@ HTML_PAGE = """<!DOCTYPE html>
       </div>
     </div>
   </div>
+
+  <!-- ======================================================= -->
+  <!-- TAB: RTS SKIRMISH ARENA                                 -->
+  <!-- ======================================================= -->
+  <div class="tab-content" id="tab-arena">
+    <div class="lib-header">
+      <div>
+        <div class="lib-title">🎯 Cyberpunk RTS Skirmish Arena <span id="arena-status-badge" style="font-size:12px;color:var(--text-muted);font-weight:normal;margin-left:8px;">(Ready)</span></div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">
+          Live Tactical Skirmish Simulator: Pit custom squads from all 15 Cyberpunk Factions against each other. Units march, detect targets, fire equipped weapons, trigger ballistics VFX, launch signature moves, and battle to the last survivor.
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" id="btn-arena-start" onclick="startArenaBattle()">⚔️ Start Skirmish</button>
+        <button class="btn btn-secondary btn-sm" id="btn-arena-pause" onclick="toggleArenaPause()">⏸️ Pause</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetArenaBattle()">🔄 Reset Arena</button>
+        <button class="btn btn-secondary btn-sm" onclick="launchGodotMainScene()" style="border-color:rgba(88,166,255,0.4);color:#79c0ff;">🎮 Play in Godot 4</button>
+      </div>
+    </div>
+
+    <div class="arena-grid-layout" style="display:grid;grid-template-columns:340px 1fr;gap:20px;min-height:640px;">
+      <!-- Left Column: Squad Setup & Deployment -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <!-- Team 1 Setup (Blue / Alliance) -->
+        <div class="card" style="border-left:4px solid #00f0ff;">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:#00f0ff;">Team 1 (Blue Alliance)</span>
+            <span id="arena-t1-alive-badge" class="lib-badge lib-badge-scene" style="background:#00f0ff22;color:#00f0ff;border-color:#00f0ff44;">0 Units</span>
+          </div>
+          <div class="form-group">
+            <label for="arena-t1-faction">Faction:</label>
+            <select id="arena-t1-faction" onchange="onArenaFactionChanged()">
+              <option value="neotokyo" selected>🎌 Neo-Tokyo Cyber-Corps</option>
+              <option value="orbital">🛰️ Orbital Black-Ops Legion</option>
+              <option value="aetherium">🔮 Aetherium Psionic Syndicate</option>
+              <option value="ghost_protocol">🥷 Ghost Protocol</option>
+              <option value="directorate">🏛️ Neo-Terra Directorate</option>
+              <option value="covenant">🧠 Neuro-Covenant</option>
+              <option value="iron_valkyrie">🛡️ Iron Valkyrie</option>
+              <option value="abyssal">☣️ Abyssal Sector Outcasts</option>
+              <option value="neonglitch">⚡ Neon Glitch Underground</option>
+              <option value="syndicate">⚙️ Rust Syndicate</option>
+              <option value="silicon">🤖 Silicon Hive</option>
+              <option value="bioforge">🧬 Bio-Forge Legion</option>
+              <option value="neon_outcasts">🔥 Neon Outcasts</option>
+              <option value="apex_transhumans">🧬 Apex Transhumans</option>
+              <option value="synth_corp">🦾 Synth-Corp</option>
+            </select>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Quick-Deploy Unit to Team 1:</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('blue', 'soldier')">+ Soldier</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('blue', 'sniper')">+ Sniper</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('blue', 'rocket')">+ Rocket</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('blue', 'flame')">+ Flame</button>
+          </div>
+        </div>
+
+        <!-- Team 2 Setup (Red / Opponents) -->
+        <div class="card" style="border-left:4px solid #e67e22;">
+          <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="color:#e67e22;">Team 2 (Red Syndicate)</span>
+            <span id="arena-t2-alive-badge" class="lib-badge lib-badge-anim" style="background:#e67e2222;color:#e67e22;border-color:#e67e2244;">0 Units</span>
+          </div>
+          <div class="form-group">
+            <label for="arena-t2-faction">Faction:</label>
+            <select id="arena-t2-faction" onchange="onArenaFactionChanged()">
+              <option value="abyssal" selected>☣️ Abyssal Sector Outcasts</option>
+              <option value="neonglitch">⚡ Neon Glitch Underground</option>
+              <option value="syndicate">⚙️ Rust Syndicate</option>
+              <option value="silicon">🤖 Silicon Hive</option>
+              <option value="bioforge">🧬 Bio-Forge Legion</option>
+              <option value="neon_outcasts">🔥 Neon Outcasts</option>
+              <option value="apex_transhumans">🧬 Apex Transhumans</option>
+              <option value="synth_corp">🦾 Synth-Corp</option>
+              <option value="neotokyo">🎌 Neo-Tokyo Cyber-Corps</option>
+              <option value="orbital">🛰️ Orbital Black-Ops Legion</option>
+              <option value="aetherium">🔮 Aetherium Psionic Syndicate</option>
+              <option value="ghost_protocol">🥷 Ghost Protocol</option>
+              <option value="directorate">🏛️ Neo-Terra Directorate</option>
+              <option value="covenant">🧠 Neuro-Covenant</option>
+              <option value="iron_valkyrie">🛡️ Iron Valkyrie</option>
+            </select>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;">Quick-Deploy Unit to Team 2:</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('red', 'soldier')">+ Soldier</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('red', 'sniper')">+ Sniper</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('red', 'rocket')">+ Rocket</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:3px 7px;" onclick="deployArenaUnit('red', 'flame')">+ Flame</button>
+          </div>
+        </div>
+
+        <!-- Simulation Controls -->
+        <div class="card">
+          <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:8px;">⚙️ Skirmish Configuration</div>
+          <div class="row-2" style="margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="arena-squad-size">Squad Size:</label>
+              <select id="arena-squad-size">
+                <option value="3">3 vs 3 (Skirmish)</option>
+                <option value="5" selected>5 vs 5 (Full Strike Team)</option>
+                <option value="8">8 vs 8 (Battalion)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label for="arena-sim-speed">Simulation Speed:</label>
+              <select id="arena-sim-speed" onchange="setArenaSpeed(this.value)">
+                <option value="1">1.0x Normal</option>
+                <option value="1.5">1.5x Fast</option>
+                <option value="2.0">2.0x Blitz</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive Battlefield & Combat Intel -->
+      <div style="display:flex;flex-direction:column;gap:18px;">
+        <!-- Interactive Battlefield Canvas Card -->
+        <div class="card" style="padding:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:13px;font-weight:700;color:var(--text);">Arena Battlefield (880×440)</span>
+              <span id="arena-score-display" style="font-size:12px;font-weight:700;color:#fff;">Blue: 0  |  Red: 0</span>
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);">
+              CLICK UNIT TO INSPECT • RIGHT CLICK TO DIRECT TARGET
+            </div>
+          </div>
+
+          <div style="position:relative;background:#090d14;border:1px solid var(--border);border-radius:8px;height:440px;overflow:hidden;">
+            <canvas id="arena-canvas" width="880" height="440" style="width:100%;height:100%;display:block;cursor:crosshair;" onclick="onArenaCanvasClick(event)"></canvas>
+            <div id="arena-banner" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,14,22,0.92);border:2px solid #00f0ff;border-radius:10px;padding:16px 32px;text-align:center;box-shadow:0 8px 32px rgba(0,240,255,0.3);z-index:10;">
+              <div id="arena-banner-title" style="font-size:22px;font-weight:800;color:#00f0ff;text-transform:uppercase;">VICTORY</div>
+              <div id="arena-banner-subtitle" style="font-size:12px;color:var(--text-muted);margin-top:4px;">All opposing forces eliminated</div>
+              <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="resetArenaBattle()">Play Next Round</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Combat Intel Log & Action Feed -->
+        <div class="card" style="padding:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;font-weight:600;color:var(--text);">📡 Live Tactical Battle Intel</span>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px;padding:2px 6px;" onclick="clearArenaLog()">Clear Feed</button>
+          </div>
+          <div id="arena-combat-feed" style="background:#06080e;border:1px solid var(--border);border-radius:6px;height:120px;overflow-y:auto;padding:8px 10px;font-family:monospace;font-size:11px;display:flex;flex-direction:column;gap:4px;">
+            <div style="color:var(--text-muted);">[ARENA READY] Select factions and click "Start Skirmish" to deploy units into combat.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Lightbox -->
@@ -1981,6 +2136,7 @@ function switchTab(name) {
   if (name === 'library') refreshLibrary();
   if (name === 'weapons') { refreshArsenal(); initFiringRangeCanvas(); }
   if (name === 'models') checkModelStatus();
+  if (name === 'arena') initArena();
 }
 
 // ---- Console ----
@@ -4214,6 +4370,874 @@ document.addEventListener("keydown", e => {
     }
   }
 });
+
+// ==============================================================================
+// RTS SKIRMISH ARENA JAVASCRIPT ENGINE
+// ==============================================================================
+
+let arenaUnits = [];
+let arenaProjectiles = [];
+let arenaParticles = [];
+let arenaDamageTexts = [];
+let arenaInitialized = false;
+let arenaRunning = false;
+let arenaPaused = false;
+let arenaSimSpeed = 1.0;
+let arenaSelectedUnitId = null;
+let arenaAnimReq = null;
+let arenaLoadedImages = {};
+let arenaScore = { blue: 0, red: 0 };
+
+const ARENA_ROLES = {
+  soldier: {
+    title: "Soldier",
+    hp: 140,
+    speed: 1.15,
+    attackRange: 180,
+    damage: 18,
+    cooldownMax: 40,
+    weaponType: "assault_rifle",
+    projType: "plasma_bolt",
+    radius: 16
+  },
+  sniper: {
+    title: "Sniper",
+    hp: 80,
+    speed: 0.85,
+    attackRange: 340,
+    damage: 52,
+    cooldownMax: 85,
+    weaponType: "sniper_rifle",
+    projType: "railgun_slug",
+    radius: 14
+  },
+  rocket: {
+    title: "Rocketeer",
+    hp: 120,
+    speed: 0.95,
+    attackRange: 230,
+    damage: 36,
+    aoe: 45,
+    cooldownMax: 70,
+    weaponType: "rocket_launcher",
+    projType: "seeker_rocket",
+    radius: 16
+  },
+  flame: {
+    title: "Flamethrower",
+    hp: 170,
+    speed: 1.35,
+    attackRange: 110,
+    damage: 9,
+    cooldownMax: 12,
+    weaponType: "flamethrower",
+    projType: "flame_jet",
+    radius: 18
+  }
+};
+
+const ARENA_SPECIAL_MOVES = [
+  { name: "⚡ Overload Burst", multiplier: 2.2, color: "#00f0ff" },
+  { name: "🎯 Hyper-Focus Crit", multiplier: 2.8, color: "#ff007f" },
+  { name: "💥 Orbital Shell", multiplier: 3.2, color: "#ffc300" },
+  { name: "🛡️ Kinetic Surge", multiplier: 1.8, color: "#2ecc71" },
+  { name: "☣️ Nanite Corrosive", multiplier: 2.4, color: "#8cff28" }
+];
+
+const ARENA_BARRIERS = [
+  { x: 290, y: 80, w: 40, h: 120 },
+  { x: 550, y: 240, w: 40, h: 120 }
+];
+
+function getArenaCharImage(charName) {
+  const url = `/sprites/${charName}/${charName}_full.png`;
+  if (!arenaLoadedImages[url]) {
+    const img = new Image();
+    img.src = url;
+    arenaLoadedImages[url] = img;
+  }
+  return arenaLoadedImages[url];
+}
+
+function getArenaWeaponImage(faction, weaponType) {
+  const url = `/sprites/weapons/${faction}_${weaponType}.png`;
+  if (!arenaLoadedImages[url]) {
+    const img = new Image();
+    img.src = url;
+    arenaLoadedImages[url] = img;
+  }
+  return arenaLoadedImages[url];
+}
+
+function initArena() {
+  const canvas = document.getElementById('arena-canvas');
+  if (!canvas) return;
+
+  if (!arenaInitialized) {
+    arenaInitialized = true;
+    logArena("[ARENA ONLINE] Cyberpunk Tactical Skirmish Simulator initialized.", "#00f0ff");
+
+    if (!allLibraryChars || allLibraryChars.length === 0) {
+      fetch('/api/characters')
+        .then(r => r.json())
+        .then(d => {
+          allLibraryChars = d.characters || [];
+          populateInitialArenaSquads();
+        })
+        .catch(() => populateInitialArenaSquads());
+    } else {
+      populateInitialArenaSquads();
+    }
+  }
+
+  if (!arenaAnimReq) {
+    arenaAnimReq = requestAnimationFrame(arenaRenderLoop);
+  }
+}
+
+function populateInitialArenaSquads() {
+  if (arenaUnits.length > 0) return;
+  const squadSize = parseInt(document.getElementById('arena-squad-size')?.value || '5', 10);
+  const roles = squadSize === 3 ? ['soldier', 'sniper', 'rocket']
+    : squadSize === 8 ? ['soldier', 'soldier', 'soldier', 'sniper', 'sniper', 'rocket', 'rocket', 'flame']
+    : ['soldier', 'soldier', 'sniper', 'rocket', 'flame'];
+
+  roles.forEach(r => {
+    deployArenaUnit('blue', r, false);
+    deployArenaUnit('red', r, false);
+  });
+  updateArenaBadges();
+  logArena(`[STAGING] Deployed initial squads (${squadSize} vs ${squadSize}). Ready to skirmish!`, "#79c0ff");
+}
+
+function deployArenaUnit(team, roleKey, logDeploy = true) {
+  const role = ARENA_ROLES[roleKey] || ARENA_ROLES.soldier;
+  const factionSelectId = team === 'blue' ? 'arena-t1-faction' : 'arena-t2-faction';
+  const faction = document.getElementById(factionSelectId)?.value || (team === 'blue' ? 'neotokyo' : 'abyssal');
+
+  let charMatch = null;
+  if (allLibraryChars && allLibraryChars.length > 0) {
+    charMatch = allLibraryChars.find(c => {
+      const f = (c.faction_id || '').toLowerCase();
+      const r = (c.role || c.name || '').toLowerCase();
+      return f === faction.toLowerCase() && (
+        r.includes(roleKey) ||
+        (roleKey === 'flame' && (r.includes('pyro') || r.includes('zealot') || r.includes('flare'))) ||
+        (roleKey === 'rocket' && (r.includes('heavy') || r.includes('grenad') || r.includes('buster') || r.includes('raider'))) ||
+        (roleKey === 'sniper' && (r.includes('phantom') || r.includes('recon') || r.includes('valkyrie'))) ||
+        (roleKey === 'soldier' && (r.includes('hunter') || r.includes('striker') || r.includes('nomad') || r.includes('gunner')))
+      );
+    });
+
+    if (!charMatch) {
+      charMatch = allLibraryChars.find(c => (c.faction_id || '').toLowerCase() === faction.toLowerCase());
+    }
+    if (!charMatch) {
+      charMatch = allLibraryChars[Math.floor(Math.random() * allLibraryChars.length)];
+    }
+  }
+
+  const charName = charMatch ? charMatch.name : `${faction}_${roleKey}`;
+  const displayName = charMatch ? (charMatch.display_name || charMatch.name.replace(/_/g, ' ')) : `${faction} ${role.title}`;
+
+  const canvas = document.getElementById('arena-canvas');
+  const w = canvas ? canvas.width : 880;
+  const h = canvas ? canvas.height : 440;
+
+  const existingTeamUnits = arenaUnits.filter(u => u.team === team);
+  const idx = existingTeamUnits.length;
+
+  const x = team === 'blue'
+    ? 60 + (idx % 2) * 55 + Math.random() * 20
+    : w - 90 - (idx % 2) * 55 - Math.random() * 20;
+  const y = 70 + ((idx * 65) % (h - 140)) + Math.random() * 15;
+
+  const unitId = 'u_' + Math.random().toString(36).substr(2, 9);
+  const unit = {
+    id: unitId,
+    name: displayName,
+    charName: charName,
+    team: team,
+    roleKey: roleKey,
+    roleTitle: role.title,
+    faction: faction,
+    x: x,
+    y: y,
+    maxHp: role.hp,
+    hp: role.hp,
+    speed: role.speed * 1.3,
+    attackRange: role.attackRange,
+    damage: role.damage,
+    cooldownMax: role.cooldownMax,
+    cooldown: Math.floor(Math.random() * 25),
+    radius: role.radius,
+    weaponType: role.weaponType,
+    projType: role.projType,
+    alive: true,
+    facing: team === 'blue' ? 1 : -1,
+    walkFrame: Math.random() * 10,
+    recoil: 0,
+    state: 'idle',
+    spriteImg: getArenaCharImage(charName),
+    weaponImg: getArenaWeaponImage(faction, role.weaponType)
+  };
+
+  arenaUnits.push(unit);
+  updateArenaBadges();
+
+  if (logDeploy) {
+    const teamColor = team === 'blue' ? '#00f0ff' : '#e67e22';
+    logArena(`[DEPLOY] ${team === 'blue' ? 'Team Blue' : 'Team Red'} deployed ${displayName} (${role.title})`, teamColor);
+  }
+  return unit;
+}
+
+function startArenaBattle() {
+  const blueCount = arenaUnits.filter(u => u.team === 'blue' && u.alive).length;
+  const redCount = arenaUnits.filter(u => u.team === 'red' && u.alive).length;
+
+  if (blueCount === 0 || redCount === 0) {
+    resetArenaBattle(false);
+  }
+
+  arenaRunning = true;
+  arenaPaused = false;
+  const pBtn = document.getElementById('btn-arena-pause');
+  if (pBtn) pBtn.textContent = '⏸️ Pause';
+  hideArenaBanner();
+  updateArenaStatusBadge("(Combat Active)", "#00f0ff");
+  logArena("[ENGAGEMENT] Combat initiated! Units advancing to engage.", "#00f0ff");
+}
+
+function toggleArenaPause() {
+  if (!arenaRunning) return;
+  arenaPaused = !arenaPaused;
+  const pBtn = document.getElementById('btn-arena-pause');
+  if (pBtn) pBtn.textContent = arenaPaused ? '▶️ Resume' : '⏸️ Pause';
+  updateArenaStatusBadge(arenaPaused ? "(Paused)" : "(Combat Active)", arenaPaused ? "#f1c40f" : "#00f0ff");
+  logArena(arenaPaused ? "[PAUSED] Battle simulation paused." : "[RESUMED] Battle simulation resumed.", "#f1c40f");
+}
+
+function resetArenaBattle(clearFeed = false) {
+  arenaUnits = [];
+  arenaProjectiles = [];
+  arenaParticles = [];
+  arenaDamageTexts = [];
+  arenaRunning = false;
+  arenaPaused = false;
+  hideArenaBanner();
+  const pBtn = document.getElementById('btn-arena-pause');
+  if (pBtn) pBtn.textContent = '⏸️ Pause';
+  updateArenaStatusBadge("(Ready)", "var(--text-muted)");
+  populateInitialArenaSquads();
+  if (clearFeed) clearArenaLog();
+}
+
+function setArenaSpeed(speed) {
+  arenaSimSpeed = parseFloat(speed) || 1.0;
+  logArena(`[SIM SPEED] Simulation speed set to ${arenaSimSpeed}x`, "#cbd5e1");
+}
+
+function onArenaFactionChanged() {
+  const f1 = document.getElementById('arena-t1-faction')?.value || 'neotokyo';
+  const f2 = document.getElementById('arena-t2-faction')?.value || 'abyssal';
+  logArena(`[FACTION] Matchup updated: ${f1.toUpperCase()} vs ${f2.toUpperCase()}`, "#cbd5e1");
+  if (!arenaRunning) {
+    resetArenaBattle(false);
+  }
+}
+
+async function launchGodotMainScene() {
+  logArena("[GODOT] Launching Godot 4 RTS Skirmish Arena (res://scenes/rts_battle_demo.tscn)...", "#79c0ff");
+  try {
+    const res = await fetch('/api/open_godot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scene: 'res://scenes/rts_battle_demo.tscn' })
+    });
+    const d = await res.json();
+    if (d.status === 'launched') {
+      logArena(`[GODOT SUCCESS] ${d.message || 'Launched scene in Godot 4 editor!'}`, "#2ecc71");
+    } else {
+      logArena(`[GODOT NOTICE] ${d.message || JSON.stringify(d)}`, "#f1c40f");
+    }
+  } catch (err) {
+    logArena(`[GODOT ERROR] Failed to launch Godot: ${err.message}`, "#ff4d4d");
+  }
+}
+
+function onArenaCanvasClick(event) {
+  const canvas = document.getElementById('arena-canvas');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (event.clientX - rect.left) * scaleX;
+  const my = (event.clientY - rect.top) * scaleY;
+
+  let clicked = null;
+  let minDist = 32;
+  for (const u of arenaUnits) {
+    if (!u.alive) continue;
+    const d = Math.hypot(mx - u.x, my - u.y);
+    if (d < minDist) {
+      minDist = d;
+      clicked = u;
+    }
+  }
+
+  if (clicked) {
+    arenaSelectedUnitId = clicked.id;
+    const teamColor = clicked.team === 'blue' ? '#00f0ff' : '#e67e22';
+    logArena(`[INSPECT] Selected: ${clicked.name} (${clicked.roleTitle}) | HP: ${Math.round(clicked.hp)}/${clicked.maxHp} | Weapon: ${clicked.weaponType} | Faction: ${clicked.faction}`, teamColor);
+  } else {
+    arenaSelectedUnitId = null;
+  }
+}
+
+function updateArenaBadges() {
+  const blueAlive = arenaUnits.filter(u => u.team === 'blue' && u.alive).length;
+  const redAlive = arenaUnits.filter(u => u.team === 'red' && u.alive).length;
+
+  const t1Badge = document.getElementById('arena-t1-alive-badge');
+  if (t1Badge) t1Badge.textContent = `${blueAlive} Unit${blueAlive === 1 ? '' : 's'}`;
+
+  const t2Badge = document.getElementById('arena-t2-alive-badge');
+  if (t2Badge) t2Badge.textContent = `${redAlive} Unit${redAlive === 1 ? '' : 's'}`;
+
+  const scoreDisplay = document.getElementById('arena-score-display');
+  if (scoreDisplay) scoreDisplay.textContent = `Blue: ${arenaScore.blue} (${blueAlive} alive)  |  Red: ${arenaScore.red} (${redAlive} alive)`;
+}
+
+function updateArenaStatusBadge(text, color) {
+  const badge = document.getElementById('arena-status-badge');
+  if (badge) {
+    badge.textContent = text;
+    if (color) badge.style.color = color;
+  }
+}
+
+function showArenaBanner(title, subtitle, color) {
+  const banner = document.getElementById('arena-banner');
+  const bTitle = document.getElementById('arena-banner-title');
+  const bSub = document.getElementById('arena-banner-subtitle');
+  if (banner) banner.style.display = 'block';
+  if (bTitle) {
+    bTitle.textContent = title;
+    bTitle.style.color = color || '#00f0ff';
+  }
+  if (bSub) bSub.textContent = subtitle;
+}
+
+function hideArenaBanner() {
+  const banner = document.getElementById('arena-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+function logArena(msg, color = 'var(--text-muted)') {
+  const feed = document.getElementById('arena-combat-feed');
+  if (!feed) return;
+  const line = document.createElement('div');
+  line.style.color = color;
+  line.textContent = msg;
+  feed.appendChild(line);
+  while (feed.children.length > 80) {
+    feed.removeChild(feed.firstChild);
+  }
+  feed.scrollTop = feed.scrollHeight;
+}
+
+function clearArenaLog() {
+  const feed = document.getElementById('arena-combat-feed');
+  if (feed) feed.innerHTML = '<div style="color:var(--text-muted);">[FEED CLEARED]</div>';
+}
+
+function checkArenaVictory() {
+  const blueAlive = arenaUnits.filter(u => u.team === 'blue' && u.alive).length;
+  const redAlive = arenaUnits.filter(u => u.team === 'red' && u.alive).length;
+
+  if (arenaRunning) {
+    if (blueAlive === 0 && redAlive > 0) {
+      arenaRunning = false;
+      arenaScore.red++;
+      showArenaBanner("RED SYNDICATE VICTORY", "All opposing alliance forces eliminated", "#e67e22");
+      updateArenaStatusBadge("(Red Syndicate Won)", "#e67e22");
+      logArena("[VICTORY] Red Syndicate has dominated the arena battlefield!", "#e67e22");
+    } else if (redAlive === 0 && blueAlive > 0) {
+      arenaRunning = false;
+      arenaScore.blue++;
+      showArenaBanner("BLUE ALLIANCE VICTORY", "All opposing syndicate forces eliminated", "#00f0ff");
+      updateArenaStatusBadge("(Blue Alliance Won)", "#00f0ff");
+      logArena("[VICTORY] Blue Alliance has secured total battlefield victory!", "#00f0ff");
+    } else if (blueAlive === 0 && redAlive === 0) {
+      arenaRunning = false;
+      showArenaBanner("MUTUAL ANNIHILATION", "Both squads were neutralized in combat", "#ffc300");
+      updateArenaStatusBadge("(Stalemate)", "#ffc300");
+      logArena("[STALEMATE] Mutual destruction across both factions.", "#ffc300");
+    }
+  }
+}
+
+function arenaRenderLoop() {
+  const canvas = document.getElementById('arena-canvas');
+  const arenaTab = document.getElementById('tab-arena');
+
+  if (canvas && arenaTab && arenaTab.classList.contains('active')) {
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // 1. Draw Battlefield Grid & Dividing Perimeter
+    drawArenaBattlefieldGrid(ctx, w, h);
+
+    // 2. Draw Defensive Obstacle Barriers
+    drawArenaBarriers(ctx);
+
+    // 3. Update Combat Simulation
+    if (arenaRunning && !arenaPaused) {
+      // Update Units
+      for (const u of arenaUnits) {
+        if (!u.alive) continue;
+
+        if (u.recoil > 0) u.recoil = Math.max(0, u.recoil - 0.8 * arenaSimSpeed);
+        if (u.cooldown > 0) u.cooldown = Math.max(0, u.cooldown - arenaSimSpeed);
+
+        // Find nearest living enemy
+        let nearestEnemy = null;
+        let minDist = 99999;
+        for (const other of arenaUnits) {
+          if (other.team !== u.team && other.alive) {
+            const d = Math.hypot(other.x - u.x, other.y - u.y);
+            if (d < minDist) {
+              minDist = d;
+              nearestEnemy = other;
+            }
+          }
+        }
+
+        if (nearestEnemy) {
+          u.facing = nearestEnemy.x >= u.x ? 1 : -1;
+
+          if (minDist <= u.attackRange) {
+            // In range: Attack
+            u.state = 'attack';
+            if (u.cooldown <= 0) {
+              unitAttackTarget(u, nearestEnemy);
+            }
+          } else {
+            // Out of range: March towards enemy with obstacle avoidance
+            u.state = 'march';
+            u.walkFrame += 0.2 * arenaSimSpeed;
+
+            let dx = nearestEnemy.x - u.x;
+            let dy = nearestEnemy.y - u.y;
+            const dist = Math.hypot(dx, dy) || 1;
+
+            let moveVx = (dx / dist) * u.speed * arenaSimSpeed;
+            let moveVy = (dy / dist) * u.speed * arenaSimSpeed;
+
+            // Barrier avoidance
+            for (const b of ARENA_BARRIERS) {
+              if (u.x + moveVx >= b.x - 18 && u.x + moveVx <= b.x + b.w + 18 &&
+                  u.y + moveVy >= b.y - 18 && u.y + moveVy <= b.y + b.h + 18) {
+                // Steer vertically away from barrier center
+                moveVx *= 0.1;
+                moveVy = (u.y < b.y + b.h / 2 ? -1 : 1) * u.speed * 1.2 * arenaSimSpeed;
+              }
+            }
+
+            u.x = Math.max(25, Math.min(w - 25, u.x + moveVx));
+            u.y = Math.max(30, Math.min(h - 40, u.y + moveVy));
+          }
+        } else {
+          u.state = 'idle';
+        }
+      }
+
+      // Update Projectiles
+      for (let i = arenaProjectiles.length - 1; i >= 0; i--) {
+        const p = arenaProjectiles[i];
+        p.x += p.vx * arenaSimSpeed;
+        p.y += p.vy * arenaSimSpeed;
+        p.life -= arenaSimSpeed;
+
+        if (Math.random() < 0.6) {
+          arenaParticles.push({
+            x: p.x,
+            y: p.y,
+            vx: -p.vx * 0.15 + (Math.random() - 0.5),
+            vy: -p.vy * 0.15 + (Math.random() - 0.5),
+            color: p.color,
+            size: p.radius * 0.7,
+            alpha: 0.8,
+            decay: 0.06
+          });
+        }
+
+        let hit = false;
+        const target = arenaUnits.find(u => u.id === p.targetUnitId && u.alive);
+        if (target) {
+          const d = Math.hypot(p.x - target.x, p.y - target.y);
+          if (d <= target.radius + p.radius + 6) {
+            hit = true;
+            target.hp -= p.damage;
+
+            arenaDamageTexts.push({
+              text: (p.isSpecial ? "💥 " : "-") + p.damage + (p.isSpecial ? " CRIT!" : ""),
+              x: target.x + (Math.random() - 0.5) * 16,
+              y: target.y - 18,
+              color: p.isSpecial ? '#ff0055' : (p.team === 'blue' ? '#79c0ff' : '#ffa657'),
+              vy: -0.8,
+              alpha: 1.0,
+              size: p.isSpecial ? 14 : 11,
+              bold: p.isSpecial
+            });
+
+            const sparkCount = p.isSpecial ? 16 : 8;
+            for (let s = 0; s < sparkCount; s++) {
+              const spd = 1.5 + Math.random() * 3.5;
+              const a = Math.random() * Math.PI * 2;
+              arenaParticles.push({
+                x: target.x,
+                y: target.y,
+                vx: Math.cos(a) * spd,
+                vy: Math.sin(a) * spd,
+                color: p.color,
+                size: 2.5,
+                alpha: 1.0,
+                decay: 0.05
+              });
+            }
+
+            if (target.hp <= 0) {
+              target.hp = 0;
+              target.alive = false;
+              logArena(`[KILL] ${target.name} (${target.team === 'blue' ? 'Blue' : 'Red'}) was eliminated!`, target.team === 'blue' ? '#ff4d4d' : '#2ecc71');
+
+              for (let d = 0; d < 22; d++) {
+                const a = Math.random() * Math.PI * 2;
+                const spd = 1 + Math.random() * 4.5;
+                arenaParticles.push({
+                  x: target.x,
+                  y: target.y,
+                  vx: Math.cos(a) * spd,
+                  vy: Math.sin(a) * spd,
+                  color: target.team === 'blue' ? '#00f0ff' : '#e67e22',
+                  size: 3.5,
+                  alpha: 1.0,
+                  decay: 0.03
+                });
+              }
+              updateArenaBadges();
+              checkArenaVictory();
+            }
+          }
+        }
+
+        if (hit || p.life <= 0 || p.x < 0 || p.x > w || p.y < 0 || p.y > h) {
+          arenaProjectiles.splice(i, 1);
+        }
+      }
+
+      // Update Particles
+      for (let i = arenaParticles.length - 1; i >= 0; i--) {
+        const p = arenaParticles[i];
+        p.x += p.vx * arenaSimSpeed;
+        p.y += p.vy * arenaSimSpeed;
+        p.alpha -= p.decay * arenaSimSpeed;
+        if (p.alpha <= 0) arenaParticles.splice(i, 1);
+      }
+
+      // Update Floating Damage Texts
+      for (let i = arenaDamageTexts.length - 1; i >= 0; i--) {
+        const dt = arenaDamageTexts[i];
+        dt.y += dt.vy * arenaSimSpeed;
+        dt.alpha -= 0.02 * arenaSimSpeed;
+        if (dt.alpha <= 0) arenaDamageTexts.splice(i, 1);
+      }
+    }
+
+    // 4. Render Living Units
+    for (const u of arenaUnits) {
+      if (u.alive) drawArenaUnit(ctx, u);
+    }
+
+    // 5. Render Projectiles
+    for (const p of arenaProjectiles) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 6. Render Particles
+    for (const p of arenaParticles) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.alpha);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 7. Render Damage Texts
+    for (const dt of arenaDamageTexts) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, dt.alpha);
+      ctx.fillStyle = dt.color;
+      ctx.font = `${dt.bold ? 'bold ' : ''}${dt.size || 11}px -apple-system, sans-serif`;
+      ctx.shadowColor = 'rgba(0,0,0,0.9)';
+      ctx.shadowBlur = 4;
+      ctx.textAlign = 'center';
+      ctx.fillText(dt.text, dt.x, dt.y);
+      ctx.restore();
+    }
+  }
+
+  requestAnimationFrame(arenaRenderLoop);
+}
+
+function unitAttackTarget(attacker, target) {
+  attacker.cooldown = attacker.cooldownMax;
+  attacker.recoil = 8;
+  attacker.state = 'attack';
+  attacker.facing = target.x >= attacker.x ? 1 : -1;
+
+  const isSpecial = Math.random() < 0.18;
+  let dmg = attacker.damage + (Math.random() * 6 - 3);
+
+  if (isSpecial) {
+    const sp = ARENA_SPECIAL_MOVES[Math.floor(Math.random() * ARENA_SPECIAL_MOVES.length)];
+    dmg *= sp.multiplier;
+    arenaDamageTexts.push({
+      text: sp.name,
+      x: attacker.x,
+      y: attacker.y - 28,
+      color: sp.color,
+      vy: -0.6,
+      alpha: 1.0,
+      size: 12,
+      bold: true
+    });
+    for (let i = 0; i < 10; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const spd = 2 + Math.random() * 3.5;
+      arenaParticles.push({
+        x: attacker.x + attacker.facing * 16,
+        y: attacker.y - 4,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        color: sp.color,
+        size: 3,
+        alpha: 1.0,
+        decay: 0.04
+      });
+    }
+  }
+
+  const dx = target.x - attacker.x;
+  const dy = target.y - attacker.y;
+  const dist = Math.hypot(dx, dy) || 1;
+  const pSpeed = attacker.roleKey === 'sniper' ? 14 : attacker.roleKey === 'rocket' ? 6.5 : 9;
+
+  arenaProjectiles.push({
+    x: attacker.x + attacker.facing * 14,
+    y: attacker.y - 4,
+    vx: (dx / dist) * pSpeed,
+    vy: (dy / dist) * pSpeed,
+    targetUnitId: target.id,
+    team: attacker.team,
+    damage: Math.round(dmg),
+    isSpecial: isSpecial,
+    projType: attacker.projType,
+    color: attacker.team === 'blue' ? (isSpecial ? '#00ffff' : '#38bdf8') : (isSpecial ? '#ff3b30' : '#fb923c'),
+    life: 180,
+    radius: attacker.roleKey === 'rocket' ? 5 : 3
+  });
+
+  for (let i = 0; i < 4; i++) {
+    arenaParticles.push({
+      x: attacker.x + attacker.facing * 14,
+      y: attacker.y - 4,
+      vx: attacker.facing * (1 + Math.random() * 3),
+      vy: (Math.random() - 0.5) * 2,
+      color: attacker.team === 'blue' ? '#00f0ff' : '#ff922b',
+      size: 2.5,
+      alpha: 1.0,
+      decay: 0.08
+    });
+  }
+}
+
+function drawArenaUnit(ctx, u) {
+  ctx.save();
+  ctx.translate(u.x, u.y);
+
+  if (u.id === arenaSelectedUnitId) {
+    ctx.beginPath();
+    ctx.arc(0, 12, 22, 0, Math.PI * 2);
+    ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  ctx.beginPath();
+  ctx.ellipse(0, 16, 16, 6, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+  ctx.fill();
+
+  const bounceY = u.state === 'march' ? Math.sin(u.walkFrame) * 2.5 : 0;
+
+  ctx.save();
+  ctx.translate(0, bounceY);
+  if (u.facing < 0) {
+    ctx.scale(-1, 1);
+  }
+
+  const img = u.spriteImg;
+  if (img && img.complete && img.naturalWidth > 0) {
+    const targetH = 48;
+    const aspect = img.naturalWidth / img.naturalHeight;
+    const targetW = targetH * aspect;
+    ctx.drawImage(img, -targetW / 2, -targetH + 16, targetW, targetH);
+  } else {
+    ctx.beginPath();
+    ctx.arc(0, -10, 14, 0, Math.PI * 2);
+    ctx.fillStyle = u.team === 'blue' ? '#003b5c' : '#5c2200';
+    ctx.strokeStyle = u.team === 'blue' ? '#00f0ff' : '#e67e22';
+    ctx.lineWidth = 2;
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(u.roleTitle.charAt(0), 0, -10);
+  }
+
+  const wImg = u.weaponImg;
+  ctx.save();
+  ctx.translate(6 - (u.recoil || 0), -6);
+  if (wImg && wImg.complete && wImg.naturalWidth > 0) {
+    const wH = 14;
+    const wAspect = wImg.naturalWidth / wImg.naturalHeight;
+    const wW = wH * wAspect;
+    ctx.drawImage(wImg, 0, -wH / 2, wW, wH);
+  }
+  if (u.recoil > 4) {
+    ctx.beginPath();
+    ctx.arc(16, 0, 5, 0, Math.PI * 2);
+    ctx.fillStyle = u.team === 'blue' ? '#00ffff' : '#ffaa00';
+    ctx.shadowColor = u.team === 'blue' ? '#00ffff' : '#ff8800';
+    ctx.shadowBlur = 8;
+    ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.restore();
+
+  const barW = 34;
+  const barH = 4;
+  const barY = -38;
+  const pct = Math.max(0, Math.min(1, u.hp / u.maxHp));
+
+  ctx.fillStyle = 'rgba(10, 14, 22, 0.8)';
+  ctx.fillRect(-barW / 2 - 1, barY - 1, barW + 2, barH + 2);
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(-barW / 2 - 1, barY - 1, barW + 2, barH + 2);
+
+  ctx.fillStyle = u.team === 'blue' ? '#00f0ff' : '#e67e22';
+  if (pct < 0.25) ctx.fillStyle = '#ff4d4d';
+  ctx.fillRect(-barW / 2, barY, barW * pct, barH);
+
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(u.name.length > 14 ? u.name.substr(0, 12) + '..' : u.name, 0, barY - 4);
+
+  ctx.restore();
+}
+
+function drawArenaBarriers(ctx) {
+  ARENA_BARRIERS.forEach(b => {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    ctx.fillRect(b.x + 4, b.y + 4, b.w, b.h);
+
+    const grad = ctx.createLinearGradient(b.x, b.y, b.x + b.w, b.y + b.h);
+    grad.addColorStop(0, '#1a2333');
+    grad.addColorStop(1, '#0e1522');
+    ctx.fillStyle = grad;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+
+    ctx.strokeStyle = '#38bdf8';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+    ctx.strokeStyle = 'rgba(230, 126, 34, 0.4)';
+    ctx.lineWidth = 2;
+    for (let ly = b.y + 10; ly < b.y + b.h; ly += 16) {
+      ctx.beginPath();
+      ctx.moveTo(b.x + 4, ly);
+      ctx.lineTo(b.x + b.w - 4, ly + 8);
+      ctx.stroke();
+    }
+  });
+}
+
+function drawArenaBattlefieldGrid(ctx, w, h) {
+  ctx.fillStyle = '#070a10';
+  ctx.fillRect(0, 0, w, h);
+
+  const blueGlow = ctx.createRadialGradient(80, h / 2, 20, 80, h / 2, 280);
+  blueGlow.addColorStop(0, 'rgba(0, 240, 255, 0.08)');
+  blueGlow.addColorStop(1, 'transparent');
+  ctx.fillStyle = blueGlow;
+  ctx.fillRect(0, 0, w / 2, h);
+
+  const redGlow = ctx.createRadialGradient(w - 80, h / 2, 20, w - 80, h / 2, 280);
+  redGlow.addColorStop(0, 'rgba(230, 126, 34, 0.08)');
+  redGlow.addColorStop(1, 'transparent');
+  ctx.fillStyle = redGlow;
+  ctx.fillRect(w / 2, 0, w / 2, h);
+
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+  ctx.lineWidth = 1;
+  const step = 40;
+  for (let x = 0; x <= w; x += step) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= h; y += step) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 8]);
+  ctx.beginPath();
+  ctx.moveTo(w / 2, 0);
+  ctx.lineTo(w / 2, h);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = 'rgba(0, 240, 255, 0.5)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, w - 2, h - 2);
+}
 
 // ---- Init ----
 initAnimCatalog();

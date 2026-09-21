@@ -1,0 +1,45 @@
+[gd_scene load_steps=2 format=3 uid="uid://rts_battle_demo_scene"]
+
+[ext_resource type="Script" path="res://scripts/rts_battle_demo.gd" id="1_script"]
+
+[node name="RTSBattleDemo" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(800, 450)
+zoom = Vector2(0.9, 0.9)
+
+[node name="Units" type="Node2D" parent="."]
+
+[node name="Effects" type="Node2D" parent="."]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="Panel" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 68.0
+grow_horizontal = 2
+
+[node name="VBox" type="VBoxContainer" parent="HUD/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 8.0
+offset_right = -20.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Title" type="Label" parent="HUD/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "CYBERPUNK RTS SKIRMISH ARENA"
+
+[node name="Stats" type="Label" parent="HUD/Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+text = "Click to select units • Right-click to direct • Keys 1-4 for Signature Moves • Space to pause"
