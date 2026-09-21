@@ -36,9 +36,10 @@ for d in [WEAPONS_DIR, PROJECTILES_DIR, SCENES_WEAPONS_DIR, SCENES_PROJECTILES_D
     d.mkdir(parents=True, exist_ok=True)
 
 # ==============================================================================
-# FACTION COLOR THEMES
+# FACTION COLOR THEMES (ALL 15 FACTIONS & MODEL SECTORS)
 # ==============================================================================
 FACTION_PALETTES = {
+    # Original 5 RTS Factions
     "directorate": {
         "primary": (52, 64, 82, 255),       # Tactical gunmetal
         "primary_dark": (30, 38, 50, 255),
@@ -78,6 +79,88 @@ FACTION_PALETTES = {
         "glow": (255, 45, 60, 255),         # Optical Laser Red
         "metal": (180, 185, 195, 255),
         "outline": (10, 12, 14, 255)
+    },
+    # 5 High-Detail Generative Model Sectors
+    "neotokyo": {
+        "primary": (230, 240, 255, 255),     # Titanium white ceramic
+        "primary_dark": (175, 195, 220, 255),
+        "accent": (0, 180, 230, 255),        # Electric cyan
+        "glow": (0, 240, 255, 255),          # Tachyon energy neon
+        "metal": (210, 225, 245, 255),
+        "outline": (15, 25, 40, 255)
+    },
+    "abyssal": {
+        "primary": (95, 65, 45, 255),        # Heavily rusted scrap metal
+        "primary_dark": (55, 35, 24, 255),
+        "accent": (195, 95, 32, 255),        # Corroded iron orange
+        "glow": (230, 126, 34, 255),         # Toxic furnace amber
+        "metal": (118, 108, 98, 255),
+        "outline": (28, 18, 12, 255)
+    },
+    "orbital": {
+        "primary": (30, 36, 32, 255),        # Spec-ops matte carbon
+        "primary_dark": (16, 20, 18, 255),
+        "accent": (48, 96, 64, 255),         # Tactical dark olive
+        "glow": (46, 204, 113, 255),         # Night-vision green
+        "metal": (135, 150, 140, 255),
+        "outline": (10, 14, 12, 255)
+    },
+    "aetherium": {
+        "primary": (42, 28, 58, 255),        # Astral obsidian
+        "primary_dark": (24, 15, 34, 255),
+        "accent": (135, 70, 200, 255),       # Deep amethyst crystal
+        "glow": (195, 120, 255, 255),        # Psionic starlight violet
+        "metal": (190, 165, 215, 255),
+        "outline": (16, 10, 24, 255)
+    },
+    "neonglitch": {
+        "primary": (26, 20, 38, 255),        # Midnight synth chassis
+        "primary_dark": (15, 11, 22, 255),
+        "accent": (255, 0, 127, 255),        # Hot neon magenta
+        "glow": (0, 255, 204, 255),          # Glitch electric cyan
+        "metal": (165, 145, 195, 255),
+        "outline": (12, 8, 18, 255)
+    },
+    # 5 Pixel/Anime Cyberpunk Factions
+    "ghost_protocol": {
+        "primary": (32, 48, 54, 255),
+        "primary_dark": (18, 26, 30, 255),
+        "accent": (57, 197, 187, 255),
+        "glow": (0, 255, 230, 255),
+        "metal": (155, 185, 190, 255),
+        "outline": (12, 18, 22, 255)
+    },
+    "iron_valkyrie": {
+        "primary": (58, 48, 32, 255),
+        "primary_dark": (34, 26, 18, 255),
+        "accent": (210, 153, 34, 255),
+        "glow": (255, 215, 0, 255),
+        "metal": (200, 180, 145, 255),
+        "outline": (22, 18, 12, 255)
+    },
+    "neon_outcasts": {
+        "primary": (42, 22, 38, 255),
+        "primary_dark": (24, 12, 20, 255),
+        "accent": (247, 120, 186, 255),
+        "glow": (255, 105, 180, 255),
+        "metal": (175, 135, 165, 255),
+        "outline": (18, 10, 16, 255)
+    },
+    "apex_transhumans": {
+        "primary": (36, 26, 52, 255),
+        "primary_dark": (20, 14, 30, 255),
+        "accent": (163, 113, 247, 255),
+        "glow": (180, 130, 255, 255),
+        "metal": (170, 155, 195, 255),
+        "outline": (14, 10, 22, 255)
+    },
+    "synth_corp": {
+        "primary": (48, 26, 26, 255),
+        "primary_dark": (26, 14, 14, 255),
+        "accent": (255, 123, 114, 255),
+        "glow": (255, 60, 60, 255),
+        "metal": (185, 155, 155, 255),
+        "outline": (22, 12, 12, 255)
     }
 }
 
@@ -87,7 +170,8 @@ FACTION_PALETTES = {
 WEAPON_ARCHETYPES = [
     "assault_rifle", "sniper_rifle", "rocket_launcher", "grenade_launcher",
     "flamethrower", "psi_emitter", "flak_cannon", "submachine_gun",
-    "shotgun", "drone_pad", "bio_spitter", "rotary_gatling"
+    "shotgun", "drone_pad", "bio_spitter", "rotary_gatling",
+    "melee_blade", "pistol"
 ]
 
 def render_weapon_sprite(weapon_type: str, faction: str = "directorate", size: Tuple[int, int] = (96, 48)) -> Image.Image:
@@ -217,8 +301,103 @@ def render_weapon_sprite(weapon_type: str, faction: str = "directorate", size: T
         # Dual spade grips
         draw.rectangle([cx - 75, cy - 10, cx - 60, cy + 10], fill=theme["primary_dark"], outline=theme["outline"], width=2)
 
-    else: # shotgun, grenade_launcher, drone_pad, bio_spitter default
-        # Heavy breach-loading weapon
+    elif weapon_type == "melee_blade":
+        # Cyberpunk Vibro-Katana / Monomolecular Energy Blade
+        # Tsuka (hilt) & Pommel
+        draw.rounded_rectangle([cx - 75, cy - 5, cx - 35, cy + 5], radius=2, fill=theme["primary_dark"], outline=theme["outline"], width=2)
+        # Hilt wrap diamond diamonds
+        for hx in [cx - 68, cx - 56, cx - 44]:
+            draw.polygon([(hx, cy - 4), (hx + 5, cy), (hx, cy + 4), (hx - 5, cy)], fill=theme["accent"])
+        # Tsuba (handguard)
+        draw.ellipse([cx - 37, cy - 14, cx - 31, cy + 14], fill=theme["metal"], outline=theme["outline"], width=2)
+        # Blade base / Habaki
+        draw.rectangle([cx - 31, cy - 4, cx - 22, cy + 4], fill=theme["accent"])
+        # Main Blade Spine (Dark steel)
+        draw.polygon([(cx - 22, cy - 5), (cx + 65, cy - 3), (cx + 85, cy + 2), (cx - 22, cy + 3)], fill=theme["primary"], outline=theme["outline"], width=2)
+        # Glowing Monomolecular Plasma Edge
+        draw.polygon([(cx - 22, cy + 1), (cx + 70, cy + 3), (cx + 86, cy + 2), (cx + 74, cy + 6), (cx - 22, cy + 4)], fill=theme["glow"])
+        draw.line([(cx - 20, cy + 2), (cx + 80, cy + 3)], fill=(255, 255, 255, 240), width=1)
+
+    elif weapon_type == "pistol":
+        # Compact Cyberpunk Blaster / Tactical Sidearm
+        # Slide & Upper Barrel
+        draw.rounded_rectangle([cx - 25, cy - 12, cx + 38, cy + 2], radius=3, fill=theme["primary"], outline=theme["outline"], width=2)
+        # Laser Sight / Underbarrel Mount
+        draw.rectangle([cx + 5, cy + 2, cx + 32, cy + 8], fill=theme["primary_dark"], outline=theme["outline"], width=1)
+        draw.ellipse([cx + 30, cy + 3, cx + 36, cy + 7], fill=theme["glow"])
+        # Ejection port & optic
+        draw.rectangle([cx - 10, cy - 10, cx + 2, cy - 5], fill=theme["metal"])
+        draw.rectangle([cx - 20, cy - 16, cx - 6, cy - 12], fill=theme["accent"], outline=theme["outline"], width=1)
+        draw.ellipse([cx - 16, cy - 15, cx - 10, cy - 13], fill=theme["glow"])
+        # Grip
+        draw.polygon([(cx - 20, cy + 2), (cx - 30, cy + 28), (cx - 16, cy + 28), (cx - 8, cy + 2)], fill=theme["primary_dark"], outline=theme["outline"], width=2)
+        draw.rectangle([cx - 26, cy + 8, cx - 18, cy + 22], fill=theme["accent"])
+        # Muzzle tip
+        draw.rectangle([cx + 38, cy - 10, cx + 43, cy], fill=theme["metal"])
+
+    elif weapon_type == "shotgun":
+        # Tactical Combat Scattergun with Pump
+        # Heavy Receiver
+        draw.rounded_rectangle([cx - 45, cy - 12, cx + 15, cy + 10], radius=4, fill=theme["primary"], outline=theme["outline"], width=3)
+        # Twin heavy barrels with ventilated rib
+        draw.rectangle([cx + 15, cy - 10, cx + 75, cy + 2], fill=theme["primary_dark"], outline=theme["outline"], width=2)
+        draw.rectangle([cx + 15, cy + 2, cx + 70, cy + 8], fill=theme["metal"], outline=theme["outline"], width=2)
+        # Underbarrel sliding pump grip
+        draw.rounded_rectangle([cx + 25, cy + 6, cx + 55, cy + 18], radius=3, fill=theme["accent"], outline=theme["outline"], width=2)
+        # Stock & Pistol grip
+        draw.polygon([(cx - 45, cy - 8), (cx - 78, cy - 6), (cx - 78, cy + 16), (cx - 45, cy + 6)], fill=theme["primary_dark"], outline=theme["outline"], width=2)
+        draw.polygon([(cx - 25, cy + 8), (cx - 32, cy + 32), (cx - 18, cy + 32), (cx - 12, cy + 8)], fill=theme["primary_dark"], outline=theme["outline"], width=2)
+        # Shell ejection port glowing
+        draw.rectangle([cx - 8, cy - 8, cx + 6, cy - 2], fill=theme["glow"])
+
+    elif weapon_type == "grenade_launcher":
+        # 6-Round Revolving Cylinder Grenade Launcher
+        # Receiver & Stock
+        draw.rounded_rectangle([cx - 55, cy - 14, cx - 15, cy + 10], radius=4, fill=theme["primary"], outline=theme["outline"], width=3)
+        draw.polygon([(cx - 55, cy - 10), (cx - 80, cy - 8), (cx - 80, cy + 16), (cx - 55, cy + 8)], fill=theme["accent"], outline=theme["outline"], width=2)
+        # Massive Revolving Cylinder Drum
+        draw.ellipse([cx - 16, cy - 18, cx + 24, cy + 18], fill=theme["metal"], outline=theme["outline"], width=3)
+        # 6 Chambers
+        for c_idx in range(6):
+            c_ang = c_idx * (math.pi / 3)
+            chx = cx + 4 + int(math.cos(c_ang) * 11)
+            chy = cy + int(math.sin(c_ang) * 11)
+            draw.ellipse([chx - 3, chy - 3, chx + 3, chy + 3], fill=theme["glow"])
+        # Wide-Bore Short Barrel
+        draw.rectangle([cx + 24, cy - 12, cx + 75, cy + 8], fill=theme["primary_dark"], outline=theme["outline"], width=3)
+        draw.polygon([(cx + 75, cy - 14), (cx + 84, cy - 10), (cx + 84, cy + 10), (cx + 75, cy + 14)], fill=theme["metal"])
+        # Foregrip & Grip
+        draw.rectangle([cx - 35, cy + 8, cx - 22, cy + 34], fill=theme["primary_dark"], outline=theme["outline"], width=2)
+        draw.rectangle([cx + 42, cy + 8, cx + 52, cy + 32], fill=theme["primary_dark"], outline=theme["outline"], width=2)
+
+    elif weapon_type == "drone_pad":
+        # Cybernetic Wrist-Mounted UAV Uplink Console
+        draw.rounded_rectangle([cx - 45, cy - 16, cx + 40, cy + 14], radius=6, fill=theme["primary"], outline=theme["outline"], width=3)
+        # Holographic Projected Screen
+        draw.rounded_rectangle([cx - 35, cy - 12, cx + 15, cy + 8], radius=3, fill=(10, 20, 35, 230), outline=theme["glow"], width=2)
+        # Radar circles on screen
+        draw.ellipse([cx - 18, cy - 8, cx - 2, cy + 4], outline=theme["glow"], width=1)
+        draw.line([(cx - 10, cy - 8), (cx - 10, cy + 4)], fill=theme["glow"], width=1)
+        # Mini Docked Quad-Rotor Drone
+        draw.polygon([(cx + 22, cy - 10), (cx + 36, cy - 10), (cx + 29, cy + 2)], fill=theme["metal"])
+        draw.line([(cx + 16, cy - 12), (cx + 42, cy - 12)], fill=theme["accent"], width=2)
+        draw.ellipse([cx + 27, cy - 8, cx + 31, cy - 4], fill=theme["glow"])
+        # Wrist mounting bracers
+        draw.rectangle([cx - 50, cy - 12, cx - 44, cy + 10], fill=theme["primary_dark"])
+        draw.rectangle([cx + 40, cy - 12, cx + 46, cy + 10], fill=theme["primary_dark"])
+
+    elif weapon_type == "bio_spitter":
+        # Biomechanical Chitin Acid Projector
+        draw.polygon([(cx - 55, cy - 10), (cx - 15, cy - 16), (cx + 35, cy - 10), (cx + 70, cy), (cx + 40, cy + 14), (cx - 20, cy + 18), (cx - 55, cy + 8)], fill=theme["primary"], outline=theme["outline"], width=3)
+        # Organic ribbed sac / gland
+        draw.ellipse([cx - 35, cy - 8, cx + 5, cy + 18], fill=theme["accent"], outline=theme["outline"], width=2)
+        draw.ellipse([cx - 25, cy - 2, cx - 5, cy + 12], fill=theme["glow"])
+        # Toxic dripping nozzle jaws
+        draw.polygon([(cx + 60, cy - 14), (cx + 82, cy - 6), (cx + 65, cy)], fill=theme["primary_dark"])
+        draw.polygon([(cx + 60, cy + 14), (cx + 82, cy + 6), (cx + 65, cy)], fill=theme["primary_dark"])
+        draw.ellipse([cx + 78, cy - 3, cx + 86, cy + 3], fill=theme["glow"])
+
+    else: # fallback default
         draw.rounded_rectangle([cx - 50, cy - 12, cx + 20, cy + 10], radius=4, fill=theme["primary"], outline=theme["outline"], width=3)
         draw.rectangle([cx + 20, cy - 8, cx + 70, cy + 6], fill=theme["metal"], outline=theme["outline"], width=2)
         draw.polygon([(cx + 70, cy - 12), (cx + 80, cy - 8), (cx + 80, cy + 6), (cx + 70, cy + 10)], fill=theme["primary_dark"])
@@ -557,12 +736,16 @@ def create_projectile(proj_name: str, proj_type: str = "plasma_bolt", faction: s
 
 
 def generate_all_default_weapons_and_projectiles() -> Dict[str, Any]:
-    """Generates standard weapon and projectile suite across all 5 factions."""
+    """Generates standard weapon and projectile suite across all 15 factions and model sectors."""
     weapons_created = []
     projectiles_created = []
 
-    # Map archetypes to representative faction weapons
-    factions = ["directorate", "syndicate", "covenant", "bioforge", "silicon"]
+    # All 15 factions and model sectors
+    factions = [
+        "directorate", "syndicate", "covenant", "bioforge", "silicon",
+        "neotokyo", "abyssal", "orbital", "aetherium", "neonglitch",
+        "ghost_protocol", "iron_valkyrie", "neon_outcasts", "apex_transhumans", "synth_corp"
+    ]
 
     for faction in factions:
         for w_type in WEAPON_ARCHETYPES:

@@ -1792,11 +1792,21 @@ HTML_PAGE = """<!DOCTYPE html>
           <div class="form-group">
             <label for="arsenal-faction">Faction Aesthetics &amp; Palette:</label>
             <select id="arsenal-faction">
-              <option value="directorate" selected>🏛️ Neo-Terra Directorate (Cyan / Carbon Composite)</option>
-              <option value="syndicate">⚙️ Rust Syndicate (Orange / Welded Scrap Iron)</option>
-              <option value="covenant">🧠 Neuro-Covenant (Violet / Psionic Prismatic)</option>
-              <option value="bioforge">🧬 Bio-Forge Legion (Toxic Green / Chitin Organics)</option>
-              <option value="silicon">⚡ Silicon Hive (Crimson / Matte Black Stealth)</option>
+              <option value="neotokyo" selected>🎌 Neo-Tokyo Cyber-Corps (Titanium White / Tachyon Cyan)</option>
+              <option value="abyssal">☣️ Abyssal Sector Outcasts (Wasteland Rust / Toxic Amber)</option>
+              <option value="orbital">🛰️ Orbital Black-Ops Legion (Matte Carbon / NVG Green)</option>
+              <option value="aetherium">🔮 Aetherium Psionic Syndicate (Astral Obsidian / Amethyst)</option>
+              <option value="neonglitch">⚡ Neon Glitch Underground (Hot Magenta / Electric Teal)</option>
+              <option value="ghost_protocol">🥷 Ghost Protocol (Stealth Slate / Tactical Cyan)</option>
+              <option value="iron_valkyrie">🛡️ Iron Valkyrie (Golden Titanium / Amber)</option>
+              <option value="neon_outcasts">🔥 Neon Outcasts (Synth Pink / Smog Carbon)</option>
+              <option value="apex_transhumans">🔮 Apex Transhumans (Neural Violet / Platinum)</option>
+              <option value="synth_corp">🤖 Synth-Corp (Chassis Charcoal / Laser Red)</option>
+              <option value="directorate">🏛️ Neo-Terra Directorate (Gunmetal / Cyan)</option>
+              <option value="syndicate">⚙️ Rust Syndicate (Welded Iron / Orange)</option>
+              <option value="covenant">🧠 Neuro-Covenant (Matte Carbon / Magenta)</option>
+              <option value="bioforge">🧬 Bio-Forge Legion (Bio-Chitin / Acid Slime)</option>
+              <option value="silicon">⚡ Silicon Hive (Matte Black / Crimson)</option>
             </select>
           </div>
 
@@ -1860,11 +1870,16 @@ HTML_PAGE = """<!DOCTYPE html>
               <button class="filter-chip" id="chip-arsenal-projectiles" onclick="setArsenalFilter('projectiles')">💥 Projectiles (<span id="arsenal-cnt-proj">0</span>)</button>
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button class="filter-chip" id="chip-af-dir" onclick="setArsenalFaction('directorate')" style="border-color:#58a6ff;">Directorate</button>
-              <button class="filter-chip" id="chip-af-syn" onclick="setArsenalFaction('syndicate')" style="border-color:#e68c14;">Syndicate</button>
-              <button class="filter-chip" id="chip-af-cov" onclick="setArsenalFaction('covenant')" style="border-color:#bc8cff;">Covenant</button>
-              <button class="filter-chip" id="chip-af-bio" onclick="setArsenalFaction('bioforge')" style="border-color:#2ea043;">Bio-Forge</button>
-              <button class="filter-chip" id="chip-af-sil" onclick="setArsenalFaction('silicon')" style="border-color:#f85149;">Silicon</button>
+              <button class="filter-chip" id="chip-af-neotokyo" onclick="setArsenalFaction('neotokyo')" style="border-color:#00f0ff;color:#00f0ff;">🎌 Neo-Tokyo</button>
+              <button class="filter-chip" id="chip-af-abyssal" onclick="setArsenalFaction('abyssal')" style="border-color:#e67e22;color:#e67e22;">☣️ Abyssal</button>
+              <button class="filter-chip" id="chip-af-orbital" onclick="setArsenalFaction('orbital')" style="border-color:#2ecc71;color:#2ecc71;">🛰️ Orbital Ops</button>
+              <button class="filter-chip" id="chip-af-aetherium" onclick="setArsenalFaction('aetherium')" style="border-color:#9b59b6;color:#d2a8ff;">🔮 Aetherium</button>
+              <button class="filter-chip" id="chip-af-neonglitch" onclick="setArsenalFaction('neonglitch')" style="border-color:#ff007f;color:#ff79c6;">⚡ Neon Glitch</button>
+              <button class="filter-chip" id="chip-af-directorate" onclick="setArsenalFaction('directorate')" style="border-color:#58a6ff;">🏛️ Directorate</button>
+              <button class="filter-chip" id="chip-af-syndicate" onclick="setArsenalFaction('syndicate')" style="border-color:#e68c14;">⚙️ Syndicate</button>
+              <button class="filter-chip" id="chip-af-covenant" onclick="setArsenalFaction('covenant')" style="border-color:#bc8cff;">🧠 Covenant</button>
+              <button class="filter-chip" id="chip-af-bioforge" onclick="setArsenalFaction('bioforge')" style="border-color:#2ea043;">🧬 Bio-Forge</button>
+              <button class="filter-chip" id="chip-af-silicon" onclick="setArsenalFaction('silicon')" style="border-color:#f85149;">⚡ Silicon</button>
               <button class="filter-chip" id="chip-af-clear" onclick="setArsenalFaction('all')">Clear</button>
             </div>
           </div>
@@ -3107,6 +3122,22 @@ function loadLimbImagesForChar(charName) {
     altFull.onload = () => { loadedLimbImages["_full"] = altFull; };
   };
 
+  // 1.5. Equipped Weapon Sprite
+  const charInfo = allLibraryChars.find(c => c.name === charName);
+  const wpnName = (charInfo && (charInfo.equipped_weapon || charInfo.weapon_id)) || "";
+  if (wpnName) {
+    const wpnImg = new Image();
+    wpnImg.src = `/sprites/weapons/${wpnName}.png?t=${Date.now()}`;
+    wpnImg.onload = () => { loadedLimbImages["_weapon"] = wpnImg; };
+    wpnImg.onerror = () => {
+      if (charInfo.faction_id && !wpnName.includes("_")) {
+        const altWpn = new Image();
+        altWpn.src = `/sprites/weapons/${charInfo.faction_id}_${wpnName}.png?t=${Date.now()}`;
+        altWpn.onload = () => { loadedLimbImages["_weapon"] = altWpn; };
+      }
+    };
+  }
+
   // 2. Load all standard limbs trying prefixed format first (cyber_scion_829_head.png) then plain (head.png)
   BONE_LIMBS.forEach(bone => {
     const prefixedImg = new Image();
@@ -3333,6 +3364,16 @@ function animRenderLoop(now) {
       ctx.drawImage(fullImg, -targetW / 2, -targetH + 65, targetW, targetH);
       ctx.restore();
 
+      // Render equipped weapon in full body mode during combat or attacks
+      const wpnImgFull = loadedLimbImages["_weapon"];
+      if (wpnImgFull && wpnImgFull.complete && wpnImgFull.naturalWidth > 0 && (currentAnimName === "fire_weapon" || currentAnimName === "punch" || currentAnimName === "hit" || currentAnimName.startsWith("special_"))) {
+        ctx.save();
+        ctx.translate(px + 28, py + torsoPos[1] + 12);
+        ctx.rotate(torsoRot * 0.7);
+        ctx.drawImage(wpnImgFull, 0, -16, 54, 28);
+        ctx.restore();
+      }
+
       // Optional skeleton overlay on top of full model
       if (showSkeletonOverlay) {
         drawSkeletonBones(ctx, px, py, torsoPos, torsoRot, headRot, armLRot, armLLowRot, armRRot, armRLowRot, legLRot, legLLowRot, legRRot, legRLowRot);
@@ -3398,6 +3439,13 @@ function animRenderLoop(now) {
       drawPart("arm_lower_R", "arm_lower_R", 34, 48, 4, 14);
       ctx.translate(4, 22);
       drawPart("hand_R", "hand_R", 26, 26, 0, 0);
+      const wpnImgHand = loadedLimbImages["_weapon"];
+      if (wpnImgHand && wpnImgHand.complete && wpnImgHand.naturalWidth > 0) {
+        ctx.save();
+        ctx.translate(8, 6);
+        ctx.drawImage(wpnImgHand, 0, -16, 54, 28);
+        ctx.restore();
+      }
       ctx.restore();
 
       // 2. Right Leg (Back Layer)
@@ -3631,8 +3679,7 @@ function setArsenalFaction(fac) {
   document.querySelectorAll('#tab-weapons .filter-chip').forEach(el => {
     if (el.id.startsWith('chip-af-')) el.classList.remove('active');
   });
-  const chipId = fac === 'all' ? 'chip-af-clear' : `chip-af-${fac.substring(0, 3)}`;
-  const chip = document.getElementById(chipId);
+  const chip = document.getElementById(fac === 'all' ? 'chip-af-clear' : `chip-af-${fac}`);
   if (chip) chip.classList.add('active');
   renderArsenalGrid();
 }
@@ -3712,7 +3759,17 @@ function renderArsenalGrid() {
 
     let facName = "Independent";
     let facCol = "#8b949e";
-    if (it.name.startsWith("directorate_")) { facName = "Directorate"; facCol = "#58a6ff"; }
+    if (it.name.startsWith("neotokyo_")) { facName = "Neo-Tokyo"; facCol = "#00f0ff"; }
+    else if (it.name.startsWith("abyssal_")) { facName = "Abyssal"; facCol = "#e67e22"; }
+    else if (it.name.startsWith("orbital_")) { facName = "Orbital Ops"; facCol = "#2ecc71"; }
+    else if (it.name.startsWith("aetherium_")) { facName = "Aetherium"; facCol = "#9b59b6"; }
+    else if (it.name.startsWith("neonglitch_")) { facName = "Neon Glitch"; facCol = "#ff007f"; }
+    else if (it.name.startsWith("ghost_protocol_")) { facName = "Ghost Protocol"; facCol = "#39c5bb"; }
+    else if (it.name.startsWith("iron_valkyrie_")) { facName = "Iron Valkyrie"; facCol = "#d29922"; }
+    else if (it.name.startsWith("neon_outcasts_")) { facName = "Neon Outcasts"; facCol = "#f778ba"; }
+    else if (it.name.startsWith("apex_transhumans_")) { facName = "Apex Transhumans"; facCol = "#a371f7"; }
+    else if (it.name.startsWith("synth_corp_")) { facName = "Synth-Corp"; facCol = "#ff7b72"; }
+    else if (it.name.startsWith("directorate_")) { facName = "Directorate"; facCol = "#58a6ff"; }
     else if (it.name.startsWith("syndicate_")) { facName = "Syndicate"; facCol = "#e68c14"; }
     else if (it.name.startsWith("covenant_")) { facName = "Covenant"; facCol = "#bc8cff"; }
     else if (it.name.startsWith("bioforge_")) { facName = "Bio-Forge"; facCol = "#2ea043"; }
@@ -3809,7 +3866,12 @@ async function equipWeaponToCurrent(weaponName) {
     });
     const d = await r.json();
     if (d.status === 'equipped' || d.status === 'success') {
-      log(`[GODOT] ✓ Weapon equipped to ${viewingChar}! Scene: ${d.scene_path}`, "ok");
+      log(`[GODOT] ✓ Weapon equipped to ${viewingChar}!`, "ok");
+      const charInfo = allLibraryChars.find(c => c.name === viewingChar);
+      if (charInfo) charInfo.equipped_weapon = weaponName;
+      const wpnImg = new Image();
+      wpnImg.src = `/sprites/weapons/${weaponName}.png?t=${Date.now()}`;
+      wpnImg.onload = () => { loadedLimbImages["_weapon"] = wpnImg; };
       refreshLibrary();
     } else {
       log(`[WARN] ${d.message || 'Failed to equip.'}`, "warn");

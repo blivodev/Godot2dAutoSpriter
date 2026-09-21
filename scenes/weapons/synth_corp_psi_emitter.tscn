@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://wpn_synth_corp_psi_emitter"]
+
+[ext_resource type="Texture2D" path="res://sprites/weapons/synth_corp_psi_emitter.png" id="1_tex"]
+
+[node name="Synth_corp_psi_emitter" type="Node2D"]
+metadata/weapon_type = "psi_emitter"
+metadata/faction = "synth_corp"
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_tex")
+offset = Vector2(16, 0)
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(48, -2)
+
+[node name="Ejector" type="Marker2D" parent="."]
+position = Vector2(-4, -6)

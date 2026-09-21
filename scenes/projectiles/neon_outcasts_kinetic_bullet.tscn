@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://prj_neon_outcasts_kinetic_bullet"]
+
+[ext_resource type="Texture2D" path="res://sprites/projectiles/neon_outcasts_kinetic_bullet.png" id="1_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_col"]
+radius = 8.0
+
+[node name="Neon_outcasts_kinetic_bullet" type="Area2D"]
+metadata/projectile_type = "kinetic_bullet"
+metadata/speed = 700.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_col")

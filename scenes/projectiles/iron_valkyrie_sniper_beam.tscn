@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://prj_iron_valkyrie_sniper_beam"]
+
+[ext_resource type="Texture2D" path="res://sprites/projectiles/iron_valkyrie_sniper_beam.png" id="1_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_col"]
+radius = 8.0
+
+[node name="Iron_valkyrie_sniper_beam" type="Area2D"]
+metadata/projectile_type = "sniper_beam"
+metadata/speed = 700.0
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_col")

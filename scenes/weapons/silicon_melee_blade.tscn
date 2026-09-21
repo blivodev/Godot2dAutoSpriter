@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://wpn_silicon_melee_blade"]
+
+[ext_resource type="Texture2D" path="res://sprites/weapons/silicon_melee_blade.png" id="1_tex"]
+
+[node name="Silicon_melee_blade" type="Node2D"]
+metadata/weapon_type = "melee_blade"
+metadata/faction = "silicon"
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_tex")
+offset = Vector2(16, 0)
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(48, -2)
+
+[node name="Ejector" type="Marker2D" parent="."]
+position = Vector2(-4, -6)

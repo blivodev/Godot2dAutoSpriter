@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://wpn_syndicate_pistol"]
+
+[ext_resource type="Texture2D" path="res://sprites/weapons/syndicate_pistol.png" id="1_tex"]
+
+[node name="Syndicate_pistol" type="Node2D"]
+metadata/weapon_type = "pistol"
+metadata/faction = "syndicate"
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_tex")
+offset = Vector2(16, 0)
+
+[node name="Muzzle" type="Marker2D" parent="."]
+position = Vector2(48, -2)
+
+[node name="Ejector" type="Marker2D" parent="."]
+position = Vector2(-4, -6)
