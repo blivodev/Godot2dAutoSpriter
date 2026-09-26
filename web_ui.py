@@ -1967,6 +1967,8 @@ HTML_PAGE = """<!DOCTYPE html>
         <button class="btn btn-primary btn-sm" id="btn-arena-start" onclick="startArenaBattle()">⚔️ Start Skirmish</button>
         <button class="btn btn-secondary btn-sm" id="btn-arena-pause" onclick="toggleArenaPause()">⏸️ Pause</button>
         <button class="btn btn-secondary btn-sm" onclick="resetArenaBattle()">🔄 Reset Arena</button>
+        <button class="btn btn-secondary btn-sm" id="btn-arena-fog" onclick="toggleArenaFogOfWar()" style="border-color:rgba(0,240,255,0.4);color:#00f0ff;">👁️ Fog: OFF</button>
+        <button class="btn btn-secondary btn-sm" id="btn-arena-stance" onclick="toggleArenaStance()" style="border-color:rgba(46,204,113,0.4);color:#2ecc71;">🛡️ Stance: Assault</button>
         <button class="btn btn-secondary btn-sm" id="btn-arena-audio" onclick="toggleArenaAudio()" style="border-color:rgba(0,240,255,0.4);color:#00f0ff;">🔊 SFX: ON</button>
         <button class="btn btn-secondary btn-sm" onclick="launchGodotMainScene()" style="border-color:rgba(88,166,255,0.4);color:#79c0ff;">🎮 Play in Godot 4</button>
       </div>
@@ -2084,7 +2086,7 @@ HTML_PAGE = """<!DOCTYPE html>
           </div>
 
           <div style="position:relative;background:#090d14;border:1px solid var(--border);border-radius:8px;height:440px;overflow:hidden;">
-            <canvas id="arena-canvas" width="880" height="440" style="width:100%;height:100%;display:block;cursor:crosshair;" onclick="onArenaCanvasClick(event)" oncontextmenu="onArenaCanvasContextMenu(event)"></canvas>
+            <canvas id="arena-canvas" width="880" height="440" style="width:100%;height:100%;display:block;cursor:crosshair;" onmousedown="onArenaMouseDown(event)" onmousemove="onArenaMouseMove(event)" onmouseup="onArenaMouseUp(event)" onclick="onArenaCanvasClick(event)" oncontextmenu="onArenaCanvasContextMenu(event)"></canvas>
             <div id="arena-banner" style="display:none;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(10,14,22,0.92);border:2px solid #00f0ff;border-radius:10px;padding:16px 32px;text-align:center;box-shadow:0 8px 32px rgba(0,240,255,0.3);z-index:10;">
               <div id="arena-banner-title" style="font-size:22px;font-weight:800;color:#00f0ff;text-transform:uppercase;">VICTORY</div>
               <div id="arena-banner-subtitle" style="font-size:12px;color:var(--text-muted);margin-top:4px;">All opposing forces eliminated</div>
@@ -2109,8 +2111,10 @@ HTML_PAGE = """<!DOCTYPE html>
             <span style="font-size:11px;font-weight:600;color:var(--text-muted);">Unleash Special Move:</span>
             <button class="btn btn-secondary btn-sm" id="cmd-move-0" onclick="triggerManualSpecialMove(0)" style="font-size:10px;padding:2px 7px;border-color:rgba(0,240,255,0.4);color:#00f0ff;">⚡ Overload Burst</button>
             <button class="btn btn-secondary btn-sm" id="cmd-move-1" onclick="triggerManualSpecialMove(1)" style="font-size:10px;padding:2px 7px;border-color:rgba(255,0,127,0.4);color:#ff007f;">🎯 Hyper-Focus Crit</button>
-            <button class="btn btn-secondary btn-sm" id="cmd-move-2" onclick="triggerManualSpecialMove(2)" style="font-size:10px;padding:2px 7px;border-color:rgba(255,195,0,0.4);color:#ffc300;">💥 Orbital Shell</button>
+            <button class="btn btn-secondary btn-sm" id="cmd-move-2" onclick="triggerManualSpecialMove(2)" style="font-size:10px;padding:2px 7px;border-color:rgba(255,195,0,0.4);color:#ffc300;">💥 Orbital Strike</button>
             <button class="btn btn-secondary btn-sm" id="cmd-move-3" onclick="triggerManualSpecialMove(3)" style="font-size:10px;padding:2px 7px;border-color:rgba(46,204,113,0.4);color:#2ecc71;">🛡️ Kinetic Surge</button>
+            <button class="btn btn-secondary btn-sm" id="cmd-move-4" onclick="triggerManualSpecialMove(4)" style="font-size:10px;padding:2px 7px;border-color:rgba(168,85,247,0.4);color:#a855f7;">⚡ EMP Nova</button>
+            <button class="btn btn-secondary btn-sm" id="cmd-move-5" onclick="triggerManualSpecialMove(5)" style="font-size:10px;padding:2px 7px;border-color:rgba(140,255,40,0.4);color:#8cff28;">☣️ Nanite Swarm</button>
           </div>
         </div>
 
@@ -4402,14 +4406,21 @@ let arenaProjectiles = [];
 let arenaParticles = [];
 let arenaDamageTexts = [];
 let arenaWaypoints = [];
+let arenaAbilityFX = [];
 let arenaInitialized = false;
 let arenaRunning = false;
 let arenaPaused = false;
+let arenaFogOfWar = false;
+let arenaStance = 'assault'; // 'assault', 'hold', 'retreat'
 let arenaSimSpeed = 1.0;
+let arenaSelectedUnitIds = [];
 let arenaSelectedUnitId = null;
 let arenaAnimReq = null;
 let arenaLoadedImages = {};
 let arenaScore = { blue: 0, red: 0 };
+let arenaIsBoxDragging = false;
+let arenaDragBoxStart = { x: 0, y: 0 };
+let arenaDragBoxCurrent = { x: 0, y: 0 };
 
 // Audio Synthesis State
 let arenaAudioCtx = null;
@@ -4548,6 +4559,67 @@ function playSfxSpecialMove() {
   } catch (_) {}
 }
 
+function playSfxShieldDeflect() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1400, now);
+    osc.frequency.exponentialRampToValueAtTime(320, now + 0.14);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.15);
+  } catch (_) {}
+}
+
+function playSfxEmpShock() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(800, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.35);
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.36);
+  } catch (_) {}
+}
+
+function playSfxOrbitalBeam() {
+  if (!arenaAudioEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  try {
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(180, now);
+    osc.frequency.linearRampToValueAtTime(1600, now + 0.2);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 0.45);
+    gain.gain.setValueAtTime(0.32, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + 0.46);
+  } catch (_) {}
+}
+
 function playSfxVictory() {
   if (!arenaAudioEnabled) return;
   const ctx = getAudioContext();
@@ -4640,11 +4712,12 @@ const ARENA_ROLES = {
 };
 
 const ARENA_SPECIAL_MOVES = [
-  { name: "⚡ Overload Burst", multiplier: 2.2, color: "#00f0ff" },
-  { name: "🎯 Hyper-Focus Crit", multiplier: 2.8, color: "#ff007f" },
-  { name: "💥 Orbital Shell", multiplier: 3.2, color: "#ffc300" },
-  { name: "🛡️ Kinetic Surge", multiplier: 1.8, color: "#2ecc71" },
-  { name: "☣️ Nanite Corrosive", multiplier: 2.4, color: "#8cff28" }
+  { name: "⚡ Overload Burst", type: "overload", multiplier: 2.2, color: "#00f0ff" },
+  { name: "🎯 Hyper-Focus Crit", type: "crit", multiplier: 2.8, color: "#ff007f" },
+  { name: "💥 Orbital Strike", type: "orbital", multiplier: 3.4, color: "#ffc300" },
+  { name: "🛡️ Kinetic Surge", type: "kinetic", multiplier: 1.8, color: "#2ecc71" },
+  { name: "⚡ EMP Nova", type: "emp", multiplier: 2.0, color: "#a855f7" },
+  { name: "☣️ Nanite Swarm", type: "nanite", multiplier: 2.5, color: "#8cff28" }
 ];
 
 const ARENA_BARRIERS = [
@@ -4771,6 +4844,11 @@ function deployArenaUnit(team, roleKey, logDeploy = true) {
     targetEnemyId: null,
     maxHp: role.hp,
     hp: role.hp,
+    maxShield: Math.round(role.hp * 0.45),
+    shield: Math.round(role.hp * 0.45),
+    shieldRegenDelay: 0,
+    isStunned: 0,
+    visionRadius: roleKey === 'sniper' ? 340 : 230,
     speed: role.speed * 1.3,
     attackRange: role.attackRange,
     damage: role.damage,
@@ -4831,9 +4909,12 @@ function resetArenaBattle(clearFeed = false) {
   arenaParticles = [];
   arenaDamageTexts = [];
   arenaWaypoints = [];
+  arenaAbilityFX = [];
+  arenaSelectedUnitIds = [];
+  arenaSelectedUnitId = null;
+  arenaIsBoxDragging = false;
   arenaRunning = false;
   arenaPaused = false;
-  arenaSelectedUnitId = null;
   hideArenaBanner();
   const cmdBar = document.getElementById('arena-unit-command-bar');
   if (cmdBar) cmdBar.style.display = 'none';
@@ -4842,6 +4923,40 @@ function resetArenaBattle(clearFeed = false) {
   updateArenaStatusBadge("(Ready)", "var(--text-muted)");
   populateInitialArenaSquads();
   if (clearFeed) clearArenaLog();
+}
+
+function toggleArenaFogOfWar() {
+  arenaFogOfWar = !arenaFogOfWar;
+  const btn = document.getElementById('btn-arena-fog');
+  if (btn) {
+    btn.textContent = arenaFogOfWar ? '👁️ Fog: ON' : '👁️ Fog: OFF';
+    btn.style.color = arenaFogOfWar ? '#00f0ff' : 'var(--text-muted)';
+  }
+  logArena(arenaFogOfWar ? "[TACTICAL] Fog of War activated. Shrouding battlefield outside allied sensors." : "[TACTICAL] Fog of War deactivated. Full battlefield visual acquired.", "#79c0ff");
+}
+
+function toggleArenaStance() {
+  if (arenaStance === 'assault') arenaStance = 'hold';
+  else if (arenaStance === 'hold') arenaStance = 'retreat';
+  else arenaStance = 'assault';
+
+  const btn = document.getElementById('btn-arena-stance');
+  let title = 'Assault';
+  let color = '#2ecc71';
+  if (arenaStance === 'hold') {
+    title = 'Hold Position';
+    color = '#f1c40f';
+  } else if (arenaStance === 'retreat') {
+    title = 'Fall Back';
+    color = '#e74c3c';
+  }
+
+  if (btn) {
+    btn.textContent = `🛡️ Stance: ${title}`;
+    btn.style.color = color;
+    btn.style.borderColor = color;
+  }
+  logArena(`[TACTICAL SQUAD ORDER] Alliance squad stance switched to ${title.toUpperCase()}`, color);
 }
 
 function setArenaSpeed(speed) {
@@ -4877,6 +4992,76 @@ async function launchGodotMainScene() {
   }
 }
 
+function onArenaMouseDown(event) {
+  if (event.button !== 0) return;
+  const canvas = document.getElementById('arena-canvas');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  arenaDragBoxStart = { x: (event.clientX - rect.left) * scaleX, y: (event.clientY - rect.top) * scaleY };
+  arenaDragBoxCurrent = { ...arenaDragBoxStart };
+  arenaIsBoxDragging = true;
+}
+
+function onArenaMouseMove(event) {
+  if (!arenaIsBoxDragging) return;
+  const canvas = document.getElementById('arena-canvas');
+  if (!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  arenaDragBoxCurrent = { x: (event.clientX - rect.left) * scaleX, y: (event.clientY - rect.top) * scaleY };
+}
+
+function onArenaMouseUp(event) {
+  if (!arenaIsBoxDragging) return;
+  arenaIsBoxDragging = false;
+  const dx = Math.abs(arenaDragBoxCurrent.x - arenaDragBoxStart.x);
+  const dy = Math.abs(arenaDragBoxCurrent.y - arenaDragBoxStart.y);
+  if (dx > 8 || dy > 8) {
+    const minX = Math.min(arenaDragBoxStart.x, arenaDragBoxCurrent.x);
+    const maxX = Math.max(arenaDragBoxStart.x, arenaDragBoxCurrent.x);
+    const minY = Math.min(arenaDragBoxStart.y, arenaDragBoxCurrent.y);
+    const maxY = Math.max(arenaDragBoxStart.y, arenaDragBoxCurrent.y);
+
+    arenaSelectedUnitIds = [];
+    for (const u of arenaUnits) {
+      if (u.team === 'blue' && u.alive && u.x >= minX && u.x <= maxX && u.y >= minY && u.y <= maxY) {
+        arenaSelectedUnitIds.push(u.id);
+      }
+    }
+    if (arenaSelectedUnitIds.length > 0) {
+      arenaSelectedUnitId = arenaSelectedUnitIds[0];
+      logArena(`[SQUAD SELECTION] Selected ${arenaSelectedUnitIds.length} units in tactical formation.`, "#00f0ff");
+      showCommandBarForSelection();
+    }
+  }
+}
+
+function showCommandBarForSelection() {
+  const cmdBar = document.getElementById('arena-unit-command-bar');
+  if (!cmdBar) return;
+  const selUnit = arenaUnits.find(u => u.id === arenaSelectedUnitId && u.alive);
+  if (!selUnit) {
+    cmdBar.style.display = 'none';
+    return;
+  }
+  cmdBar.style.display = 'block';
+  cmdBar.style.borderLeftColor = selUnit.team === 'blue' ? '#00f0ff' : '#e67e22';
+  const title = document.getElementById('cmd-unit-title');
+  const role = document.getElementById('cmd-unit-role');
+  const hp = document.getElementById('cmd-unit-hp-text');
+  if (title) {
+    title.textContent = arenaSelectedUnitIds.length > 1
+      ? `Squad Selected: ${arenaSelectedUnitIds.length} Units (Lead: ${selUnit.name})`
+      : `Selected: ${selUnit.name}`;
+    title.style.color = selUnit.team === 'blue' ? '#00f0ff' : '#e67e22';
+  }
+  if (role) role.textContent = selUnit.roleTitle;
+  if (hp) hp.textContent = `HP: ${Math.round(selUnit.hp)}/${selUnit.maxHp} | Shield: ${Math.round(selUnit.shield || 0)}/${selUnit.maxShield || 0}`;
+}
+
 function onArenaCanvasClick(event) {
   getAudioContext();
   const canvas = document.getElementById('arena-canvas');
@@ -4901,24 +5086,13 @@ function onArenaCanvasClick(event) {
   const cmdBar = document.getElementById('arena-unit-command-bar');
   if (clicked) {
     arenaSelectedUnitId = clicked.id;
+    arenaSelectedUnitIds = [clicked.id];
+    showCommandBarForSelection();
     const teamColor = clicked.team === 'blue' ? '#00f0ff' : '#e67e22';
-    logArena(`[INSPECT] Selected: ${clicked.name} (${clicked.roleTitle}) | HP: ${Math.round(clicked.hp)}/${clicked.maxHp} | Weapon: ${clicked.weaponType} | Faction: ${clicked.faction}`, teamColor);
-
-    if (cmdBar) {
-      cmdBar.style.display = 'block';
-      cmdBar.style.borderLeftColor = teamColor;
-      const title = document.getElementById('cmd-unit-title');
-      const role = document.getElementById('cmd-unit-role');
-      const hp = document.getElementById('cmd-unit-hp-text');
-      if (title) {
-        title.textContent = `Selected: ${clicked.name}`;
-        title.style.color = teamColor;
-      }
-      if (role) role.textContent = clicked.roleTitle;
-      if (hp) hp.textContent = `HP: ${Math.round(clicked.hp)}/${clicked.maxHp} | Weapon: ${clicked.weaponType}`;
-    }
+    logArena(`[INSPECT] Selected: ${clicked.name} (${clicked.roleTitle}) | HP: ${Math.round(clicked.hp)}/${clicked.maxHp} | Shield: ${Math.round(clicked.shield || 0)}/${clicked.maxShield || 0} | Weapon: ${clicked.weaponType}`, teamColor);
   } else {
     arenaSelectedUnitId = null;
+    arenaSelectedUnitIds = [];
     if (cmdBar) cmdBar.style.display = 'none';
   }
 }
@@ -4934,13 +5108,13 @@ function onArenaCanvasContextMenu(event) {
   const mx = (event.clientX - rect.left) * scaleX;
   const my = (event.clientY - rect.top) * scaleY;
 
-  const selUnit = arenaUnits.find(u => u.id === arenaSelectedUnitId && u.alive);
-  if (!selUnit) return;
+  const squad = arenaUnits.filter(u => (arenaSelectedUnitIds.includes(u.id) || u.id === arenaSelectedUnitId) && u.alive);
+  if (squad.length === 0) return;
 
   let clickedEnemy = null;
   let minDist = 30;
   for (const other of arenaUnits) {
-    if (other.team !== selUnit.team && other.alive) {
+    if (other.team !== squad[0].team && other.alive) {
       const d = Math.hypot(mx - other.x, my - other.y);
       if (d < minDist) {
         minDist = d;
@@ -4950,16 +5124,26 @@ function onArenaCanvasContextMenu(event) {
   }
 
   if (clickedEnemy) {
-    selUnit.targetEnemyId = clickedEnemy.id;
-    selUnit.cooldown = 0;
-    logArena(`[FOCUS TARGET] ${selUnit.name} targeting ${clickedEnemy.name}!`, "#ff007f");
+    squad.forEach(u => {
+      u.targetEnemyId = clickedEnemy.id;
+      u.cooldown = 0;
+    });
+    logArena(`[FOCUS TARGET] ${squad.length > 1 ? squad.length + ' Units' : squad[0].name} targeting ${clickedEnemy.name}!`, "#ff007f");
     playSfxSpecialMove();
     arenaWaypoints.push({ x: clickedEnemy.x, y: clickedEnemy.y, radius: 26, alpha: 1.0, color: '#ff007f' });
   } else {
-    selUnit.moveTargetX = mx;
-    selUnit.moveTargetY = my;
-    selUnit.state = 'march';
-    logArena(`[MOVE ORDER] ${selUnit.name} advancing to (${Math.round(mx)}, ${Math.round(my)})`, "#00f0ff");
+    const cols = Math.ceil(Math.sqrt(squad.length));
+    const spacing = 32;
+    squad.forEach((u, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const offX = (col - cols * 0.5) * spacing;
+      const offY = (row - cols * 0.5) * spacing;
+      u.moveTargetX = Math.max(25, Math.min(canvas.width - 25, mx + offX));
+      u.moveTargetY = Math.max(30, Math.min(canvas.height - 30, my + offY));
+      u.state = 'march';
+    });
+    logArena(`[FORMATION ORDER] Directed ${squad.length} units to (${Math.round(mx)}, ${Math.round(my)})`, "#00f0ff");
     playSfxWaypoint();
     arenaWaypoints.push({ x: mx, y: my, radius: 24, alpha: 1.0, color: '#00f0ff' });
   }
@@ -4993,9 +5177,123 @@ function triggerManualSpecialMove(moveIndex) {
   const sp = ARENA_SPECIAL_MOVES[moveIndex % ARENA_SPECIAL_MOVES.length];
   selUnit.cooldown = 0;
   selUnit.facing = nearest.x >= selUnit.x ? 1 : -1;
-  unitAttackTarget(selUnit, nearest, sp);
+
+  if (sp.type === 'orbital') {
+    arenaAbilityFX.push({
+      type: 'orbital',
+      x: nearest.x,
+      y: nearest.y,
+      radius: 80,
+      maxTimer: 25,
+      timer: 25
+    });
+    for (const other of arenaUnits) {
+      if (other.team !== selUnit.team && other.alive) {
+        if (Math.hypot(other.x - nearest.x, other.y - nearest.y) <= 80) {
+          applyDirectDamage(other, 65, true, "🛰️ ORBITAL");
+        }
+      }
+    }
+    playSfxOrbitalBeam();
+  } else if (sp.type === 'emp') {
+    arenaAbilityFX.push({
+      type: 'emp',
+      x: selUnit.x,
+      y: selUnit.y,
+      maxRadius: 180,
+      maxTimer: 24,
+      timer: 24
+    });
+    for (const other of arenaUnits) {
+      if (other.team !== selUnit.team && other.alive) {
+        if (Math.hypot(other.x - selUnit.x, other.y - selUnit.y) <= 180) {
+          other.isStunned = 40;
+          applyDirectDamage(other, 30, false, "⚡ EMP");
+        }
+      }
+    }
+    playSfxEmpShock();
+  } else if (sp.type === 'nanite') {
+    arenaAbilityFX.push({
+      type: 'nanite',
+      x: nearest.x,
+      y: nearest.y,
+      radius: 70,
+      maxTimer: 90,
+      timer: 90,
+      tickDelay: 0
+    });
+    playSfxPlasma();
+  } else {
+    unitAttackTarget(selUnit, nearest, sp);
+  }
+
   logArena(`[SIGNATURE UNLEASHED] ${selUnit.name} activated ${sp.name}!`, sp.color);
-  playSfxSpecialMove();
+}
+
+function applyDirectDamage(target, rawDamage, isSpecial = false, prefix = "") {
+  if (!target || !target.alive) return;
+  target.shieldRegenDelay = 60;
+  let dmgRem = rawDamage;
+  let absorbed = false;
+
+  if (target.shield > 0) {
+    absorbed = true;
+    if (target.shield >= dmgRem) {
+      target.shield -= dmgRem;
+      dmgRem = 0;
+      playSfxShieldDeflect();
+    } else {
+      dmgRem -= target.shield;
+      target.shield = 0;
+      arenaDamageTexts.push({
+        text: "⚡ SHIELD BREAK!",
+        x: target.x,
+        y: target.y - 32,
+        color: '#d8b4fe',
+        vy: -0.9,
+        alpha: 1.0,
+        size: 12,
+        bold: true
+      });
+    }
+  }
+
+  target.hp = Math.max(0, target.hp - dmgRem);
+
+  arenaDamageTexts.push({
+    text: (prefix ? prefix + " " : "") + (isSpecial ? "💥 " : (absorbed && dmgRem === 0 ? "🛡️ " : "-")) + Math.round(rawDamage) + (isSpecial ? " CRIT!" : (absorbed && dmgRem === 0 ? " ABSORB" : "")),
+    x: target.x + (Math.random() - 0.5) * 16,
+    y: target.y - 20,
+    color: isSpecial ? '#ff0055' : (absorbed && dmgRem === 0 ? '#c084fc' : (target.team === 'blue' ? '#ff7849' : '#00f0ff')),
+    vy: -0.8,
+    alpha: 1.0,
+    size: isSpecial ? 13 : 11,
+    bold: isSpecial || absorbed
+  });
+
+  if (target.hp <= 0) {
+    target.hp = 0;
+    target.alive = false;
+    playSfxExplosion(true);
+    logArena(`[KILL] ${target.name} was eliminated!`, target.team === 'blue' ? '#ff4d4d' : '#2ecc71');
+    for (let d = 0; d < 20; d++) {
+      const a = Math.random() * Math.PI * 2;
+      const spd = 1 + Math.random() * 4.5;
+      arenaParticles.push({
+        x: target.x,
+        y: target.y,
+        vx: Math.cos(a) * spd,
+        vy: Math.sin(a) * spd,
+        color: target.team === 'blue' ? '#00f0ff' : '#e67e22',
+        size: 3.5,
+        alpha: 1.0,
+        decay: 0.03
+      });
+    }
+    updateArenaBadges();
+    checkArenaVictory();
+  }
 }
 
 function updateArenaBadges() {
@@ -5127,6 +5425,81 @@ function arenaRenderLoop() {
       ctx.restore();
     }
 
+    // 3.5. Update & Render Active Ability FX
+    for (let i = arenaAbilityFX.length - 1; i >= 0; i--) {
+      const fx = arenaAbilityFX[i];
+      fx.timer -= arenaSimSpeed;
+
+      if (fx.type === 'orbital') {
+        const p = fx.timer / fx.maxTimer;
+        ctx.save();
+        const bGrad = ctx.createLinearGradient(fx.x - 20, 0, fx.x + 20, 0);
+        bGrad.addColorStop(0, 'rgba(0, 240, 255, 0)');
+        bGrad.addColorStop(0.5, `rgba(220, 250, 255, ${p * 0.95})`);
+        bGrad.addColorStop(1, 'rgba(0, 240, 255, 0)');
+        ctx.fillStyle = bGrad;
+        ctx.fillRect(fx.x - 16, 0, 32, fx.y);
+
+        ctx.strokeStyle = `rgba(255, 255, 255, ${p})`;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(fx.x, 0);
+        ctx.lineTo(fx.x, fx.y);
+        ctx.stroke();
+
+        const curR = fx.radius * (1 - p * 0.3);
+        ctx.strokeStyle = `rgba(0, 240, 255, ${p})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(fx.x, fx.y, curR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      } else if (fx.type === 'emp') {
+        const t = 1 - (fx.timer / fx.maxTimer);
+        const curR = fx.maxRadius * t;
+        const a = (1 - t) * 0.85;
+        ctx.save();
+        ctx.strokeStyle = `rgba(168, 85, 247, ${a})`;
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(fx.x, fx.y, curR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.strokeStyle = `rgba(0, 240, 255, ${a * 0.6})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(fx.x, fx.y, curR * 0.85, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      } else if (fx.type === 'nanite') {
+        const a = (fx.timer / fx.maxTimer) * 0.45;
+        ctx.save();
+        ctx.fillStyle = `rgba(140, 255, 40, ${a})`;
+        ctx.beginPath();
+        ctx.arc(fx.x, fx.y, fx.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = `rgba(140, 255, 40, ${a * 1.5})`;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.restore();
+
+        fx.tickDelay = (fx.tickDelay || 0) + arenaSimSpeed;
+        if (fx.tickDelay >= 15) {
+          fx.tickDelay = 0;
+          for (const u of arenaUnits) {
+            if (u.alive && u.team === 'red' && Math.hypot(u.x - fx.x, u.y - fx.y) <= fx.radius) {
+              applyDirectDamage(u, 7, false, "☣️");
+            }
+          }
+        }
+      }
+
+      if (fx.timer <= 0) {
+        arenaAbilityFX.splice(i, 1);
+      }
+    }
+
     // 4. Update Combat Simulation
     if (arenaRunning && !arenaPaused) {
       // Update Units
@@ -5135,6 +5508,29 @@ function arenaRenderLoop() {
 
         if (u.recoil > 0) u.recoil = Math.max(0, u.recoil - 0.8 * arenaSimSpeed);
         if (u.cooldown > 0) u.cooldown = Math.max(0, u.cooldown - arenaSimSpeed);
+
+        // Shield regeneration & EMP Stun
+        if (u.shieldRegenDelay > 0) u.shieldRegenDelay -= arenaSimSpeed;
+        else if (u.shield < u.maxShield) u.shield = Math.min(u.maxShield, u.shield + 0.3 * arenaSimSpeed);
+
+        if (u.isStunned > 0) {
+          u.isStunned = Math.max(0, u.isStunned - 0.05 * arenaSimSpeed);
+          continue; // Stunned units cannot march or attack
+        }
+
+        // Tactical Stance Orders
+        if (u.team === 'blue' && u.moveTargetX == null) {
+          if (arenaStance === 'retreat') {
+            const rdx = 60 - u.x;
+            if (Math.abs(rdx) > 15) {
+              u.state = 'march';
+              u.walkFrame += 0.25 * arenaSimSpeed;
+              u.facing = rdx >= 0 ? 1 : -1;
+              u.x += Math.sign(rdx) * u.speed * 1.3 * arenaSimSpeed;
+            }
+            continue;
+          }
+        }
 
         // Check if unit has manual destination waypoint
         if (u.moveTargetX != null && u.moveTargetY != null) {
@@ -5183,6 +5579,11 @@ function arenaRenderLoop() {
               unitAttackTarget(u, nearestEnemy);
             }
           } else if (u.moveTargetX == null) {
+            if (u.team === 'blue' && arenaStance === 'hold') {
+              u.state = 'idle';
+              continue;
+            }
+
             // March towards enemy with obstacle avoidance
             u.state = 'march';
             u.walkFrame += 0.2 * arenaSimSpeed;
@@ -5236,18 +5637,43 @@ function arenaRenderLoop() {
           const d = Math.hypot(p.x - target.x, p.y - target.y);
           if (d <= target.radius + p.radius + 6) {
             hit = true;
-            target.hp -= p.damage;
             playSfxLaser();
 
+            target.shieldRegenDelay = 60;
+            let dmgRem = p.damage;
+            let absorbed = false;
+            if (target.shield > 0) {
+              absorbed = true;
+              if (target.shield >= dmgRem) {
+                target.shield -= dmgRem;
+                dmgRem = 0;
+                playSfxShieldDeflect();
+              } else {
+                dmgRem -= target.shield;
+                target.shield = 0;
+                arenaDamageTexts.push({
+                  text: "⚡ SHIELD BREAK!",
+                  x: target.x,
+                  y: target.y - 32,
+                  color: '#d8b4fe',
+                  vy: -0.9,
+                  alpha: 1.0,
+                  size: 12,
+                  bold: true
+                });
+              }
+            }
+            target.hp = Math.max(0, target.hp - dmgRem);
+
             arenaDamageTexts.push({
-              text: (p.isSpecial ? "💥 " : "-") + p.damage + (p.isSpecial ? " CRIT!" : ""),
+              text: (p.isSpecial ? "💥 " : (absorbed && dmgRem === 0 ? "🛡️ " : "-")) + p.damage + (p.isSpecial ? " CRIT!" : (absorbed && dmgRem === 0 ? " ABSORB" : "")),
               x: target.x + (Math.random() - 0.5) * 16,
               y: target.y - 18,
-              color: p.isSpecial ? '#ff0055' : (p.team === 'blue' ? '#79c0ff' : '#ffa657'),
+              color: p.isSpecial ? '#ff0055' : (absorbed && dmgRem === 0 ? '#c084fc' : (p.team === 'blue' ? '#79c0ff' : '#ffa657')),
               vy: -0.8,
               alpha: 1.0,
               size: p.isSpecial ? 14 : 11,
-              bold: p.isSpecial
+              bold: p.isSpecial || absorbed
             });
 
             const sparkCount = p.isSpecial ? 16 : 8;
@@ -5315,9 +5741,69 @@ function arenaRenderLoop() {
       }
     }
 
+    // 4.5. Render Tactical Fog of War Shroud
+    if (arenaFogOfWar) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(5, 8, 14, 0.88)';
+      ctx.fillRect(0, 0, w, h);
+
+      // Reveal circles around living Blue Alliance units
+      ctx.globalCompositeOperation = 'destination-out';
+      for (const u of arenaUnits) {
+        if (u.team === 'blue' && u.alive) {
+          const vRad = u.visionRadius || 240;
+          const grad = ctx.createRadialGradient(u.x, u.y, vRad * 0.35, u.x, u.y, vRad);
+          grad.addColorStop(0, 'rgba(0, 0, 0, 1.0)');
+          grad.addColorStop(0.75, 'rgba(0, 0, 0, 0.85)');
+          grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(u.x, u.y, vRad, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.restore();
+    }
+
     // 5. Render Living Units
     for (const u of arenaUnits) {
-      if (u.alive) drawArenaUnit(ctx, u);
+      if (!u.alive) continue;
+      let isVisibleInFog = true;
+      if (arenaFogOfWar && u.team === 'red') {
+        isVisibleInFog = false;
+        for (const b of arenaUnits) {
+          if (b.team === 'blue' && b.alive) {
+            const vRad = b.visionRadius || 240;
+            if (Math.hypot(b.x - u.x, b.y - u.y) <= vRad) {
+              isVisibleInFog = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (isVisibleInFog) {
+        drawArenaUnit(ctx, u);
+      } else {
+        // Shrouded radar contact
+        ctx.save();
+        ctx.translate(u.x, u.y);
+        ctx.strokeStyle = 'rgba(255, 75, 75, 0.55)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -9);
+        ctx.lineTo(7, 0);
+        ctx.lineTo(0, 9);
+        ctx.lineTo(-7, 0);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fillStyle = 'rgba(255, 75, 75, 0.7)';
+        ctx.font = '8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('RADAR', 0, -12);
+        ctx.restore();
+      }
     }
 
     // 6. Render Projectiles
@@ -5353,6 +5839,24 @@ function arenaRenderLoop() {
       ctx.shadowBlur = 4;
       ctx.textAlign = 'center';
       ctx.fillText(dt.text, dt.x, dt.y);
+      ctx.restore();
+    }
+
+    // 9. Render Drag-Box Marquee
+    if (arenaIsBoxDragging) {
+      const minX = Math.min(arenaDragBoxStart.x, arenaDragBoxCurrent.x);
+      const maxX = Math.max(arenaDragBoxStart.x, arenaDragBoxCurrent.x);
+      const minY = Math.min(arenaDragBoxStart.y, arenaDragBoxCurrent.y);
+      const maxY = Math.max(arenaDragBoxStart.y, arenaDragBoxCurrent.y);
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(0, 240, 255, 0.18)';
+      ctx.fillRect(minX, minY, maxX - minX, maxY - minY);
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
+      ctx.setLineDash([]);
       ctx.restore();
     }
   }
@@ -5443,10 +5947,11 @@ function drawArenaUnit(ctx, u) {
   ctx.save();
   ctx.translate(u.x, u.y);
 
-  if (u.id === arenaSelectedUnitId) {
+  const isSelected = (u.id === arenaSelectedUnitId) || arenaSelectedUnitIds.includes(u.id);
+  if (isSelected) {
     ctx.beginPath();
     ctx.arc(0, 12, 22, 0, Math.PI * 2);
-    ctx.strokeStyle = '#ffff00';
+    ctx.strokeStyle = u.team === 'blue' ? '#00f0ff' : '#ff7849';
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 4]);
     ctx.stroke();
@@ -5509,25 +6014,52 @@ function drawArenaUnit(ctx, u) {
 
   ctx.restore();
 
-  const barW = 34;
+  const barW = 36;
   const barH = 4;
   const barY = -38;
   const pct = Math.max(0, Math.min(1, u.hp / u.maxHp));
 
-  ctx.fillStyle = 'rgba(10, 14, 22, 0.8)';
+  // Shield Bar (above health bar)
+  if (u.maxShield > 0) {
+    const sBarY = barY - 4;
+    const sBarH = 2.5;
+    const sPct = Math.max(0, Math.min(1, (u.shield || 0) / u.maxShield));
+    ctx.fillStyle = 'rgba(10, 14, 22, 0.85)';
+    ctx.fillRect(-barW / 2 - 1, sBarY - 1, barW + 2, sBarH + 2);
+    ctx.fillStyle = '#a855f7';
+    ctx.fillRect(-barW / 2, sBarY, barW * sPct, sBarH);
+  }
+
+  // Health Bar Background
+  ctx.fillStyle = 'rgba(10, 14, 22, 0.85)';
   ctx.fillRect(-barW / 2 - 1, barY - 1, barW + 2, barH + 2);
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
   ctx.lineWidth = 1;
   ctx.strokeRect(-barW / 2 - 1, barY - 1, barW + 2, barH + 2);
 
+  // Health Bar Fill
   ctx.fillStyle = u.team === 'blue' ? '#00f0ff' : '#e67e22';
   if (pct < 0.25) ctx.fillStyle = '#ff4d4d';
   ctx.fillRect(-barW / 2, barY, barW * pct, barH);
 
+  // Segment Notches
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  for (const s of [0.25, 0.5, 0.75]) {
+    ctx.fillRect(-barW / 2 + barW * s, barY, 1, barH);
+  }
+
+  // Role and Unit Name
   ctx.fillStyle = '#cbd5e1';
   ctx.font = '9px -apple-system, BlinkMacSystemFont, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText(u.name.length > 14 ? u.name.substr(0, 12) + '..' : u.name, 0, barY - 4);
+  ctx.fillText(u.name.length > 14 ? u.name.substr(0, 12) + '..' : u.name, 0, barY - (u.maxShield > 0 ? 8 : 4));
+
+  // EMP Stun indicator
+  if (u.isStunned > 0) {
+    ctx.fillStyle = '#facc15';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.fillText('⚡ STUNNED', 0, barY - 18);
+  }
 
   ctx.restore();
 }
